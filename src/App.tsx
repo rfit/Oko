@@ -24,6 +24,7 @@ import SettingsApplications from '@material-ui/icons/SettingsApplications';
 
 import Admin from './views/admin';
 import Dashboard from './views/dashboard';
+import Help from './views/help';
 import Login from './views/login';
 import NewEntry from './views/NewEntry';
 import Overview from './views/Overview';
@@ -183,7 +184,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							{/* tslint:disable-next-line jsx-no-lambda */ }
 							<ListItem button {...{ to: "/help" }} component={Link}>
 								<ListItemIcon><HelpIcon /></ListItemIcon>
-								<ListItemText primary="Bod Admin" />
+								<ListItemText primary="Hjælp" />
 							</ListItem>
 						</List>
 						</List>
@@ -195,6 +196,8 @@ class App extends React.Component<IAppProps, IAppState> {
 						<Route path="/admin" component={Admin} />
 						<Route path="/create-new" component={NewEntry} />
 						<Route path="/dashboard" component={Dashboard} />
+						<Route path="/help" component={Help} />
+
 						<Menu />
 					</main>
 				</div>

@@ -1,12 +1,11 @@
 import * as React from 'react';
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Paper from '@material-ui/core/Paper';
+// import Button from '@material-ui/core/Button';
+// import CssBaseline from '@material-ui/core/CssBaseline';
+// import Paper from '@material-ui/core/Paper';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
-import LockIcon from '@material-ui/icons/LockOutlined';
+// import LockIcon from '@material-ui/icons/LockOutlined';
 
 const styles: any = (theme: any) => ({
 	layout: {
@@ -28,9 +27,9 @@ function Help(props: any) {
 	return (
 		<React.Fragment>
 			<main className={classes.layout}>
-				Hjælp
-
-
+				<Typography component="h1" variant="display2" gutterBottom>
+					Hjælp
+				</Typography>
 
 			</main>
 		</React.Fragment>
