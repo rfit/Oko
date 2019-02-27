@@ -15,6 +15,7 @@ function configureServer() {
     const resolvers = require('./data/resolvers');
     
     const server = new ApolloServer({
+        cors: true,
         typeDefs,
         resolvers,
         engine: {
