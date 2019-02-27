@@ -40,9 +40,14 @@ const styles: any = (theme: any) => ({
 	},
   });
 
-function Login(props: any) {
-	const { classes } = props;
+interface ILoginProps {
+	onClick: () => void;
+	classes: any;
+}
 
+function Login(props: ILoginProps) {
+	const { classes } = props;
+	console.log(props.onClick);
 	return (
 	  <React.Fragment>
 		<CssBaseline />
@@ -55,7 +60,8 @@ function Login(props: any) {
 				Log ind
 			</Typography>
 
-			  <Button
+			<Button
+				onClick={props.onClick}
 				type="submit"
 				fullWidth
 				variant="contained"

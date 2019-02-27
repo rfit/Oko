@@ -32,6 +32,7 @@ import Overview from './views/Overview';
 
 interface IAppState {
 	open: boolean;
+	loggedin: boolean;
 }
 
 interface IAppProps {
@@ -108,7 +109,8 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 
 class App extends React.Component<IAppProps, IAppState> {
 	public state: Readonly<IAppState> = {
-		open: false
+		open: false,
+		loggedin: false
 	};
 	public handleDrawerOpen = () => {
 		this.setState({ open: true });
@@ -118,8 +120,34 @@ class App extends React.Component<IAppProps, IAppState> {
 		this.setState({ open: false });
 	};
 
+	public handleLoginFake = () => {
+		console.log('logging in!');
+		this.setState({ loggedin: true });
+	};
+
 	public render() {
 		const { classes } = this.props;
+
+		if(!this.state.loggedin) {
+			console.log('not logged in');
+			const loginFuntion = this.handleLoginFake;
+			return (
+				<Router>
+					<div className={classes.root}>
+						<CssBaseline />
+						<main className={classes.content}>
+							<Route path="/*" component={Login} />
+								<Route
+								path='/dashboard'
+								// tslint:disable-next-line:jsx-no-lambda
+								render={(props) => <Login {...props} onClick={loginFuntion} />}
+							/>
+							<button onClick={loginFuntion}>fake login</button>
+						</main>
+					</div>
+				</Router>
+			);
+		}
 
 		return (
 			<Router>
@@ -197,8 +225,6 @@ class App extends React.Component<IAppProps, IAppState> {
 						<Route path="/create-new" component={NewEntry} />
 						<Route path="/dashboard" component={Dashboard} />
 						<Route path="/help" component={Help} />
-
-						<Menu />
 					</main>
 				</div>
 			</Router>
@@ -206,6 +232,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	}
 }
 
+/*
 const Menu = () => (
 	<ul>
 		<li>
@@ -215,7 +242,7 @@ const Menu = () => (
 			<Link to="/dashboard">Dashboard</Link>
 		</li>
 	</ul>
-);
+);*/
 
 
 export default withStyles(styles)(App);

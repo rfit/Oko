@@ -25,6 +25,13 @@ class NewEntry extends React.Component<INewEntry, {}> {
       			/><br />
 				<TextField
 					variant="filled"
+					id="datetime-local"
+					label="Faktura dato"
+					type="date-local"
+					defaultValue="2017-05-24T10:30"
+      			/><br />
+				<TextField
+					variant="filled"
 					id="standard-name"
 					label="Faktura/bilag nummer"
 					margin="normal"
@@ -33,14 +40,21 @@ class NewEntry extends React.Component<INewEntry, {}> {
 					type="number"
 					variant="filled"
 					id="total-price"
-					label="kr/kg"
+					label="Samlet kr/kg"
 					margin="normal"
 				/><br />
 				<TextField
 					type="number"
 					variant="filled"
 					id="non-eco"
-					label="kr/kg"
+					label="Økologisk andel kr/kg"
+					margin="normal"
+				/><br />
+				<TextField
+					type="number"
+					variant="filled"
+					id="non-eco"
+					label="Ikke omfattet andel kr/kg"
 					margin="normal"
 				/>
 

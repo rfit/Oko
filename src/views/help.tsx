@@ -30,7 +30,9 @@ function Help(props: any) {
 				<Typography component="h1" variant="display2" gutterBottom>
 					Hjælp
 				</Typography>
-
+				<Typography paragraph>
+					Der er ingen hjælp at få :-(
+				</Typography>
 			</main>
 		</React.Fragment>
 	);
