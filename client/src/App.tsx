@@ -22,12 +22,12 @@ import MenuIcon from '@material-ui/icons/Menu';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import SettingsApplications from '@material-ui/icons/SettingsApplications';
 
-import Admin from './views/admin';
 import Dashboard from './views/dashboard';
 import Help from './views/help';
 import Login from './views/login';
 import NewEntry from './views/NewEntry';
 import Overview from './views/Overview';
+import Admin from './views/TeamAdmin';
 
 
 interface IAppState {
@@ -45,7 +45,11 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 	'@global': {
 		body: {
 		    minHeight: '100vh',
-			backgroundColor: palette.common.white,
+			backgroundColor: '#1b1b1b' // '#0a0a0a',
+		},
+		'::selection': {
+			background: '#ee7203',
+			color: '#fff'
 		}
 	},
 	root: {
@@ -91,7 +95,7 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 		}),
 		width: spacing.unit * 7,
 		[breakpoints.up('sm')]: {
-			width: spacing.unit * 9,
+			width: spacing.unit * 7,
 		},
 	},
 	toolbar: {
@@ -136,13 +140,11 @@ class App extends React.Component<IAppProps, IAppState> {
 					<div className={classes.root}>
 						<CssBaseline />
 						<main className={classes.content}>
-							<Route path="/*" component={Login} />
-								<Route
-								path='/dashboard'
+							<Route
+								path='/*'
 								// tslint:disable-next-line:jsx-no-lambda
-								render={(props) => <Login {...props} onClick={loginFuntion} />}
+								render={(props) => <Login {...props} loginFunction={loginFuntion} />}
 							/>
-							<button onClick={loginFuntion}>fake login</button>
 						</main>
 					</div>
 				</Router>
@@ -171,7 +173,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							<MenuIcon />
 							</IconButton>
 							<Typography variant="h6" color="inherit" noWrap>
-								ØkoApp
+								Økologi Tracker - Roskilde Festival
 							</Typography>
 						</Toolbar>
 					</AppBar>
@@ -231,18 +233,5 @@ class App extends React.Component<IAppProps, IAppState> {
 		);
 	}
 }
-
-/*
-const Menu = () => (
-	<ul>
-		<li>
-			<Link to="/login">Login</Link>
-		</li>
-		<li>
-			<Link to="/dashboard">Dashboard</Link>
-		</li>
-	</ul>
-);*/
-
 
 export default withStyles(styles)(App);

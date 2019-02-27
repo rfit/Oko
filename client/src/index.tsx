@@ -7,8 +7,26 @@ import ApolloClient from "apollo-boost";
 import gql from "graphql-tag";
 import { ApolloProvider } from "react-apollo";
 
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+
+const RFMuiTheme = createMuiTheme({
+	palette: {
+		type: 'dark',
+		primary: {
+			main: '#ee7203' // RF Orange
+		}
+	},
+	typography: {
+		useNextVariants: true,
+	},
+});
+
 const client = new ApolloClient({
-	uri: "https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql"
+	// Backend API Url from firebase
+	uri: "https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql",
+  fetchOptions: {
+		credentials: 'omit'
+  }
 });
 
 client
@@ -16,18 +34,20 @@ client
     query: gql`
 	{
 		users {
-			  email,
-		  memberName,
-		  memberId
+			email,
+			memberName,
+			memberId
 		}
-	  }
+	}
     `
   })
   .then(result => console.log(result));
 
 ReactDOM.render(
 	<ApolloProvider client={client}>
-		<App />
+	    <MuiThemeProvider theme={RFMuiTheme}>
+			<App />
+		</MuiThemeProvider>
 	</ApolloProvider>,
 	document.getElementById('root') as HTMLElement
 );
