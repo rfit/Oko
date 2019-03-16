@@ -7,70 +7,60 @@ type Query {
     users: [User]
     team(id: ID!): Team
     teams: [Team]
-    bill(id: ID!): Bill
-    bills: [Bill]
-    login(user: String!): Boolean!
+    invoice(id: ID!): Invoice
+    invoices(teamId: String!): [Invoice]
   }
 
   type Mutation {
-    createTeam(
-        teamId: String!, 
-        teamName: String!,
-        teamParentId: String,
-        CopyOfTeamId: String
-    ): Team!
-    deleteTeam(teamId: String!): Boolean!
-    createUser(
-        memberId: String,
-        memberNumber: String,
-        memberName: String,
-        email: String,
-        roleName: String,
-        teamId: String
+    addUser(
+        peopleId: String,
+        email: String
     ): User!
-    deleteUser(memberId: String!): Boolean!
-    createBill(
-      id: ID!,
-      oko: String,
-      nonoko: String,
-      teamId: String
-    ): Bill!
-    deleteBill(id: ID!): Boolean!
-  }
+    removeUser(_id: ID!): Boolean!
+    createInvoice(
+      invoiceId: Int!,
+      invoiceDate: String!,
+        "Firebase ID reference: teams/_id"
+      teamId: String!
+    ): Invoice!
+    updateInvoice(
+      _id: ID!,
+      invoiceId: Int,
+      invoiceDate: String
+    ): Invoice!
+    deleteInvoice(_id: ID!): Boolean!
 
-  type Login {
-    user: String!
-    password: String!
   }
 
   type User {
-    memberId: String
-    memberNumber: String
-    memberName: String
-    email: String
-    roleName: String
-    teamId: String
-    team: Team!
+      "Firebase id"
+    id: ID!
+    peopleId: Int!
+    memberName: String!
+    email: String!
+    roleName: String!
     teams: [Team]
-    username: String
   }
 
   type Team {
-    teamId: String
-    teamName: String
-    teamParentId: String
-    CopyOfTeamId: String
+      "Firebase id"
+    id: ID!
+    peopleId: Int!
+    name: String!
     users: [User]
-    bills: [Bill]
+    invoices: [Invoice]
   }
 
-  type Bill {
+  type Invoice {
+      "Firebase id"
     id: ID!
-    created: String
-    oko: String
-    nonoko: String
-    teamId: String
+    invoiceId: Int!
+    createdDate: String
+    invoiceDate: String
+      "Firebase ID reference: teams/_id"
+    teamId: String!
   }
+
 
 `;
 
