@@ -21,46 +21,57 @@ type Query {
       invoiceId: Int!,
       invoiceDate: String!,
         "Firebase ID reference: teams/_id"
-      teamId: String!
+      teamId: String!,
+      eco: Float,
+      nonEco: Float,
+      excluded: Float,
+      total: Float
     ): Invoice!
     updateInvoice(
       _id: ID!,
       invoiceId: Int,
-      invoiceDate: String
+      invoiceDate: String,
+      eco: Float,
+      nonEco: Float,
+      excluded: Float,
+      total: Float
     ): Invoice!
     deleteInvoice(_id: ID!): Boolean!
 
   }
 
   type User {
-      "Firebase id"
+      "Firebase user id"
     id: ID!
     peopleId: Int!
-    memberName: String!
+    name: String!
     email: String!
-    roleName: String!
     teams: [Team]
   }
 
   type Team {
-      "Firebase id"
+      "Firebase team id"
     id: ID!
     peopleId: Int!
     name: String!
+    measurement: String
     users: [User]
     invoices: [Invoice]
   }
 
   type Invoice {
-      "Firebase id"
+      "Firebase invoice id"
     id: ID!
     invoiceId: Int!
     createdDate: String
     invoiceDate: String
       "Firebase ID reference: teams/_id"
     teamId: String!
+    eco: Float!
+    nonEco: Float!
+    excluded: Float!
+    total: Float
   }
-
 
 `;
 

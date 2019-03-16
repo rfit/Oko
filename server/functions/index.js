@@ -13,15 +13,15 @@
 const admin = require('firebase-admin');
 var serviceAccount = require('./serviceAccountKey.json');
 
-const functions = require("firebase-functions");
-const configureServer = require("./graphql/server");
-const peopleLogin = require("./login/index");
-const getPeopleData = require("./startup/index");
-
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
   });
+
+const functions = require("firebase-functions");
+const configureServer = require("./graphql/server");
+const peopleLogin = require("./login/index");
+const getPeopleData = require("./startup/index");
 
 //initialize the server
 const server = configureServer();

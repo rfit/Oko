@@ -3,6 +3,12 @@ const admin = require('firebase-admin');
 const uuidv4 = require('uuid/v4');
 const request = require('request');
 
+/*var serviceAccount = require('../../serviceAccountKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});*/
+
 var db = admin.firestore();
 
 const resolvers = {
@@ -79,6 +85,42 @@ const resolvers = {
                 return err;
             })
         },
+        invoices: () => {
+            return db.collection('invoices').get()
+            .then(snapshot => {
+                if (snapshot.empty) {
+                    console.log('No such document!');
+                    return;
+                } 
+                
+                var invoiceArray = [];
+                snapshot.forEach(doc => {
+                //console.log('Document data:', doc.data());
+                    invoiceArray.push(doc.data());
+                });
+                return invoiceArray;
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err;
+            })
+        },
+        invoice: (parent,args) => {
+            return db.collection('invoices').doc(`${args.id}`).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log('No such document!');
+                    return null;
+                } else {
+                    console.log('Invoice Document data:', doc.data());
+                    return doc.data();
+                }
+            })
+            .catch(err => {
+                //console.log('Error getting document', err);
+                return err;
+            })
+        },
     },
     User: {
         //Eksempel på custom felter, udfra de eksisterende
@@ -89,13 +131,14 @@ const resolvers = {
                     console.log('No such document!');
                     return;
                 } 
+                //console.log(doc.data().teamIds);
                 
                 var teamArray = [];
                 snapshot.forEach(doc => {
                     if( doc.data().teamId === user.teamId ) {
                         teamArray.push(doc.data());
                     }
-                });
+                }); 
                 return teamArray;
             })
             .catch(err => {
@@ -103,7 +146,6 @@ const resolvers = {
                 return err;
             })
         },
-          
       },
     Team: {
         users: team => {
@@ -133,12 +175,9 @@ const resolvers = {
         
         addUser: (parent, args) => {
             const user = {
-                memberId: args.memberId,
-                memberNumber: args.memberNumber,
-                memberName: args.memberName,
-                email: args.email,
-                roleName: args.roleName,
-                teamId: args.teamId,
+                peopleId: args.peopleId,
+                name: args.name,
+                email: args.email
             };
 
             return db.collection('users').doc(args.memberId).get()

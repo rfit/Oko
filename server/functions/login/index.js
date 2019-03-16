@@ -1,9 +1,10 @@
 // Firebase Setup
 const admin = require('firebase-admin');
 // Modules imports
-const express = require('express');
+
+/*const express = require('express');
 const cookieParser = require('cookie-parser');
-const crypto = require('crypto');
+const crypto = require('crypto');*/
 
 const config = require('../heimdalKey');
 
@@ -18,13 +19,13 @@ const credentials = {
       tokenPath: 'https://sso.roskilde-festival.dk'
     }
   };
-
+/*
 const oauth2 = require('simple-oauth2').create(credentials);  
 
 // Path to the OAuth handlers.
 const OAUTH_REDIRECT_PATH = 'http://localhost:3000/auth/heimdal/callback';
 const OAUTH_CALLBACK_PATH = '/auth/heimdal/callback';
-
+*/
 
 
 /**
