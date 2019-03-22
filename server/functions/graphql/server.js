@@ -19,7 +19,7 @@ function configureServer() {
         typeDefs,
         resolvers,
         engine: {
-          apiKey: "service:okoapp-test:9RcfHAa2lsv0CdFxEM0rzQ"
+          apiKey: "service:oeko-app:_VDrVCXARLxxk4sHbdDP8g"
         },
         introspection: true,
         playground: true,
