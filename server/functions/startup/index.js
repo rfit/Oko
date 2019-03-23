@@ -20,8 +20,6 @@ var requiredTeamId = [
      
 const Link = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=poul&ApiKey=';
 
-const UserLogin = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/AuthenticateMember/?username=mikael.soerensen@roskilde-festival.dk&password=Prune2018!&ApiKey=';
-
 requiredTeamId.forEach(function(entry) {
     console.log(entry);
 
