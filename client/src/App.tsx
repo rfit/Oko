@@ -29,7 +29,6 @@ import NewEntry from './views/NewEntry';
 import Overview from './views/Overview';
 import Admin from './views/TeamAdmin';
 
-
 interface IAppState {
 	open: boolean;
 	loggedin: boolean;
