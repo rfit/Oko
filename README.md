@@ -8,31 +8,29 @@ Graphiql can be found at: https://us-central1-okoapp-staging.cloudfunctions.net/
 
 Firestore data structure:
 
-**users** (firebaseId)
+**users** (peopleId)
 - email (e.g. mikael.soerensen@roskilde-festival.dk)
 - name (e.g. Mikael Sørensen)
 - peopleId (e.g. 123456)
 - role (e.g. Admin/Editor)
+- teams [12,42,12,..] (id som array)
 
-**teams** (firebaseId)
+**teams** (peopleId)
 - name (e.g. Økoboden)
-- peopleTeamId (e.g. 1234)
+- peopleId (e.g. 1234)
 - measurement (e.g. Null, KG, KR)
 
 **invoices** (firebaseId)
 - createdDate
 - invoiceDate
 - invoiceId (e.g. 213535)
-- teamId (firebaseID)
-- userId (firebaseID)
+- teamId (peopleID)
+- userId (peopleID)
+- userName (e.g. Mikael)
 - eco (e.g. 80)
 - nonEco (e.g. 10)
 - excluded (e.g. 10)
 - total (e.g. 100)
-
-**roles** (userId_teamId)
-- userId (firebaseId)
-- teamId (firebaseId)
 
 
 ## Client
