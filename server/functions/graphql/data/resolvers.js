@@ -1,15 +1,8 @@
 const admin = require('firebase-admin');
+var db = admin.firestore();
 
 const uuidv4 = require('uuid/v4');
 const request = require('request');
-
-/*var serviceAccount = require('../../serviceAccountKey.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});*/
-
-var db = admin.firestore();
 
 const resolvers = {
     Query: {
@@ -85,8 +78,28 @@ const resolvers = {
                 return err;
             })
         },
-        invoices: () => {
+        allinvoices: () => {
             return db.collection('invoices').get()
+            .then(snapshot => {
+                if (snapshot.empty) {
+                    console.log('No such document!');
+                    return;
+                } 
+                
+                var invoiceArray = [];
+                snapshot.forEach(doc => {
+                //console.log('Document data:', doc.data());
+                    invoiceArray.push(doc.data());
+                });
+                return invoiceArray;
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err;
+            })
+        },
+        invoices: (parent,args) => {
+            return db.collection('invoices').where('teamId', '==', args.teamId).get()
             .then(snapshot => {
                 if (snapshot.empty) {
                     console.log('No such document!');

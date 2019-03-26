@@ -8,7 +8,8 @@ type Query {
     team(id: ID!): Team
     teams: [Team]
     invoice(id: ID!): Invoice
-    invoices(teamId: String!): [Invoice]
+    invoices(teamId: Int!): [Invoice]
+    allinvoices: [Invoice]
   }
 
   type Mutation {
@@ -37,20 +38,19 @@ type Query {
       total: Float
     ): Invoice!
     deleteInvoice(_id: ID!): Boolean!
-
   }
 
   type User {
-      "Firebase user id"
     id: ID!
     peopleId: Int!
     name: String!
     email: String!
+    role: String!
     teams: [Team]
+    invoices: [Invoice]
   }
 
   type Team {
-      "Firebase team id"
     id: ID!
     peopleId: Int!
     name: String!
@@ -65,8 +65,9 @@ type Query {
     invoiceId: Int!
     createdDate: String
     invoiceDate: String
-      "Firebase ID reference: teams/_id"
-    teamId: String!
+    teamId: Int!
+    userId: Int!
+    userName: String!
     eco: Float!
     nonEco: Float!
     excluded: Float!
