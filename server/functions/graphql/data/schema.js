@@ -7,69 +7,71 @@ type Query {
     users: [User]
     team(id: ID!): Team
     teams: [Team]
-    bill(id: ID!): Bill
-    bills: [Bill]
-    login(user: String!): Boolean!
+    invoice(id: ID!): Invoice
+    invoices(teamId: Int!): [Invoice]
+    allinvoices: [Invoice]
   }
 
   type Mutation {
-    createTeam(
-        teamId: String!, 
-        teamName: String!,
-        teamParentId: String,
-        CopyOfTeamId: String
-    ): Team!
-    deleteTeam(teamId: String!): Boolean!
-    createUser(
-        memberId: String,
-        memberNumber: String,
-        memberName: String,
-        email: String,
-        roleName: String,
-        teamId: String
+    addUser(
+        peopleId: String,
+        email: String
     ): User!
-    deleteUser(memberId: String!): Boolean!
-    createBill(
-      id: ID!,
-      oko: String,
-      nonoko: String,
-      teamId: String
-    ): Bill!
-    deleteBill(id: ID!): Boolean!
-  }
-
-  type Login {
-    user: String!
-    password: String!
+    removeUser(_id: ID!): Boolean!
+    createInvoice(
+      invoiceId: Int!,
+      invoiceDate: String!,
+        "Firebase ID reference: teams/_id"
+      teamId: String!,
+      eco: Float,
+      nonEco: Float,
+      excluded: Float,
+      total: Float
+    ): Invoice!
+    updateInvoice(
+      _id: ID!,
+      invoiceId: Int,
+      invoiceDate: String,
+      eco: Float,
+      nonEco: Float,
+      excluded: Float,
+      total: Float
+    ): Invoice!
+    deleteInvoice(_id: ID!): Boolean!
   }
 
   type User {
-    memberId: String
-    memberNumber: String
-    memberName: String
-    email: String
-    roleName: String
-    teamId: String
-    team: Team!
+    id: ID!
+    peopleId: Int!
+    name: String!
+    email: String!
+    role: String!
     teams: [Team]
-    username: String
+    invoices: [Invoice]
   }
 
   type Team {
-    teamId: String
-    teamName: String
-    teamParentId: String
-    CopyOfTeamId: String
+    id: ID!
+    peopleId: Int!
+    name: String!
+    measurement: String
     users: [User]
-    bills: [Bill]
+    invoices: [Invoice]
   }
 
-  type Bill {
+  type Invoice {
+      "Firebase invoice id"
     id: ID!
-    created: String
-    oko: String
-    nonoko: String
-    teamId: String
+    invoiceId: Int!
+    createdDate: String
+    invoiceDate: String
+    teamId: Int!
+    userId: Int!
+    userName: String!
+    eco: Float!
+    nonEco: Float!
+    excluded: Float!
+    total: Float
   }
 
 `;
