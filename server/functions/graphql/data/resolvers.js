@@ -144,13 +144,15 @@ const resolvers = {
                     console.log('No such document!');
                     return;
                 } 
-                //console.log(doc.data().teamIds);
                 
                 var teamArray = [];
                 snapshot.forEach(doc => {
-                    if( doc.data().teamId === user.teamId ) {
-                        teamArray.push(doc.data());
-                    }
+                    user.teams.forEach(team => {
+                        if( doc.data().peopleId === team ) {
+                            teamArray.push(doc.data());
+                        }
+                    })
+
                 }); 
                 return teamArray;
             })
@@ -160,7 +162,7 @@ const resolvers = {
             })
         },
       },
-    Team: {
+      Team: {
         users: team => {
             return db.collection('users').get()
             .then(snapshot => {
@@ -171,9 +173,11 @@ const resolvers = {
                 
                 var userArray = [];
                 snapshot.forEach(doc => {
-                    if( doc.data().teamId === team.teamId ) {
-                        userArray.push(doc.data());
-                    }
+                    doc.data().teams.forEach(id => {
+                        if( id === team.peopleId ) {
+                            userArray.push(doc.data());
+                        }
+                    });
                 });
                 return userArray;
             })

@@ -57,7 +57,10 @@ requiredAdmins.forEach(function(entry) {
             
                 // Add user to firestore if admin
                 var addUser = db.collection('users').doc(`${PeopleData.Member.MemberId}`).set(tempUser).then(ref => {
-                    //console.log('Added document', ref);
+                    return ref;
+                }).catch(err => {
+                    console.log('Error getting document', err);
+                    return err;
                 });
             }
         });
@@ -90,7 +93,10 @@ requiredTeamId.forEach(function(entry) {
                 
                     // Add team to firestore if admin
                     var addTeam = db.collection('teams').doc(`${PeopleData.Teams[item].TeamId}`).set(tempTeam).then(ref => {
-                        //console.log('Added document: ', ref);
+                        return ref;
+                    }).catch(err => {
+                        console.log('Error getting document', err);
+                        return err;
                     });
                 }
         });
@@ -122,7 +128,10 @@ requiredTeamId.forEach(function(entry) {
                 
                     // Add user to firestore if admin
                     var addUser = db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
-                        //console.log('Added document with ID: ', ref);
+                        return ref;
+                    }).catch(err => {
+                        console.log('Error getting document', err);
+                        return err;
                     });
 
                 }
