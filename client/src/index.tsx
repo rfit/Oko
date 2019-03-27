@@ -7,6 +7,9 @@ import ApolloClient from "apollo-boost";
 import gql from "graphql-tag";
 import { ApolloProvider } from "react-apollo";
 
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 const RFMuiTheme = createMuiTheme({
@@ -24,9 +27,9 @@ const RFMuiTheme = createMuiTheme({
 const client = new ApolloClient({
 	// Backend API Url from firebase
 	uri: "https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql",
-  fetchOptions: {
+	fetchOptions: {
 		credentials: 'omit'
-  }
+	}
 });
 
 client
@@ -46,7 +49,9 @@ client
 ReactDOM.render(
 	<ApolloProvider client={client}>
 	    <MuiThemeProvider theme={RFMuiTheme}>
-			<App />
+			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+				<App />
+			</MuiPickersUtilsProvider>
 		</MuiThemeProvider>
 	</ApolloProvider>,
 	document.getElementById('root') as HTMLElement

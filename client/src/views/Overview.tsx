@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
-import Fab from '@material-ui/core/Fab';
+// import Fab from '@material-ui/core/Fab';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -133,13 +133,15 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 				</Typography>
 				<StyledTable />
 
-				{/* tslint:disable-next-line:jsx-no-lambda */}
+				{/* tslint:disable-next-line:jsx-no-lambda
 				<Fab variant="round" color="primary" component={(props: any) => <Link to="/create-new" {...props} />}>
 					<AddIcon />
 				</Fab>
+				*/}
 
-				<Button variant="contained" color="secondary">
-					Tilføj
+				{/* tslint:disable-next-line:jsx-no-lambda */}
+				<Button variant="contained" color="secondary" component={(props: any) => <Link to="/create-new" {...props} />}>
+					Tilføj leverance
 					<AddIcon />
 				</Button>
 			</main>

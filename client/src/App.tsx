@@ -114,7 +114,7 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 class App extends React.Component<IAppProps, IAppState> {
 	public state: Readonly<IAppState> = {
 		open: false,
-		loggedin: false
+		loggedin: true // false when deploy
 	};
 	public handleDrawerOpen = () => {
 		this.setState({ open: true });

@@ -15,7 +15,7 @@ function Help(props: any) {
 
 	return (
 		<main>
-			<Typography component="h1" variant="display2" gutterBottom>
+			<Typography component="h1" variant="h2" gutterBottom>
 				Hjælp
 			</Typography>
 			<Typography paragraph>
