@@ -5,6 +5,7 @@ var db = admin.firestore();
 const keys = require('../serviceAccountKey');
 const request = require('request');
 
+
 /*
 var userRef = db.collection('users').where('teams', 'array-contains', 6822);
   
@@ -19,10 +20,14 @@ userRef.get().then(snapshot => {
  */
 
 var requiredTeamId = [
+    
+    8023, // Pavilion Volunteer Café 
+    6817, // Kristinedal
     6822, // BUSBUS
     6835, // Meyers
     6858, // Folkets Madhus
     7885 // Dava Foods
+
 ];    
 
 // Manuel oprettelse af Admins
@@ -113,21 +118,41 @@ requiredTeamId.forEach(function(entry) {
 
         // Loop through a whole team
         Object.keys(PeopleData.TeamMembers).forEach(function (item) {
-            
+            var tempUser = {};
                 // Find users that are admins / "Holdleder". If not users is "basis"
                 if (PeopleData.TeamMembers[item].RoleName === 'Holdleder') {
                     //console.log('body:', PeopleData.TeamMembers[item]);
 
-                    var tempUser = {
+                    tempUser = {
                         email: PeopleData.TeamMembers[item].Email,
                         name: PeopleData.TeamMembers[item].MemberName,
                         peopleId: PeopleData.TeamMembers[item].MemberId,
-                        role: PeopleData.TeamMembers[item].RoleName,
+                        role: 'Admin',
                         teams: [PeopleData.TeamMembers[item].TeamId]
                     };
                 
                     // Add user to firestore if admin
-                    var addUser = db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
+                    db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
+                        return ref;
+                    }).catch(err => {
+                        console.log('Error getting document', err);
+                        return err;
+                    });
+
+                    // Find users that are admins / "Ansvarlig".
+                } else if (PeopleData.TeamMembers[item].TitleName === 'Ansvarlig') {
+                    //console.log('body:', PeopleData.TeamMembers[item]);
+
+                    tempUser = {
+                        email: PeopleData.TeamMembers[item].Email,
+                        name: PeopleData.TeamMembers[item].MemberName,
+                        peopleId: PeopleData.TeamMembers[item].MemberId,
+                        role: 'Admin',
+                        teams: [PeopleData.TeamMembers[item].TeamId]
+                    };
+                
+                    // Add user to firestore if admin
+                    db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
                         return ref;
                     }).catch(err => {
                         console.log('Error getting document', err);

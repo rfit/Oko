@@ -69,7 +69,7 @@ const resolvers = {
                     console.log('No such document!');
                     return null;
                 } else {
-                    console.log('Team Document data:', doc.data());
+                    //console.log('Team Document data:', doc.data());
                     return doc.data();
                 }
             })
@@ -161,6 +161,29 @@ const resolvers = {
                 return err;
             })
         },
+        invoices: user => {
+            return db.collection('invoices').get()
+            .then(snapshot => {
+                if (snapshot.empty) {
+                    console.log('No such document!');
+                    return;
+                } 
+                
+                var teamArray = [];
+                snapshot.forEach(doc => {
+                    user.teams.forEach(team => {
+                        if( doc.data().teamId === team ) {
+                            teamArray.push(doc.data());
+                        }
+                    })
+                }); 
+                return teamArray;
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err;
+            })
+        },
       },
       Team: {
         users: team => {
@@ -185,36 +208,69 @@ const resolvers = {
                 console.log('Error getting document', err);
                 return err;
             })
-        }
+        },
+        invoices: team => {
+            return db.collection('invoices').where('teamId', '==', team.peopleId).get()
+            .then(snapshot => {
+                if (snapshot.empty) {
+                    console.log('No such document!');
+                    return;
+                } 
+                
+                var invoiceArray = [];
+                snapshot.forEach(doc => {
+                    invoiceArray.push(doc.data());
+                });
+                return invoiceArray;
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err;
+            })
+        },
     },
     
+
+/*
+get().then(snapshot => {
+      snapshot.docs.forEach(doc => {
+              console.log('Document data:', doc.id, doc.data());
+          })
+      }).catch(err => {
+        console.log('Error getting document', err);
+        return err;
+    });
+*/
     Mutation: {
-        
         addUser: (parent, args) => {
             const user = {
-                peopleId: args.peopleId,
-                name: args.name,
-                email: args.email
+                peopleId: 99999, //args.peopleId,
+                name: 'Mikael Test', //args.name,
+                email: args.email,
+                role: 'editor'
             };
-
-            return db.collection('users').doc(args.memberId).get()
-            .then(doc => {
-                if (!doc.exists) {
-                    return addTeam = db.collection('users').doc(args.memberId).set(user)
-                    .then(ref => {
-                        console.log("User Added: ", user);
-                        return user;
-                    })
-                    .catch(err => {
-                        console.log('Error getting document', err);
-                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                        return err;
-                    });
-                } else {
-                    console.log('User already exists:', doc.data());
-                    //return doc.data();
-                    throw new Error(`User already exists.`); 
-                }
+            console.log('args.email', args.email);
+            return db.collection('users').where('email', '==', args.email).get()
+            .then(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    console.log('doc', doc.data());
+                    if (!doc.exists) {
+                        return addUser = db.collection('users').doc(args.peopleId).set(user)
+                        .then(function() {
+                            console.log("User Added: ", user);
+                            return user;
+                        })
+                        .catch(err => {
+                            console.log('Error getting document', err);
+                            //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                            return err;
+                        });
+                    } else {
+                        console.log('User already exists:', doc.data());
+                        //return doc.data();
+                        throw new Error(`User already exists.`); 
+                    }
+                })
             })
             .catch(err => {
                 console.log('Error getting document', err);
