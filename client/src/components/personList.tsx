@@ -9,7 +9,8 @@ import * as React from 'react';
 
 export interface IPerson {
 	memberId: number;
-	memberName: string;
+	name: string;
+	peopleId: string;
 	email: string;
 }
 
@@ -29,8 +30,8 @@ class PeopleList extends React.Component<IPersonListProps, {}> {
 			<List>
 				{this.props.persons.map((person) => (
 					<ListItem key={person.memberId}>
-						<Avatar alt={person.memberName} src={`https://api.adorable.io/avatars/285/${person.memberName}.png`} />
-						<ListItemText primary={person.memberName} secondary={person.email} />
+						<Avatar alt={person.name} src={`https://api.adorable.io/avatars/285/${person.peopleId}.png`} />
+						<ListItemText primary={person.name} secondary={person.email} />
 						<ListItemSecondaryAction>
 							<IconButton aria-label="Delete" onClick={this.onClickDelete}>
 								<DeleteIcon />

@@ -35,6 +35,8 @@ interface IAppState {
 }
 
 interface IAppProps {
+	clientState?: any;
+	client?: any;
 	classes: any;
 }
 
@@ -125,13 +127,15 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	public handleLoginFake = () => {
 		console.log('logging in!');
-		this.setState({ loggedin: true });
+		this.props.client.writeData({ data: { isLoggedIn: true } })
 	};
 
 	public render() {
 		const { classes } = this.props;
 
-		if(!this.state.loggedin) {
+		console.log('clientState', this.props.clientState);
+
+		if(!this.props.clientState.isLoggedIn) {
 			console.log('not logged in');
 			const loginFuntion = this.handleLoginFake;
 			return (
