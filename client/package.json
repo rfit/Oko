@@ -9,7 +9,8 @@
     "@types/classnames": "^2.2.6",
     "@types/graphql": "^14.0.7",
     "@types/react-router-dom": "^4.3.1",
-    "apollo-boost": "^0.1.28",
+    "apollo-boost": "0.3.1",
+    "apollo-router5": "^0.5.0",
     "classnames": "^2.2.6",
     "date-fns": "^2.0.0-alpha.27",
     "graphql": "^14.1.1",
@@ -18,7 +19,10 @@
     "react-apollo": "^2.4.1",
     "react-dom": "^16.6.0",
     "react-router-dom": "^4.3.1",
-    "react-scripts-ts": "3.1.0"
+    "react-router5": "^7.1.0",
+    "react-scripts-ts": "3.1.0",
+    "router5": "^7.0.2",
+    "router5-plugin-browser": "^7.0.2"
   },
   "scripts": {
     "start": "react-scripts-ts start",
@@ -27,8 +31,8 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.9",
-    "@types/node": "^10.12.2",
+    "@types/jest": "^24.0.11",
+    "@types/node": "11.12.2",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
     "typescript": "^3.1.6"
