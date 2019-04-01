@@ -89,9 +89,13 @@ const resolvers = {
                 } 
                 
                 var invoiceArray = [];
+                var tempArray = {};
                 snapshot.forEach(doc => {
-                //console.log('Document data:', doc.data());
-                    invoiceArray.push(doc.data());
+                    tempArray = doc.data();
+                    //tempArray.createdDate = new Date(doc.data().createdDate.toDate());
+                    //console.log('tempArray.createdDate', tempArray.createdDate);
+                    tempArray.id = doc.id;
+                    invoiceArray.push(tempArray);
                 });
                 return invoiceArray;
             })
@@ -109,9 +113,13 @@ const resolvers = {
                 } 
                 
                 var invoiceArray = [];
+                var tempArray = {};
                 snapshot.forEach(doc => {
-                //console.log('Document data:', doc.data());
-                    invoiceArray.push(doc.data());
+                    tempArray = doc.data();
+                    //tempArray.createdDate = new Date(doc.data().createdDate.toDate());
+                    tempArray.id = doc.id;
+                    invoiceArray.push(tempArray);
+                    //console.log('invoiceArray: ', invoiceArray);
                 });
                 return invoiceArray;
             })
@@ -244,7 +252,7 @@ get().then(snapshot => {
     });
 */
     Mutation: {
-        addUser: (parent, args) => {         
+       /* addUser: (parent, args) => {         
             // People REST API: GetTeams (Get all teams in people)
             var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=' + args.teamId + '&ApiKey=';
             var myURL = RestMember + keys.RestAPIKey;
@@ -300,7 +308,7 @@ get().then(snapshot => {
                 }
               }
               processData();   
-        },
+        },*/
         removeUser: (parent, args) => {
             
             return db.collection('users').doc(`${args.id}`).get()

@@ -20,7 +20,7 @@ admin.initializeApp({
     databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
   });
 
-const settings = {timestampsInSnapshots: true};
+const settings = {timestampsInSnapshots: false};
 admin.firestore().settings(settings);
 
 const functions = require("firebase-functions");
