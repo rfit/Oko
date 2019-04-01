@@ -28,12 +28,21 @@ export interface INewEntryState {
 
 */
 const ADD_INVOICE = gql`
-  mutation createBill($ID: String, $oko: Number, $nooko: Number, $teamId: String ) {
-	createBill(id: $ID oko: $oko, nonoko: $nooko, teamId: $teamId) {
-		created,
-	  	id
+	mutation createInvoice(
+		$invoiceId: Number,
+		$invoiceDate: String,
+		$teamId: Number,
+		$eco: Number,
+		$nonEco: Number,
+		$excluded: Number,
+		$total: Number
+	){
+		createBill(id: $ID oko: $oko, nonoko: $nooko, teamId: $teamId) {
+			createdDate,
+			invoiceId,
+	  		id
+		}
 	}
-  }
 `;
 
 function uuidv4() {
@@ -48,17 +57,16 @@ function uuidv4() {
 console.log(uuidv4());
 
 class NewEntry extends React.Component<INewEntryProps, {}> {
-	public handleDateChange = () => {
-		console.log('changed!!!')
+	public state = {
+		invoiceDate: new Date(),
+	}
+	public handleDateChange = (date: any) => {
+		this.setState({ invoiceDate: date });
+		console.log('changed!!!', this.state.invoiceDate)
 	}
 	public render() {
-		let invoiceDate: any;
 		let invoiceId: any;
 		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
-
-		this.setState({
-			invoiceDate: new Date()
-		});
 
 		return (
 			<Mutation mutation={ADD_INVOICE}>
@@ -69,9 +77,8 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 							e.preventDefault();
 							CreateInvoice({
 								variables: {
-									invoiceDate: new Date(),
+									invoiceDate: this.state.invoiceDate,
 									invoiceId: invoiceId.value,
-									type: invoiceDate.value,
 									oko: '100',
 									nooko: '0',
 									teamId: '23'
@@ -83,20 +90,11 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 							Opret ny faktura
 						</Typography>
 
-						<TextField
-							// tslint:disable-next-line: jsx-no-lambda
-							inputRef={node => {
-								invoiceDate = node;
-						  	}}
-							id="invoice-time"
+						<DatePicker
+							variant="filled"
 							label="Faktura dato"
-							type="date"
-							margin="normal"
-							defaultValue="201705-24"
-						/>
-
-						<DatePicker value={this.state.selectedDate} onChange={this.handleDateChange} />
-
+							value={this.state.invoiceDate}
+							onChange={this.handleDateChange} />
 						<br />
 						<TextField
 							// tslint:disable-next-line: jsx-no-lambda

@@ -49,12 +49,12 @@ const SimpleTable = (props: any) => (
 	<Query
 		query={gql`
 			{
-				bills {
-					id,
-					created,
-					oko,
-					nonoko,
-					teamId
+				invoices(teamId: 6822) {
+					invoiceId,
+					eco,
+					nonEco,
+					excluded,
+					total
 				}
 			}
 		`}
@@ -76,18 +76,20 @@ const SimpleTable = (props: any) => (
 							<TableCell>Tidspunkt</TableCell>
 							<TableCell>Øko</TableCell>
 							<TableCell>Ikke Øko</TableCell>
+							<TableCell>Undtaget</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{data.bills.map((bill: any) => {
+						{data.invoices.map((invoice: any) => {
 						return (
-							<TableRow key={bill.id}>
-							<TableCell component="th" scope="row">
-								{bill.id}
-							</TableCell>
-							<TableCell>{bill.created}</TableCell>
-							<TableCell>{bill.oko}</TableCell>
-							<TableCell>{bill.nonoko}</TableCell>
+							<TableRow key={invoice.id || invoice.invoiceId}>
+								<TableCell component="th" scope="row">
+									{invoice.invoiceId}
+								</TableCell>
+								<TableCell>{invoice.created}</TableCell>
+								<TableCell>{invoice.eco}</TableCell>
+								<TableCell>{invoice.nonEco}</TableCell>
+								<TableCell>{invoice.excluded}</TableCell>
 							</TableRow>
 						);
 						})}

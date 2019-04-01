@@ -211,7 +211,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							<Divider />
 						<List>
 							{/* tslint:disable-next-line jsx-no-lambda */ }
-							<ListItem button {...{ to: "/help" }} component={Link}>
+							<ListItem button {...{component: Link, to: `/help`} as any} {...{ to: "/help" }}>
 								<ListItemIcon><HelpIcon /></ListItemIcon>
 								<ListItemText primary="Hjælp" />
 							</ListItem>

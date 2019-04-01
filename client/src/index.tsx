@@ -24,14 +24,30 @@ const RFMuiTheme = createMuiTheme({
 	},
 });
 
+
+const typeDefs = gql`
+	extend type Query {
+		isLoggedIn: Boolean!
+		currentUser: [Launch]!
+	}
+
+	extend type currentUser {
+		name: String!
+		token: String!
+		teamId: string!
+	}
+`;
+
 const client = new ApolloClient({
 	// Backend API Url from firebase
 	uri: "https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql",
 	fetchOptions: {
 		credentials: 'omit'
-	}
+	},
+	typeDefs
 });
 
+/*
 client
   .query({
     query: gql`
@@ -45,6 +61,7 @@ client
     `
   })
   .then(result => console.log(result));
+*/
 
 ReactDOM.render(
 	<ApolloProvider client={client}>

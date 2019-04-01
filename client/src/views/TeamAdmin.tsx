@@ -81,10 +81,12 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 			<Query
 				query={gql`
 					{
-						users {
-							memberId,
-							email,
-							memberName
+						team(id: 6822) {
+							users {
+								name,
+								email,
+								peopleId
+							}
 						}
 					}
 				`}
@@ -153,7 +155,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Personer med adgang
 							</Typography>
 
-							<PersonList persons={data.users} onDeletePerson={handleDelete} />
+							<PersonList persons={data.team.users} onDeletePerson={handleDelete} />
 
 							<Paper className={classes.addBox}>
 								<FormControl className={classes.margin}>
