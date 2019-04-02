@@ -5,6 +5,7 @@ var db = admin.firestore();
 const keys = require('../serviceAccountKey');
 const request = require('request');
 
+const requiredTeamId = require('../data/team-2019');
 
 /*
 var userRef = db.collection('users').where('teams', 'array-contains', 6822);
@@ -19,6 +20,7 @@ userRef.get().then(snapshot => {
     });
  */
 
+ /*
 var requiredTeamId = [
     
     8023, // Pavilion Volunteer Café 
@@ -28,7 +30,7 @@ var requiredTeamId = [
     6858, // Folkets Madhus
     7885 // Dava Foods
 
-];    
+];    */
 
 // Manuel oprettelse af Admins
 var requiredAdmins = [ // PeopleIDs
@@ -93,7 +95,8 @@ requiredTeamId.forEach(function(entry) {
                     var tempTeam = {
                         measurement: 'null',
                         name: PeopleData.Teams[item].TeamName,
-                        peopleId: PeopleData.Teams[item].TeamId
+                        peopleId: PeopleData.Teams[item].TeamId,
+                        id: PeopleData.Teams[item].TeamId
                     };
                 
                     // Add team to firestore if admin
@@ -127,6 +130,7 @@ requiredTeamId.forEach(function(entry) {
                         email: PeopleData.TeamMembers[item].Email,
                         name: PeopleData.TeamMembers[item].MemberName,
                         peopleId: PeopleData.TeamMembers[item].MemberId,
+                        id: PeopleData.TeamMembers[item].MemberId,
                         role: 'Admin',
                         teams: [PeopleData.TeamMembers[item].TeamId]
                     };
@@ -147,6 +151,7 @@ requiredTeamId.forEach(function(entry) {
                         email: PeopleData.TeamMembers[item].Email,
                         name: PeopleData.TeamMembers[item].MemberName,
                         peopleId: PeopleData.TeamMembers[item].MemberId,
+                        id: PeopleData.TeamMembers[item].MemberId,
                         role: 'Admin',
                         teams: [PeopleData.TeamMembers[item].TeamId]
                     };

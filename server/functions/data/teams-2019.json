@@ -1,0 +1,10 @@
+{
+    "requiredTeamId": [
+        8023, // Pavilion Volunteer Café 
+        6817, // Kristinedal
+        6822, // BUSBUS
+        6835, // Meyers
+        6858, // Folkets Madhus
+        7885 // Dava Foods
+    ]
+}
