@@ -5,7 +5,6 @@ import { Query } from "react-apollo";
 import { Link } from "react-router-dom";
 
 import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
 // import Fab from '@material-ui/core/Fab';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -15,8 +14,10 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 
-
 import AddIcon from '@material-ui/icons/Add';
+
+import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
+import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
@@ -45,63 +46,43 @@ export interface IOverviewState {
 	shopName: string;
 }
 
-const SimpleTable = (props: any) => (
-	<Query
-		query={gql`
-			{
-				invoices(teamId: 6822) {
-					invoiceId,
-					eco,
-					nonEco,
-					excluded,
-					total
-				}
-			}
-		`}
-	>
-		{({ loading, error, data }) => {
-			const { classes } = props;
+const SimpleInvoiceTable = (props: any) => {
+	const { classes, invoices } = props;
+	return (
+		<Paper className={classes.root}>
+			<Table className={classes.table}>
+			<TableHead>
+				<TableRow>
+					<TableCell>Nummer</TableCell>
+					<TableCell>Faktura dato</TableCell>
+					<TableCell>Øko</TableCell>
+					<TableCell>Ikke Øko</TableCell>
+					<TableCell>Undtaget</TableCell>
+					<TableCell>Øko %</TableCell>
+				</TableRow>
+			</TableHead>
+			<TableBody>
+				{invoices.map((invoice: any) => {
+				return (
+					<TableRow key={invoice.id || invoice.invoiceId}>
+						<TableCell component="th" scope="row">
+							{invoice.invoiceId}
+						</TableCell>
+						<TableCell>{invoice.invoiceDate}</TableCell>
+						<TableCell>{invoice.eco}</TableCell>
+						<TableCell>{invoice.nonEco}</TableCell>
+						<TableCell>{invoice.excluded}</TableCell>
+						<TableCell>{calculateEcoPercentage(invoice.eco, invoice.nonEco).toFixed(1)}%</TableCell>
+					</TableRow>
+				);
+				})}
+			</TableBody>
+			</Table>
+		</Paper>
+	);
+};
 
-			if (loading) { return <p>Loading...</p>; }
-			if (error) { return <p>Error :(</p>; }
-
-			console.log('Overview data', data);
-
-			return (
-				<Paper className={classes.root}>
-					<Table className={classes.table}>
-					<TableHead>
-						<TableRow>
-							<TableCell>Nummer</TableCell>
-							<TableCell>Tidspunkt</TableCell>
-							<TableCell>Øko</TableCell>
-							<TableCell>Ikke Øko</TableCell>
-							<TableCell>Undtaget</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{data.invoices.map((invoice: any) => {
-						return (
-							<TableRow key={invoice.id || invoice.invoiceId}>
-								<TableCell component="th" scope="row">
-									{invoice.invoiceId}
-								</TableCell>
-								<TableCell>{invoice.created}</TableCell>
-								<TableCell>{invoice.eco}</TableCell>
-								<TableCell>{invoice.nonEco}</TableCell>
-								<TableCell>{invoice.excluded}</TableCell>
-							</TableRow>
-						);
-						})}
-					</TableBody>
-					</Table>
-				</Paper>
-			);
-		}}
-	</Query>
-  );
-
-const StyledTable = withStyles(tableStyles)(SimpleTable);
+const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
 
 class Overview extends React.Component<IOverviewProps, IOverviewState> {
 	constructor(props: IOverviewProps) {
@@ -119,35 +100,60 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 		// } = this.props;
 
 		return (
-			<main>
-				<Typography component="h1" variant="h3" gutterBottom>
-					Oversigt
-				</Typography>
+			<Query
+				query={gql`
+					{
+						invoices(teamId: 6822) {
+							invoiceId,
+							invoiceDate,
+							createdDate,
+							eco,
+							nonEco,
+							excluded,
+							total
+						}
+					}
+				`}
+			>
+			{({ loading, error, data }) => {
 
-				<Card>
-					<Typography component="h3" style={{ padding: 10 }}>
-						Nuværende øko procent: 86%
-					</Typography>
-				</Card>
+		console.log('Overview data', data);
 
-				<Typography component="h2" variant="h6" gutterBottom>
-					Tidligere leverancer for {this.state.shopName}
-				</Typography>
-				<StyledTable />
+				if (loading) { return <p>Loading...</p>; }
+				if (error) { return <p>Error :(</p>; }
 
-				{/* tslint:disable-next-line:jsx-no-lambda
-				<Fab variant="round" color="primary" component={(props: any) => <Link to="/create-new" {...props} />}>
-					<AddIcon />
-				</Fab>
-				*/}
+				const totalEco = data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
+				const totalNonEco = data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 
-				{/* tslint:disable-next-line:jsx-no-lambda */}
-				<Button variant="contained" color="secondary" component={(props: any) => <Link to="/create-new" {...props} />}>
-					Tilføj leverance
-					<AddIcon />
-				</Button>
-			</main>
-		);
+				return (
+					<main>
+						<Typography component="h1" variant="h3" gutterBottom>
+							Oversigt
+						</Typography>
+
+						<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
+
+						<Typography component="h2" variant="h6" gutterBottom>
+							Tidligere leverancer for {this.state.shopName}
+						</Typography>
+
+						<StyledInvoiceTable invoices={data.invoices} />
+
+						{/* tslint:disable-next-line:jsx-no-lambda
+						<Fab variant="round" color="primary" component={(props: any) => <Link to="/create-new" {...props} />}>
+							<AddIcon />
+						</Fab>
+						*/}
+
+						{/* tslint:disable-next-line:jsx-no-lambda */}
+						<Button variant="contained" color="secondary" component={(props: any) => <Link to="/create-new" {...props} />}>
+							Tilføj leverance
+							<AddIcon />
+						</Button>
+					</main>
+				);
+			}}
+		</Query>);
 	}
 }
 
