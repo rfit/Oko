@@ -1,10 +1,29 @@
 {
     "requiredTeamId": [
-        8023, // Pavilion Volunteer Café 
-        6817, // Kristinedal
-        6822, // BUSBUS
-        6835, // Meyers
-        6858, // Folkets Madhus
-        7885 // Dava Foods
-    ]
+        8023, 
+        6817, 
+        6822, 
+        6835, 
+        6858, 
+        7885 
+    ],
+    "__commentTeamId": {
+        "Pavilion Volunteer Café": 8023, 
+        "Kristinedal": 6817, 
+        "BUSBUS": 6822, 
+        "Meyers": 6835, 
+        "Folkets Madhus": 6858, 
+        "Dava Foods": 7885
+    },
+    "requiredAdmins": [
+        111100,
+        1756, 
+        203757
+    ],
+    "__commentAdmins": {
+        "Stine Eisen": 111100, 
+        "Mikael Langrand Sørensen": 1756, 
+        "Allan Kimmer Jensen": 203757 
+    }
+
 }

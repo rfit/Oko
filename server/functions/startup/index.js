@@ -5,7 +5,9 @@ var db = admin.firestore();
 const keys = require('../serviceAccountKey');
 const request = require('request');
 
-const requiredTeamId = require('../data/team-2019');
+const data = require('../data/teams-2019');
+var requiredTeamId = data.requiredTeamId;
+var requiredAdmins = data.requiredAdmins;
 
 /*
 var userRef = db.collection('users').where('teams', 'array-contains', 6822);
@@ -19,25 +21,6 @@ userRef.get().then(snapshot => {
         return err;
     });
  */
-
- /*
-var requiredTeamId = [
-    
-    8023, // Pavilion Volunteer Café 
-    6817, // Kristinedal
-    6822, // BUSBUS
-    6835, // Meyers
-    6858, // Folkets Madhus
-    7885 // Dava Foods
-
-];    */
-
-// Manuel oprettelse af Admins
-var requiredAdmins = [ // PeopleIDs
-    111100, // Stine Eisen
-    1756, // Mikael Langrand Sørensen
-    203757 // Allan Kimmer Jensen
-];
 
 // Loop through all admins and create. 
 requiredAdmins.forEach(function(entry) {
