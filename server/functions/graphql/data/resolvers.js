@@ -240,75 +240,66 @@ const resolvers = {
         },
     },
     
-
-/*
-get().then(snapshot => {
-      snapshot.docs.forEach(doc => {
-              console.log('Document data:', doc.id, doc.data());
-          })
-      }).catch(err => {
-        console.log('Error getting document', err);
-        return err;
-    });
-*/
     Mutation: {
-       /* addUser: (parent, args) => {         
-            // People REST API: GetTeams (Get all teams in people)
-            var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=' + args.teamId + '&ApiKey=';
-            var myURL = RestMember + keys.RestAPIKey;
+       
+        addUser: (parent, args) => {
+            console.log('args.email: ', args.email);
+            return db.collection('users').where('email', '==', args.email).get() 
+            .then(snapshot => {
+                if (snapshot.size === 0) {
+                    var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=' + args.teamId + '&ApiKey=';
+                    var myURL = RestMember + keys.RestAPIKey;
 
-            async function processData() {
-                try {
-                  let response = await rp(myURL);
-                  const PeopleData = JSON.parse(response);
-
-                    Object.keys(PeopleData.TeamMembers).forEach(function (item) {
-                        // Find users that are admins / "Holdleder". If not users is "basis"
-                        if (PeopleData.TeamMembers[item].Email === args.email) {
-
-                            var user = {
-                                id: PeopleData.TeamMembers[item].MemberId,
-                                email: PeopleData.TeamMembers[item].Email,
-                                name: PeopleData.TeamMembers[item].MemberName,
-                                peopleId: PeopleData.TeamMembers[item].MemberId,
-                                role: 'Editor',
-                                teams: [args.teamId]
-                            };
-                            console.log('user ', user);
-
-                            return db.collection('users').doc(`${user.peopleId}`).get()
-                            .then(doc => {
-                                if (!doc.exists) {
-                                    return addUser = db.collection('users').doc(`${user.peopleId}`).set(user)
+                    rp(myURL)
+                    .then(function (response) {
+                        const PeopleData = JSON.parse(response);
+                        
+                        Object.keys(PeopleData.TeamMembers).forEach(function (item) {
+                            // Find users that are admins / "Holdleder". If not users is "basis"
+                            if (PeopleData.TeamMembers[item].Email === args.email) {
+    
+                                var user = {
+                                    id: PeopleData.TeamMembers[item].MemberId,
+                                    email: PeopleData.TeamMembers[item].Email,
+                                    name: PeopleData.TeamMembers[item].MemberName,
+                                    peopleId: PeopleData.TeamMembers[item].MemberId,
+                                    role: 'Editor',
+                                    teams: [args.teamId]
+                                };
+                                
+                                return addUser = db.collection('users').doc(`${user.id}`).set(user)
                                     .then(ref => {
                                         console.log("User Added: ", user);
-                                        return doc.data();
+                                        return user;
                                     })
                                     .catch(err => {
                                         console.log('Error getting document', err);
                                         //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
                                         return err;
                                     });
-                                } else {
-                                    console.log('User already exists:', doc.data());
-                                    //return doc.data();
-                                    //throw new Error(`User already exists.`);
-                                    return Error(`User already exists.`, doc.data());
-                                }
-                            })
-                            .catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                                //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                            })
+                            } 
+                        })
+                        return true;
+                    })
+                    .catch(function (err) {
+                        return err;
+                    });
+                } else {
+                    snapshot.docs.forEach(doc => {
+                        if (doc.exists) {
+                            console.log('User already exists:', doc.data());
+                            return 'User already exists:', doc.data();
                         } 
                     })
-                } catch (error) {
-                  console.log("Error: ", error);
                 }
-              }
-              processData();   
-        },*/
+                return true;
+            }) 
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err;
+            })
+        },
+
         removeUser: (parent, args) => {
             
             return db.collection('users').doc(`${args.id}`).get()
