@@ -375,7 +375,39 @@ const resolvers = {
                 return err; 
             })
         },
-      },
+      
+      setTeamMeasurement: (parent, args) => {
+        return db.collection('teams').doc(`${args.teamId}`).get()
+        .then(doc => {
+                  if (!doc.exists) {
+                      console.log('No such document!');
+                      return null;
+                  } else {
+                    
+                    if (args.measurement === 'KG' || args.measurement === 'KR') {
+                            console.log('Team Document data:', doc.data());
+                            return updateMeasurement = db.collection('teams').doc(`${args.teamId}`).update({
+                                measurement: args.measurement
+                            })
+                            .then(ref => {
+                                console.log("Measurement Changed");
+                                return true;
+                            })
+                            .catch(err => {
+                                console.log('Error getting document', err);
+                                return true;
+                            });
+                        } else {
+                            return true;
+                        } 
+                  }
+              })
+              .catch(err => {
+                  //console.log('Error getting document', err);
+                  return err;
+              })
+          },
+    },
 };
   
 module.exports = resolvers;
