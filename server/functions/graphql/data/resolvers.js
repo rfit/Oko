@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+var FieldValue = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 var db = admin.firestore();
 
 
@@ -299,7 +300,6 @@ const resolvers = {
                 return err;
             })
         },
-
         removeUser: (parent, args) => {
             
             return db.collection('users').doc(`${args.id}`).get()
@@ -327,8 +327,55 @@ const resolvers = {
                 //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
             })
         },
+        addInvoice: (parent, args) => {
+            
+            const invoice = {
+                invoiceId: args.invoiceId, 
+                createdDate: FieldValue,
+                invoiceDate: args.invoiceDate,
+                teamId: args.teamId,
+                userId: args.userId,
+                userName: args.userName,
+                eco: args.eco,
+                nonEco: args.nonEco,
+                excluded: args.excluded,
+                total: args.eco + args.nonEco + args.excluded
+            };
+
+            return addInvoice = db.collection('invoices').add(invoice)
+                .then(function() {
+                    console.log("Invoice Added: ", invoice);
+                    return invoice;
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return err;
+                });
+        },
+        deleteInvoice: (parent, args) => {
+            return db.collection('invoices').doc(`${args.id}`).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log("Invoice Not Found");
+                    return false;
+                } else {
+                    return addUser = db.collection('invoices').doc(`${args.id}`).delete()
+                    .then(ref => {
+                        console.log("Invoice Deleted");
+                        return true;
+                    })
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                        return true;
+                    });
+                }
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err; 
+            })
+        },
       },
-    
 };
   
 module.exports = resolvers;
