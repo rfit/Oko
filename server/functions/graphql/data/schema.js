@@ -21,7 +21,7 @@ type Query {
     addInvoice(
       invoiceId: Int!,
       invoiceDate: String!,
-      teamId: String!,
+      teamId: Int!,
       userId: Int!,
       userName: String,
       eco: Float!,

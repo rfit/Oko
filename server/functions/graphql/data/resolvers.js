@@ -343,9 +343,23 @@ const resolvers = {
             };
 
             return addInvoice = db.collection('invoices').add(invoice)
-                .then(function() {
-                    console.log("Invoice Added: ", invoice);
-                    return invoice;
+                .then(ref => {
+                    return db.collection('invoices').doc(`${ref.id}`).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            console.log('No such document!');
+                            return null;
+                        } else {
+                            var invoiceArray = [];
+                            invoiceArray = doc.data();
+                            invoiceArray.id = ref.id;
+                            console.log('Invoice Document data:', invoiceArray);
+                            return invoiceArray;
+                        }
+                    })
+                    .catch(err => {
+                        return err;
+                    })
                 })
                 .catch(err => {
                     console.log('Error getting document', err);
