@@ -366,6 +366,66 @@ const resolvers = {
                     return err;
                 });
         },
+        updateInvoice: (parent, args) => {
+            
+            return db.collection('invoices').doc(`${args.id}`).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log("Invoice Not Found");
+                    return false;
+                } else {
+
+                    const invoice = {
+                        createdDate: FieldValue,
+                        invoiceId: doc.data().invoiceId,
+                        invoiceDate: doc.data().invoiceDate,
+                        teamId: doc.data().teamId,
+                        userId: doc.data().userId,
+                        userName: doc.data().userName,
+                        eco: doc.data().eco,
+                        nonEco: doc.data().nonEco,
+                        excluded: doc.data().excluded
+                    };
+
+                    if( args.invoiceId !== undefined ) { invoice.invoiceId = args.invoiceId; }
+                    if( args.invoiceDate !== undefined ) { invoice.invoiceDate = args.invoiceDate; }
+                    if( args.userId !== undefined ) { invoice.userId = args.userId; }
+                    if( args.userName !== undefined ) { invoice.userName = args.userName; }
+                    if( args.eco !== undefined ) { invoice.eco = args.eco; }
+                    if( args.nonEco !== undefined ) { invoice.nonEco = args.nonEco; }
+                    if( args.excluded !== undefined ) { invoice.excluded = args.excluded; }
+                    invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
+
+                    return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
+                    .then(ref => {
+                        return db.collection('invoices').doc(`${args.id}`).get()
+                        .then(updatedoc => {
+                            if (!updatedoc.exists) {
+                                console.log('No such document!');
+                                return null;
+                            } else {
+                                var invoiceArray = [];
+                                invoiceArray = updatedoc.data();
+                                invoiceArray.id = args.id;
+                                console.log('Invoice Document data:', invoiceArray);
+                                return invoiceArray;
+                            }
+                        })
+                        .catch(err => {
+                            return err;
+                        })
+                    })
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                        return true;
+                    });
+                }
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+                return err; 
+            })
+        },
         deleteInvoice: (parent, args) => {
             return db.collection('invoices').doc(`${args.id}`).get()
             .then(doc => {

@@ -32,11 +32,12 @@ type Query {
       id: ID!,
       invoiceId: Int,
       invoiceDate: String,
+      userId: Int!,
+      userName: String,
       eco: Float,
       nonEco: Float,
-      excluded: Float,
-      total: Float
-    ): Invoice!
+      excluded: Float
+    ): Invoice
     deleteInvoice(id: ID!): Boolean!
     setTeamMeasurement(teamId: Int!, measurement: String): Boolean
   }
