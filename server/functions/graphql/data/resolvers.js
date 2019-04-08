@@ -244,7 +244,7 @@ const resolvers = {
     Mutation: {
        
         addUser: (parent, args) => {
-            console.log('args.email: ', args.email);
+            //console.log('args.email: ', args.email);
             return db.collection('users').where('email', '==', args.email).get() 
             .then(snapshot => {
                 if (snapshot.size === 0) {

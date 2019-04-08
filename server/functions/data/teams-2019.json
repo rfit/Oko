@@ -5,7 +5,10 @@
         6822, 
         6835, 
         6858, 
-        7885 
+        7885,
+        7137,
+        6814,
+        6815
     ],
     "__commentTeamId": {
         "Pavilion Volunteer Café": 8023, 
@@ -13,7 +16,10 @@
         "BUSBUS": 6822, 
         "Meyers": 6835, 
         "Folkets Madhus": 6858, 
-        "Dava Foods": 7885
+        "Dava Foods": 7885,
+        "Halifax Burgers": 7137,
+        "JGI Lasagne, Sandwich & Laundry": 6814,
+        "Gringobar": 6815
     },
     "requiredAdmins": [
         111100,

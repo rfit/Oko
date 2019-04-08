@@ -10,6 +10,18 @@ var requiredTeamId = data.requiredTeamId;
 var requiredAdmins = data.requiredAdmins;
 
 /*
+var userRef = db.collection('users').where('email', '==', 'stine.eisen@roskilde-festival.dk');
+  
+userRef.get().then(snapshot => {
+      snapshot.docs.forEach(doc => {
+              console.log('Document data:', doc.id, doc.data());
+          })
+      }).catch(err => {
+        console.log('Error getting document', err);
+        return err;
+    });
+*/
+/*
 var userRef = db.collection('users').where('teams', 'array-contains', 6822);
   
 userRef.get().then(snapshot => {
@@ -82,13 +94,28 @@ requiredTeamId.forEach(function(entry) {
                         id: PeopleData.Teams[item].TeamId
                     };
                 
-                    // Add team to firestore if admin
-                    var addTeam = db.collection('teams').doc(`${PeopleData.Teams[item].TeamId}`).set(tempTeam).then(ref => {
-                        return ref;
-                    }).catch(err => {
+                    return db.collection('teams').doc(`${entry}`).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            // Add team to firestore if admin
+                            var addTeam = db.collection('teams').doc(`${PeopleData.Teams[item].TeamId}`).set(tempTeam).then(ref => {
+                                console.log('Team do not exists: ', tempTeam);
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                            
+                        } else {
+                            //console.log("Team already exists: ", doc.data().name);
+                            return doc.data();
+                        }
+                    })
+                    .catch(err => {
                         console.log('Error getting document', err);
                         return err;
-                    });
+                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                    })   
                 }
         });
     });
@@ -118,13 +145,36 @@ requiredTeamId.forEach(function(entry) {
                         teams: [PeopleData.TeamMembers[item].TeamId]
                     };
                 
-                    // Add user to firestore if admin
-                    db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
-                        return ref;
-                    }).catch(err => {
+
+                    return db.collection('users').doc(`${entry}`).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            // Add user to firestore if admin
+                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                        } else {
+                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).update({
+                                teamId: admin.firestore.FieldValue.arrayUnion(PeopleData.TeamMembers[item].TeamId)
+                            }).then(ref => {
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                        }
+                    })
+                    .catch(err => {
                         console.log('Error getting document', err);
                         return err;
-                    });
+                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                    }) 
+
+
+                    
 
                     // Find users that are admins / "Ansvarlig".
                 } else if (PeopleData.TeamMembers[item].TitleName === 'Ansvarlig') {
@@ -139,16 +189,36 @@ requiredTeamId.forEach(function(entry) {
                         teams: [PeopleData.TeamMembers[item].TeamId]
                     };
                 
-                    // Add user to firestore if admin
-                    db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
-                        return ref;
-                    }).catch(err => {
+                    return db.collection('users').doc(`${entry}`).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            // Add user to firestore if admin
+                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                        } else {
+                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).update({
+                                teamId: admin.firestore.FieldValue.arrayUnion(PeopleData.TeamMembers[item].TeamId)
+                            }).then(ref => {
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                        }
+                    })
+                    .catch(err => {
                         console.log('Error getting document', err);
                         return err;
-                    });
+                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                    }) 
 
                 }
         });
 
     });
 });
+                
