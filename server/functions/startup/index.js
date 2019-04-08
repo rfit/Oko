@@ -110,6 +110,7 @@ requiredTeamId.forEach(function(entry) {
                             //console.log("Team already exists: ", doc.data().name);
                             return doc.data();
                         }
+                        return true;
                     })
                     .catch(err => {
                         console.log('Error getting document', err);
@@ -166,6 +167,7 @@ requiredTeamId.forEach(function(entry) {
                                 return err;
                             });
                         }
+                        return true;
                     })
                     .catch(err => {
                         console.log('Error getting document', err);
@@ -209,6 +211,7 @@ requiredTeamId.forEach(function(entry) {
                                 return err;
                             });
                         }
+                        return true;
                     })
                     .catch(err => {
                         console.log('Error getting document', err);
