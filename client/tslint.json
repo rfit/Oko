@@ -4,7 +4,9 @@
     "jsx-boolean-value": false,
     "jsx-no-multiline-js": false,
 	"object-literal-sort-keys": false,
-	"no-console": false
+	"no-console": false,
+	"ordered-imports": false,
+	"no-unused-variable": false
   },
   "linterOptions": {
     "exclude": [

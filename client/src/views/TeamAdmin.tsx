@@ -15,9 +15,11 @@ import Save from '@material-ui/icons/Save';
 import * as React from 'react';
 
 import PersonList from '../components/personList';
+import Loading from '../components/Loading';
 
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
+import SetTeamMesurement from '../components/SetTeamMesurement';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	'@global': {
@@ -34,8 +36,8 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 
 export interface IAdminProps {
 	classes: any;
-	unitValue: 'kr' | 'kg';
-	unitHasBeenPicked: boolean;
+	unitValue?: 'kr' | 'kg';
+	unitHasBeenPicked?: boolean;
 }
 
 
@@ -55,7 +57,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 
 		this.state = {
 			unitValue: props.unitValue,
-			unitHasBeenPicked: props.unitHasBeenPicked
+			unitHasBeenPicked: props.unitHasBeenPicked || false
 		}
 	}
 	public handleUnitChange = (event: any) => {
@@ -82,6 +84,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 				query={gql`
 					{
 						team(id: 6822) {
+							measurement,
 							users {
 								name,
 								email,
@@ -92,7 +95,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 				`}
 				>
 				{({ loading, error, data }) => {
-					if (loading) { return <p>Loading...</p>; }
+					if (loading) { return <Loading />; }
 					if (error) { return <p>Error :(</p>; }
 
 					const {
@@ -115,40 +118,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 							</Typography>
 
 
-							<hr />
-							<Typography component="h1" variant="h6" gutterBottom>
-								Faktura mål
-							</Typography>
-							<Typography variant="body2" gutterBottom>
-								Du kan kun vælge dette én gang.
-							</Typography>
-
-							<FormControl className={classes.formControl}>
-								<RadioGroup
-									aria-label="gender"
-									name="gender2"
-									className={classes.group}
-									value={this.state.unitValue}
-									onChange={this.handleUnitChange}
-								>
-									<FormControlLabel
-										value="kr"
-										control={<Radio color="primary" />}
-										label="kr - Pris"
-										disabled={unitHasBeenPicked}
-										labelPlacement="end"
-									/>
-									<FormControlLabel
-										value="kg"
-										disabled={unitHasBeenPicked}
-										control={<Radio color="primary" />}
-										label="kg - Kilo"
-										labelPlacement="end"
-									/>
-								</RadioGroup>
-							</FormControl>
-							<br />
-							<Button variant="contained" color="primary" disabled={unitHasBeenPicked} onClick={this.handleUnitSave}><Save />Gem valg</Button>
+							<SetTeamMesurement unitValue={data.team.measurement} />
 
 							<hr />
 							<Typography component="h1" variant="h6" gutterBottom>

@@ -2,7 +2,7 @@ import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import * as React from 'react';
 import { Query } from "react-apollo";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router5'
 
 import Button from '@material-ui/core/Button';
 // import Fab from '@material-ui/core/Fab';
@@ -18,6 +18,9 @@ import AddIcon from '@material-ui/icons/Add';
 
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
+
+import SubHeader from '../components/SubHeader';
+import Loading from '../components/Loading';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
@@ -47,7 +50,7 @@ export interface IOverviewState {
 }
 
 const SimpleInvoiceTable = (props: any) => {
-	const { classes, invoices } = props;
+	const { classes, invoices = [] } = props;
 	return (
 		<Paper className={classes.root}>
 			<Table className={classes.table}>
@@ -104,6 +107,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 				query={gql`
 					{
 						invoices(teamId: 6822) {
+							id,
 							invoiceId,
 							invoiceDate,
 							createdDate,
@@ -119,38 +123,37 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 
 		console.log('Overview data', data);
 
-				if (loading) { return <p>Loading...</p>; }
+				if (loading) { return <Loading />; }
 				if (error) { return <p>Error :(</p>; }
 
-				const totalEco = data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
-				const totalNonEco = data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
+				const totalNonEco =  data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 
 				return (
-					<main>
-						<Typography component="h1" variant="h3" gutterBottom>
-							Oversigt
-						</Typography>
+					<React.Fragment>
+						<SubHeader title="Oversigt" />
+						<main>
+							<Typography component="h1" variant="h3" gutterBottom>
+								Oversigt
+							</Typography>
 
-						<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
+							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
 
-						<Typography component="h2" variant="h6" gutterBottom>
-							Tidligere leverancer for {this.state.shopName}
-						</Typography>
+							<Typography component="h2" variant="h6" gutterBottom>
+								Tidligere leverancer for {this.state.shopName}
+							</Typography>
 
-						<StyledInvoiceTable invoices={data.invoices} />
+							<StyledInvoiceTable invoices={data.invoices} />
 
-						{/* tslint:disable-next-line:jsx-no-lambda
-						<Fab variant="round" color="primary" component={(props: any) => <Link to="/create-new" {...props} />}>
-							<AddIcon />
-						</Fab>
-						*/}
+							<br />
 
-						{/* tslint:disable-next-line:jsx-no-lambda */}
-						<Button variant="contained" color="secondary" component={(props: any) => <Link to="/create-new" {...props} />}>
-							Tilføj leverance
-							<AddIcon />
-						</Button>
-					</main>
+							{/* tslint:disable-next-line:jsx-no-lambda */}
+							<Button variant="contained" color="secondary" component={(props: any) => <Link routeName="add-invoice" {...props} />}>
+								Tilføj faktura
+								<AddIcon />
+							</Button>
+						</main>
+					</React.Fragment>
 				);
 			}}
 		</Query>);

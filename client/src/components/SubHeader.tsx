@@ -16,9 +16,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 
-
-import TeamSwitcher from './TeamSwitcher';
-
 const lightColor = 'rgba(255, 255, 255, 0.7)';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
@@ -43,64 +40,52 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 });
 
-interface IHeaderState {
-	auth: boolean;
-	admin: boolean;
-	anchorEl: any;
-}
-
 interface IHeaderProps {
+	title: string;
 	classes: any;
-	onDrawerToggle: any;
 	children?: React.ReactNode;
 }
 
-function Header(props: IHeaderProps) {
-	const { classes, onDrawerToggle } = props;
+function SubHeader(props: IHeaderProps) {
+	const { classes, title } = props;
 
 	return (
 	  <React.Fragment>
-		<AppBar color="primary" position="sticky" elevation={0}>
+		<AppBar
+		  component="div"
+		  className={classes.secondaryBar}
+		  color="primary"
+		  position="static"
+		  elevation={0}
+		>
 		  <Toolbar>
-			<Grid container spacing={8} alignItems="center">
-			  <Hidden smUp>
-				<Grid item>
-				  <IconButton
-					color="inherit"
-					aria-label="Open drawer"
-					onClick={onDrawerToggle}
-					className={classes.menuButton}
-				  >
-					<MenuIcon />
-				  </IconButton>
-				</Grid>
-			  </Hidden>
-			  <Grid item xs />
-			  <Grid item>
-				<TeamSwitcher />
-			  </Grid>
-			  <Grid item>
-				<Tooltip title="Alerts • No alters">
-				  <IconButton color="inherit">
-					<NotificationsIcon />
-				  </IconButton>
-				</Tooltip>
-			  </Grid>
-			  <Grid item>
-				<IconButton color="inherit" className={classes.iconButtonAvatar}>
-				  <Avatar className={classes.avatar} src="https://api.adorable.io/avatars/285/111100.png" />
-				</IconButton>
+			<Grid container alignItems="center" spacing={8}>
+			  <Grid item xs>
+				<Typography color="inherit" variant="h5">
+				  {title}
+				</Typography>
 			  </Grid>
 			</Grid>
 		  </Toolbar>
 		</AppBar>
+
+		{ false && <AppBar
+		  component="div"
+		  className={classes.secondaryBar}
+		  color="primary"
+		  position="static"
+		  elevation={0}
+		>
+		  <Tabs value={0} textColor="inherit">
+			<Tab textColor="inherit" label="Users" />
+			<Tab textColor="inherit" label="Sign-in method" />
+			<Tab textColor="inherit" label="Templates" />
+			<Tab textColor="inherit" label="Usage" />
+		  </Tabs>
+		</AppBar>
+		}
 	  </React.Fragment>
 	);
-  }
+}
 
-  Header.propTypes = {
-	classes: PropTypes.object.isRequired,
-	onDrawerToggle: PropTypes.func.isRequired,
-  };
-
-  export default withStyles(styles)(Header);
+export default withStyles(styles)(SubHeader);
