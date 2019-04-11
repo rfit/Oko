@@ -1,4 +1,19 @@
 {
+    "requiredListOwnerEmail": [
+        "meyerdisse@gmail.com",
+        "mikehede@hotmail.com",
+        "simon.ugilt@roskilde-festival.dk",
+        "jeppe@kristinedal.dk",
+        "busbus.roskilde@gmail.com",
+        "pc@peterlarsenkaffe.dk",
+        "Boline@halifax.dk",
+        "Patrick@ramentobiiru.dk",
+        "bojen@tunenet.dk",
+        "jgi.festival93@gmail.com",
+        "euoffice@delaselva.com",
+        "chpe@muskelsvindfonden.dk",
+        "line.renner@roskilde-festival.dk"
+    ],
     "requiredTeamId": [
         8023, 
         6817, 
@@ -27,7 +42,7 @@
         203757
     ],
     "__commentAdmins": {
-        "Stine Eisen": 111100, 
+        "Stine Eisen": 111100,
         "Mikael Langrand Sørensen": 1756, 
         "Allan Kimmer Jensen": 203757 
     }

@@ -1,113 +1,63 @@
 // Firebase Setup
 const admin = require('firebase-admin');
 var db = admin.firestore();
+var FieldValue = require("firebase-admin").firestore.FieldValue;
 
 const keys = require('../serviceAccountKey');
 const request = require('request');
 
 const data = require('../data/teams-2019');
-var requiredTeamId = data.requiredTeamId;
+var requiredListOwnerEmail = data.requiredListOwnerEmail;
 var requiredAdmins = data.requiredAdmins;
 
-/*
-var userRef = db.collection('users').where('email', '==', 'stine.eisen@roskilde-festival.dk');
-  
-userRef.get().then(snapshot => {
-      snapshot.docs.forEach(doc => {
-              console.log('Document data:', doc.id, doc.data());
-          })
-      }).catch(err => {
-        console.log('Error getting document', err);
-        return err;
-    });
-*/
-/*
-var userRef = db.collection('users').where('teams', 'array-contains', 6822);
-  
-userRef.get().then(snapshot => {
-      snapshot.docs.forEach(doc => {
-              console.log('Document data:', doc.id, doc.data());
-          })
-      }).catch(err => {
-        console.log('Error getting document', err);
-        return err;
-    });
- */
+var arrayListId = [];
+var j=0;
+var arrayMemberId = [];
+var i=0;
+var itemsProcessed = 0;
 
 // Loop through all admins and create. 
-requiredAdmins.forEach(function(entry) {
+requiredListOwnerEmail.forEach(function(entry) {
 
     // People REST API: GetTeams (Get all teams in people)
-    var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
+    var RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
 
     request(RestMember + keys.RestAPIKey, function (error, response, body) {
             //console.log('error:', error); // Print the error if one occurred
             //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             const PeopleData = JSON.parse(body);
             module.exports = PeopleData;
-                
-            // Find users that are admins / "Holdleder". If not users is "basis"
-            if (PeopleData.Member.MemberId === entry) {
-                
-                var tempUser = {
-                    email: PeopleData.Member.Email,
-                    name: PeopleData.Member.Name,
-                    peopleId: PeopleData.Member.MemberId,
-                    role: 'Admin',
-                    teams: requiredTeamId
-                };
             
-                // Add user to firestore if admin
-                var addUser = db.collection('users').doc(`${PeopleData.Member.MemberId}`).set(tempUser).then(ref => {
-                    return ref;
-                }).catch(err => {
-                    console.log('Error getting document', err);
-                    return err;
-                });
-            }
-        });
-});
-
-// Loop through all team and create if not exists. Also editors (holdleder) are created for each team.
-requiredTeamId.forEach(function(entry) {
-
-    // People REST API: GetTeams (Get all teams in people)
-    var RestTeams = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeams/?ApiKey=';
-
-    request(RestTeams + keys.RestAPIKey, function (error, response, body) {
-        //console.log('error:', error); // Print the error if one occurred
-        //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        const PeopleData = JSON.parse(body);
-        module.exports = PeopleData;
-    
-        // Loop through a whole team
-        Object.keys(PeopleData.Teams).forEach(function (item) {
-            
-                // Find team based on TeamId
-                if (PeopleData.Teams[item].TeamId === entry) {
-                    //console.log('body:', PeopleData.Teams[item]);
-    
-                    var tempTeam = {
-                        measurement: 'null',
-                        name: PeopleData.Teams[item].TeamName,
-                        peopleId: PeopleData.Teams[item].TeamId,
-                        id: PeopleData.Teams[item].TeamId
+            // Loop through a whole team
+            Object.keys(PeopleData.Members).forEach(function (item) {
+                
+                // Find users that are admins / "Holdleder". If not users is "basis"
+                if (PeopleData.Members[item].Email === entry) {
+                    
+                    var tempUser = {
+                        email: PeopleData.Members[item].Email,
+                        name: PeopleData.Members[item].Name,
+                        id: PeopleData.Members[item].MemberId,
+                        peopleId: PeopleData.Members[item].MemberId,
+                        role: 'Admin'//,
+                        //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
                     };
-                
-                    return db.collection('teams').doc(`${entry}`).get()
+                    arrayMemberId[i] = PeopleData.Members[item].MemberId;
+                    i=i+1;
+                    
+                    return db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).get()
                     .then(doc => {
                         if (!doc.exists) {
-                            // Add team to firestore if admin
-                            var addTeam = db.collection('teams').doc(`${PeopleData.Teams[item].TeamId}`).set(tempTeam).then(ref => {
-                                console.log('Team do not exists: ', tempTeam);
+                            // Add user to firestore if admin
+                            db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).set(tempUser).then(ref => {
+                                console.log('User added: ', tempUser);
                                 return ref;
                             }).catch(err => {
                                 console.log('Error getting document', err);
                                 return err;
                             });
-                            
                         } else {
-                            //console.log("Team already exists: ", doc.data().name);
+                            console.log('User already exists: ', doc.data());
                             return doc.data();
                         }
                         return true;
@@ -116,112 +66,133 @@ requiredTeamId.forEach(function(entry) {
                         console.log('Error getting document', err);
                         return err;
                         //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                    })   
-                }
-        });
-    });
-
-    // People REST API: GetTeamMember pr. teamID
-    var RestTeam = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=' + entry + '&ApiKey=';
-
-    request(RestTeam + keys.RestAPIKey, function (error, response, body) {
-        //console.log('error:', error); // Print the error if one occurred
-        //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        const PeopleData = JSON.parse(body);
-        module.exports = PeopleData;
-
-        // Loop through a whole team
-        Object.keys(PeopleData.TeamMembers).forEach(function (item) {
-            var tempUser = {};
-                // Find users that are admins / "Holdleder". If not users is "basis"
-                if (PeopleData.TeamMembers[item].RoleName === 'Holdleder') {
-                    //console.log('body:', PeopleData.TeamMembers[item]);
-
-                    tempUser = {
-                        email: PeopleData.TeamMembers[item].Email,
-                        name: PeopleData.TeamMembers[item].MemberName,
-                        peopleId: PeopleData.TeamMembers[item].MemberId,
-                        id: PeopleData.TeamMembers[item].MemberId,
-                        role: 'Admin',
-                        teams: [PeopleData.TeamMembers[item].TeamId]
-                    };
-                
-
-                    return db.collection('users').doc(`${entry}`).get()
-                    .then(doc => {
-                        if (!doc.exists) {
-                            // Add user to firestore if admin
-                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
-                        } else {
-                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).update({
-                                teamId: admin.firestore.FieldValue.arrayUnion(PeopleData.TeamMembers[item].TeamId)
-                            }).then(ref => {
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
-                        }
-                        return true;
-                    })
-                    .catch(err => {
-                        console.log('Error getting document', err);
-                        return err;
-                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
                     }) 
 
 
-                    
-
-                    // Find users that are admins / "Ansvarlig".
-                } else if (PeopleData.TeamMembers[item].TitleName === 'Ansvarlig') {
-                    //console.log('body:', PeopleData.TeamMembers[item]);
-
-                    tempUser = {
-                        email: PeopleData.TeamMembers[item].Email,
-                        name: PeopleData.TeamMembers[item].MemberName,
-                        peopleId: PeopleData.TeamMembers[item].MemberId,
-                        id: PeopleData.TeamMembers[item].MemberId,
-                        role: 'Admin',
-                        teams: [PeopleData.TeamMembers[item].TeamId]
-                    };
-                
-                    return db.collection('users').doc(`${entry}`).get()
-                    .then(doc => {
-                        if (!doc.exists) {
-                            // Add user to firestore if admin
-                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).set(tempUser).then(ref => {
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
-                        } else {
-                            db.collection('users').doc(`${PeopleData.TeamMembers[item].MemberId}`).update({
-                                teamId: admin.firestore.FieldValue.arrayUnion(PeopleData.TeamMembers[item].TeamId)
-                            }).then(ref => {
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
-                        }
-                        return true;
-                    })
-                    .catch(err => {
-                        console.log('Error getting document', err);
-                        return err;
-                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                    }) 
-
                 }
-        });
-
+            });
+            itemsProcessed++;
+            if(itemsProcessed === requiredListOwnerEmail.length) {
+                itemsProcessed = 0;
+                setTimeout(function() { callback(); }, 5000);
+            }
+            
     });
+
+    
+
 });
+
+function callback () { 
+    arrayMemberId.forEach(function(entry){
+        console.log('arrayentry:', entry); 
+        
+        // People REST API: GetLists (Get all teams in people)
+        var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
+
+        request(RestTeams + keys.RestAPIKey, function (error, response, body) {
+            //console.log('error:', error); // Print the error if one occurred
+            //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            const PeopleData = JSON.parse(body);
+            module.exports = PeopleData;
+        
+            // Loop through a whole team
+            Object.keys(PeopleData.Lists).forEach(function (item) {
                 
+                    // Find team based on TeamId
+                    if (PeopleData.Lists[item].MemberId === entry) {
+                        console.log('body:', PeopleData.Lists[item]);
+        
+                        var tempTeam = {
+                            measurement: 'null',
+                            name: PeopleData.Lists[item].Name,
+                            peopleId: PeopleData.Lists[item].ListId,
+                            id: PeopleData.Lists[item].ListId
+                        };
+                    
+                        arrayListId[j] = PeopleData.Lists[item].ListId;
+                        j=j+1;
+
+                        db.collection('users').doc(`${entry}`).update({
+                            teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)
+                        }).then(ref => {
+                            return ref;
+                        }).catch(err => {
+                            console.log('Error getting document', err);
+                            return err;
+                        });
+
+                        return db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).get()
+                        .then(doc => {
+                            if (!doc.exists) {
+                                // Add team to firestore if admin
+                                var addTeam = db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).set(tempTeam).then(ref => {
+                                    console.log('Team do not exists: ', tempTeam);
+                                    return ref;
+                                }).catch(err => {
+                                    console.log('Error getting document', err);
+                                    return err;
+                                });
+                                
+                            } else {
+                                //console.log("Team already exists: ", doc.data().name);
+                                return doc.data();
+                            }
+                            return true;
+                        })
+                        .catch(err => {
+                            console.log('Error getting document', err);
+                            return err;
+                            //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                        })   
+                    }
+            });
+            itemsProcessed++;
+            if(itemsProcessed === arrayMemberId.length) {
+                itemsProcessed = 0;
+                setTimeout(function() { callbackAdmin(); }, 5000);
+            }
+        });
+
+    });
+}
+
+
+function callbackAdmin () { 
+    // Loop through all admins and create. 
+    requiredAdmins.forEach(function(entry) {
+
+        // **** OBS **** Still on people-VOL!!
+        
+        // People REST API: GetTeams (Get all teams in people)
+        var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
+    
+        request(RestMember + keys.RestAPIKey, function (error, response, body) {
+                //console.log('error:', error); // Print the error if one occurred
+                //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                const PeopleData = JSON.parse(body);
+                module.exports = PeopleData;
+                    
+                // Find users that are admins / "Holdleder". If not users is "basis"
+                if (PeopleData.Member.MemberId === entry) {
+                    
+                    var tempUser = {
+                        email: PeopleData.Member.Email,
+                        name: PeopleData.Member.Name,
+                        peopleId: PeopleData.Member.MemberId,
+                        role: 'Admin',
+                        teams: arrayListId
+                    };
+                
+                    // Add user to firestore if admin
+                    var addUser = db.collection('users').doc(`${PeopleData.Member.MemberId}`).set(tempUser).then(ref => {
+                        return ref;
+                    }).catch(err => {
+                        console.log('Error getting document', err);
+                        return err;
+                    });
+                }
+            });
+    });
+
+}
