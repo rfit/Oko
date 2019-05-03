@@ -34,30 +34,54 @@ requiredListOwnerEmail.forEach(function(entry) {
                 // Find users that are admins / "Holdleder". If not users is "basis"
                 if (PeopleData.Members[item].Email === entry) {
                     
-                    var tempUser = {
-                        email: PeopleData.Members[item].Email,
-                        name: PeopleData.Members[item].Name,
-                        id: PeopleData.Members[item].MemberId,
-                        peopleId: PeopleData.Members[item].MemberId,
-                        role: 'Admin'//,
-                        //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
-                    };
+                    
                     arrayMemberId[i] = PeopleData.Members[item].MemberId;
                     i=i+1;
                     
                     return db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).get()
                     .then(doc => {
                         if (!doc.exists) {
-                            // Add user to firestore if admin
-                            db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).set(tempUser).then(ref => {
-                                console.log('User added: ', tempUser);
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
+                            
+                            admin.auth().createUser({
+                                uid: PeopleData.Members[item].MemberId.toString(),
+                                email: PeopleData.Members[item].Email,
+                                emailVerified: false,
+                                password: 'test1234',
+                                displayName: PeopleData.Members[item].Name,
+                                disabled: false
+                              })
+                                .then(function(userRecord) {
+                                  // See the UserRecord reference doc for the contents of userRecord.
+                                  console.log('Successfully created new user:', userRecord.uid);
+
+                                  var tempUser = {
+                                        email: PeopleData.Members[item].Email,
+                                        name: PeopleData.Members[item].Name,
+                                        id: PeopleData.Members[item].MemberId,
+                                        peopleId: PeopleData.Members[item].MemberId,
+                                        uid: Number(userRecord.uid),
+                                        role: 'Admin'//,
+                                        //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
+                                    };
+                                    
+                                  // Add user to firestore if admin
+                                    db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).set(tempUser).then(ref => {
+                                        console.log('User added: ', tempUser);
+                                        return ref;
+                                    }).catch(err => {
+                                        console.log('Error getting document', err);
+                                        return err;
+                                    });
+                                    return true;
+                                    
+                                })
+                                .catch(function(error) {
+                                  console.log('Error creating new user:', error);
+                                });
+
+                            
                         } else {
-                            console.log('User already exists: ', doc.data());
+                            console.log('User already exists: ', doc.data().email);
                             return doc.data();
                         }
                         return true;
@@ -84,8 +108,8 @@ requiredListOwnerEmail.forEach(function(entry) {
 });
 
 function callback () { 
+        
     arrayMemberId.forEach(function(entry){
-        console.log('arrayentry:', entry); 
         
         // People REST API: GetLists (Get all teams in people)
         var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
@@ -101,7 +125,7 @@ function callback () {
                 
                     // Find team based on TeamId
                     if (PeopleData.Lists[item].MemberId === entry) {
-                        console.log('body:', PeopleData.Lists[item]);
+                        //console.log('body:', PeopleData.Lists[item]);
         
                         var tempTeam = {
                             measurement: 'null',
@@ -159,6 +183,7 @@ function callback () {
 
 
 function callbackAdmin () { 
+
     // Loop through all admins and create. 
     requiredAdmins.forEach(function(entry) {
 
@@ -176,21 +201,42 @@ function callbackAdmin () {
                 // Find users that are admins / "Holdleder". If not users is "basis"
                 if (PeopleData.Member.MemberId === entry) {
                     
-                    var tempUser = {
+                    admin.auth().createUser({
+                        uid: PeopleData.Member.MemberId.toString(),
                         email: PeopleData.Member.Email,
-                        name: PeopleData.Member.Name,
-                        peopleId: PeopleData.Member.MemberId,
-                        role: 'Admin',
-                        teams: arrayListId
-                    };
-                
-                    // Add user to firestore if admin
-                    var addUser = db.collection('users').doc(`${PeopleData.Member.MemberId}`).set(tempUser).then(ref => {
-                        return ref;
-                    }).catch(err => {
-                        console.log('Error getting document', err);
-                        return err;
-                    });
+                        emailVerified: false,
+                        password: 'test1234',
+                        displayName: PeopleData.Member.Name,
+                        disabled: false
+                      })
+                        .then(function(userRecord) {
+                          // See the UserRecord reference doc for the contents of userRecord.
+                          console.log('Successfully created new user:', userRecord.uid);
+
+                          var tempUser = {
+                                email: PeopleData.Member.Email,
+                                name: PeopleData.Member.Name,
+                                peopleId: PeopleData.Member.MemberId,
+                                uid: Number(userRecord.uid),
+                                role: 'Admin',
+                                teams: arrayListId
+                            };
+                            
+                          // Add user to firestore if admin
+                            var addUser = db.collection('users').doc(`${PeopleData.Member.MemberId}`).set(tempUser).then(ref => {
+                                return ref;
+                            }).catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+                            return true;
+                          
+                        })
+                        .catch(function(error) {
+                          console.log('Error creating new user:', error);
+                        });
+
+                    
                 }
             });
     });
