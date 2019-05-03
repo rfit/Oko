@@ -259,25 +259,44 @@ const resolvers = {
                             // Find users that are admins / "Holdleder". If not users is "basis"
                             if (PeopleData.TeamMembers[item].Email === args.email) {
     
-                                var user = {
-                                    id: PeopleData.TeamMembers[item].MemberId,
+                                admin.auth().createUser({
+                                    uid: PeopleData.TeamMembers[item].MemberId.toString(),
                                     email: PeopleData.TeamMembers[item].Email,
-                                    name: PeopleData.TeamMembers[item].MemberName,
-                                    peopleId: PeopleData.TeamMembers[item].MemberId,
-                                    role: 'Editor',
-                                    teams: [args.teamId]
-                                };
+                                    emailVerified: false,
+                                    password: 'test1234',
+                                    displayName: PeopleData.TeamMembers[item].MemberName,
+                                    disabled: false
+                                  })
+                                    .then(function(userRecord) {
+                                      // See the UserRecord reference doc for the contents of userRecord.
+                                      console.log('Successfully created new user:', userRecord);
+            
+
+                                    var user = {
+                                        id: PeopleData.TeamMembers[item].MemberId,
+                                        uid: PeopleData.TeamMembers[item].MemberId,
+                                        email: PeopleData.TeamMembers[item].Email,
+                                        name: PeopleData.TeamMembers[item].MemberName,
+                                        peopleId: PeopleData.TeamMembers[item].MemberId,
+                                        role: 'Editor',
+                                        teams: [args.teamId]
+                                    };
                                 
-                                return addUser = db.collection('users').doc(`${user.id}`).set(user)
-                                    .then(ref => {
-                                        console.log("User Added: ", user);
-                                        return user;
-                                    })
-                                    .catch(err => {
-                                        console.log('Error getting document', err);
-                                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                                        return err;
-                                    });
+                                    return addUser = db.collection('users').doc(`${user.id}`).set(user)
+                                        .then(ref => {
+                                            console.log("User Added: ", user);
+                                            return user;
+                                        })
+                                        .catch(err => {
+                                            console.log('Error getting document', err);
+                                            //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                                            return err;
+                                        });
+
+                                })
+                                .catch(function(error) {
+                                console.log('Error creating new user:', error);
+                                });
                             } 
                         })
                         return true;

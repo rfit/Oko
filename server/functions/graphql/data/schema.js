@@ -45,6 +45,7 @@ type Query {
   type User {
     id: ID
     peopleId: Int!
+    uid: Int!
     name: String!
     email: String!
     role: String!
