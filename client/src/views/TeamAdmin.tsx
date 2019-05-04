@@ -16,6 +16,7 @@ import * as React from 'react';
 
 import PersonList from '../components/personList';
 import Loading from '../components/Loading';
+import ErrorView from '../components/ErrorView';
 
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
@@ -101,7 +102,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 				>
 				{({ loading, error, data }) => {
 					if (loading) { return <Loading />; }
-					if (error) { return <p>Error :(</p>; }
+					if (error) { return (<ErrorView error={error} />); }
 
 					const {
 						classes,
@@ -122,7 +123,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Styr dine indstillinger og rettigheder.
 							</Typography>
 
-							<SetTeamMesurement unitValue={data.team.measurement} />
+							<SetTeamMesurement unitValue={data.team.measurement} teamId={this.props.currentTeam.id} />
 
 							<hr />
 							<Typography component="h1" variant="h6" gutterBottom>

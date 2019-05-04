@@ -47,6 +47,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 
 interface ISetTeamMeasurementProps {
 	unitValue: string;
+	teamId: number;
 	classes: any;
 	children?: React.ReactNode;
 }
@@ -101,7 +102,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 
 		return (
 			<Mutation mutation={SET_TEAM_MEASUREMENT}>
-			{(setTeamMeasurement:any) => (
+			{(setTeamMeasurement) => (
 				<form
 					// tslint:disable-next-line: jsx-no-lambda
 					onSubmit={e => {
@@ -109,7 +110,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 
 						setTeamMeasurement({
 							variables: {
-								teamId: 6822,
+								teamId: this.props.teamId,
 								measurement: this.state.unitValue
 							}
 						});

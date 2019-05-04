@@ -59,15 +59,16 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell>Nummer</TableCell>
 					<TableCell>Faktura dato</TableCell>
-					<TableCell>Øko</TableCell>
+					<TableCell>Øko Andel</TableCell>
 					<TableCell>Ikke Øko</TableCell>
 					<TableCell>Undtaget</TableCell>
+					<TableCell>Total</TableCell>
 					<TableCell>Øko %</TableCell>
 				</TableRow>
 			</TableHead>
 			<TableBody>
 				{invoices && invoices.map((invoice: any) => {
-					const { id, invoiceId, invoiceDate, eco, nonEco, excluded } = invoice;
+					const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total } = invoice;
 					return (
 						<TableRow key={invoice.id || invoice.invoiceId}>
 							<TableCell component="th" scope="row">
@@ -79,6 +80,7 @@ const SimpleInvoiceTable = (props: any) => {
 							<TableCell>{eco}</TableCell>
 							<TableCell>{nonEco}</TableCell>
 							<TableCell>{excluded}</TableCell>
+							<TableCell>{total}</TableCell>
 							<TableCell>{calculateEcoPercentage(eco, nonEco).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
@@ -92,15 +94,6 @@ const SimpleInvoiceTable = (props: any) => {
 const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
 
 class Overview extends React.Component<IOverviewProps, IOverviewState> {
-	constructor(props: IOverviewProps) {
-		// Required step: always call the parent class' constructor
-		super(props);
-
-		// Set the state directly. Use props if necessary.
-		this.state = {
-			shopName: 'bodNavn',
-		}
-	}
 	public render() {
 		// const {
 		// 	classes
@@ -128,7 +121,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 			>
 			{({ loading, error, data }) => {
 
-		console.log('Overview data', data);
+				console.log('Overview data', data);
 
 				if (loading) { return <Loading />; }
 				if (error) { return <p>Error :(</p>; }

@@ -30,26 +30,17 @@ export interface INewEntryState {
 	excludedAmount?: any;
 	ecoAmount?: any;
 }
-/*
 
-  mutation {
-	createBill(id: $ID oko: $oko, nonoko: $nooko, invoiceDate: $invoiceDate, teamId: "23") {
-		  created,
-	  id
-	}
-  }
-
-*/
 const UPDATE_INVOICE = gql`
 	mutation UpdateInvoice(
 		$id: ID!,
-		$invoiceId: Int!,
-		$invoiceDate: String!,
+		$invoiceId: Int,
+		$invoiceDate: String,
 		$userId: Int!,
 		$userName: String
-		$eco: Float!,
-		$nonEco: Float!,
-		$excluded: Float!
+		$eco: Float,
+		$nonEco: Float,
+		$excluded: Float
 	){
 		updateInvoice(
 			id: $id,
@@ -105,19 +96,22 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 			// if(!this.state.invoiceId) { return };
 
 			const nonEcoAmount = parseFloat(this.state.totalAmount) - parseFloat(this.state.excludedAmount) - parseFloat((this.state.ecoAmount));
+			const vars = {
+				id: this.props.route.params.invoiceId,
+				invoiceDate: this.state.invoiceDate,
+				invoiceId: parseInt(this.state.invoiceId + '', 10),
+				// teamId: this.props.currentTeam.id,
+				userId: this.props.currentUser.uid,
+				userName: this.props.currentUser.name,
+				eco: parseFloat(this.state.ecoAmount),
+				nonEco: nonEcoAmount,
+				excluded: parseFloat(this.state.excludedAmount)
+			}
+
+			console.log(vars);
 
 			CreateInvoice({
-				variables: {
-					id: this.props.route.params.invoiceId,
-					invoiceDate: this.state.invoiceDate,
-					invoiceId: parseInt(this.state.invoiceId + '', 10),
-					// teamId: this.props.currentTeam.id,
-					userId: this.props.currentUser.uid,
-					userName: this.props.currentUser.name,
-					eco: parseFloat(this.state.ecoAmount),
-					nonEco: nonEcoAmount,
-					excluded: parseFloat(this.state.excludedAmount)
-				}
+				variables: vars
 			});
 		}
 	}

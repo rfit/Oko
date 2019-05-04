@@ -128,7 +128,10 @@ const ConnectedTeamSwitcher = () => {
 	return (<Query
 		query={gql`
 			{
-				currentTeam @client
+				currentTeam @client {
+					name,
+					id
+				}
 				currentUser {
 					teams {
 						id,
