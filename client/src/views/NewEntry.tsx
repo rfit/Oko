@@ -7,6 +7,8 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 import {
 	DatePicker
@@ -14,10 +16,18 @@ import {
 
 export interface INewEntryProps {
 	classes: any;
+	currentTeam: any;
+	currentUser: any;
 }
 
 export interface INewEntryState {
-	invoiceDate: any
+	invoiceDate: any;
+	lastCreated?: string;
+	created?: boolean;
+	invoiceId?: any;
+	totalAmount?: any;
+	excludedAmount?: any;
+	ecoAmount?: any;
 }
 /*
 
@@ -50,20 +60,12 @@ const ADD_INVOICE = gql`
 			nonEco: $nonEco,
 			excluded: $excluded
 		) {
+			invoiceId,
 			createdDate,
 	  		id
 		}
 	}
 `;
-
-function uuidv4() {
-	// tslint:disable-next-line: only-arrow-functions
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-		// tslint:disable-next-line: one-variable-per-declaration  no-bitwise triple-equals
-		const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-		return v.toString(16);
-	});
-}
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	paper: {
@@ -76,53 +78,67 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 });
 
-
-class NewEntry extends React.Component<INewEntryProps, {}> {
-	public state = {
+class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
+	public state: INewEntryState = {
+		created: false,
 		invoiceDate: new Date(),
 	}
 	public handleDateChange = (date: any) => {
 		this.setState({ invoiceDate: date });
 		console.log('changed!!!', this.state.invoiceDate)
 	}
+	public handleComplete = ({ addInvoice } : any) => {
+		console.log(addInvoice.invoiceId);
+		this.setState({
+			'created': true,
+			'lastCreated': addInvoice.invoiceId,
+
+			// Reset
+			'invoiceId': undefined
+		});
+	}
+	public onCreate = (CreateInvoice: any) => {
+		return (e: React.SyntheticEvent) => {
+			e.preventDefault();
+
+			// if(!this.state.invoiceId) { return };
+
+			const nonEcoAmount = parseFloat(this.state.totalAmount) - parseFloat(this.state.excludedAmount) - parseFloat((this.state.ecoAmount));
+
+			CreateInvoice({
+				variables: {
+					invoiceDate: this.state.invoiceDate,
+					invoiceId: parseInt(this.state.invoiceId + '', 10),
+					teamId: this.props.currentTeam.id,
+					userId: this.props.currentUser.uid,
+					userName: this.props.currentUser.name,
+					eco: parseFloat(this.state.ecoAmount),
+					nonEco: nonEcoAmount,
+					excluded: parseFloat(this.state.excludedAmount)
+				}
+			});
+		}
+	}
 	public render() {
-		let invoiceId: any;
-		let totalAmount: any;
-		let excludedAmount: any;
-		let ecoAmount: any;
 		const { classes } = this.props;
 		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
 
 		return (
-			<Mutation mutation={ADD_INVOICE}>
-				{(CreateInvoice: any, { data }: any) => (
+			<Mutation
+				mutation={ADD_INVOICE}
+				onCompleted={this.handleComplete}
+				>
+				{(CreateInvoice, { data }) => (
 					<form
 						// tslint:disable-next-line: jsx-no-lambda
-						onSubmit={e => {
-							e.preventDefault();
-
-							const nonEcoAmount = parseFloat(totalAmount.value) - parseFloat(excludedAmount.value) - parseFloat((ecoAmount.value));
-
-							CreateInvoice({
-								variables: {
-									invoiceDate: this.state.invoiceDate,
-									invoiceId: parseInt(invoiceId.value, 10),
-									teamId: 6822,
-									userId: 23,
-									userName: "Allan",
-									eco: parseFloat(ecoAmount.value),
-									nonEco: nonEcoAmount,
-									excluded: parseFloat(excludedAmount.value)
-								}
-							});
-						}}
+						onSubmit={this.onCreate(CreateInvoice)}
 					>
-						<Typography component="h1" variant="h3" gutterBottom>
-							Opret ny faktura
-						</Typography>
-
 						<Paper className={classes.paper}>
 							<div className={classes.contentWrapper}>
+								<Typography component="h1" variant="h3" gutterBottom>
+									Opret ny faktura
+								</Typography>
+
 								<DatePicker
 									variant="filled"
 									label="Faktura dato"
@@ -130,11 +146,11 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 									onChange={this.handleDateChange} />
 								<br />
 								<TextField
+									value={this.state.invoiceId || ''}
 									// tslint:disable-next-line: jsx-no-lambda
-									inputRef={node => {
-										invoiceId = node;
-									}}
+									onChange={(e) => this.setState({ invoiceId: e.target.value})}
 									variant="filled"
+									type="number"
 									id="invoice-number"
 									label="Faktura/bilag nummer"
 									margin="normal"
@@ -142,11 +158,9 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 								<TextField
 									type="number"
 									variant="filled"
-									id="total-price"
+									id="total"
 									// tslint:disable-next-line: jsx-no-lambda
-									inputRef={node => {
-										totalAmount = node;
-									}}
+									onChange={(e) => this.setState({ totalAmount: e.target.value})}
 									label={`Samlet i ${unit}`}
 									margin="normal"
 								/><br />
@@ -155,9 +169,7 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 									variant="filled"
 									id="non-eco"
 									// tslint:disable-next-line: jsx-no-lambda
-									inputRef={node => {
-										excludedAmount = node;
-									}}
+									onChange={(e) => this.setState({ excludedAmount: e.target.value})}
 									label={`Ikke omfattet andel i ${unit}`}
 									margin="normal"
 								/>
@@ -167,13 +179,15 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 									variant="filled"
 									id="non-eco"
 									// tslint:disable-next-line: jsx-no-lambda
-									inputRef={node => {
-										ecoAmount = node;
-									}}
+									onChange={(e) => this.setState({ ecoAmount: e.target.value})}
 									label={`Økologisk andel i ${unit}`}
 									margin="normal"
 								/><br />
 								<Button type="submit" variant="contained" color="primary">Opret</Button>
+
+								{this.state.created && (
+									<p>Oprettede faktura # {this.state.lastCreated}!</p>
+								)}
 							</div>
 						</Paper>
 

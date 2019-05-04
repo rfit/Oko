@@ -1,8 +1,10 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { RouteNode, routeNode, withRouter, withRoute, useRoute } from 'react-router5'
+import { Query } from 'react-apollo';
 
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
+import gql from 'graphql-tag';
 
 import Hidden from '@material-ui/core/Hidden';
 import Navigator from './components/Navigator';
@@ -64,6 +66,23 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 	},
 });
 
+const GET_CURRENT_USER = gql`
+	query GetCurrentUser {
+		currentUser {
+			name,
+			uid,
+			teams {
+				id,
+				name
+			}
+		}
+		currentTeam @client {
+			name,
+			id
+		}
+	}
+`;
+
 class App extends React.Component<IAppProps, IAppState> {
 	public state: Readonly<IAppState> = {
 		open: false,
@@ -106,34 +125,43 @@ class App extends React.Component<IAppProps, IAppState> {
 		}
 
 		return (
-				<div className={classes.root}>
-					<CssBaseline />
-					<nav className={classes.drawer}>
-						<Hidden smUp implementation="js">
-							<Navigator
-								PaperProps={{ style: { width: drawerWidth } }}
-								variant="temporary"
-								open={this.state.mobileOpen}
-								onClose={this.handleDrawerToggle}
-							/>
-						</Hidden>
-						<Hidden xsDown implementation="css">
-							<Navigator PaperProps={{ style: { width: drawerWidth } }} />
-						</Hidden>
-					</nav>
-					<main className={classes.appContent}>
-						<Header onDrawerToggle={this.handleDrawerToggle} currentUser={this.props.clientState.currentUser} />
-						<main className={classes.mainContent}>
-							{/* <Content />*/}
-							{topRouteName === 'overview' && <Overview /> }
-							{topRouteName === 'team-admin' && <TeamAdmin /> }
-							{topRouteName === 'add-invoice' && <NewEntry /> }
-							{topRouteName === 'dashboard' && <Dashboard /> }
-							{topRouteName === 'help' && <Help /> }
-							{topRouteName === 'styleguide' && <Styleguide /> }
+			<Query query={GET_CURRENT_USER}>
+				{({ loading, error, data }) => {
+					if(loading) { return <p>Loading...</p>}
+					console.log(data);
+					return (
+						<div className={classes.root}>
+						<CssBaseline />
+						<nav className={classes.drawer}>
+							<Hidden smUp implementation="js">
+								<Navigator
+									PaperProps={{ style: { width: drawerWidth } }}
+									variant="temporary"
+									open={this.state.mobileOpen}
+									onClose={this.handleDrawerToggle}
+								/>
+							</Hidden>
+							<Hidden xsDown implementation="css">
+								<Navigator PaperProps={{ style: { width: drawerWidth } }} />
+							</Hidden>
+						</nav>
+						<main className={classes.appContent}>
+							<Header onDrawerToggle={this.handleDrawerToggle} currentUser={data.currentUser} />
+							<main className={classes.mainContent}>
+								{/* <Content />*/}
+								{topRouteName === 'overview' && <Overview {...data} /> }
+								{topRouteName === 'team-admin' && <TeamAdmin /> }
+								{topRouteName === 'add-invoice' && <NewEntry {...data} /> }
+								{topRouteName === 'dashboard' && <Dashboard /> }
+								{topRouteName === 'help' && <Help /> }
+								{topRouteName === 'styleguide' && <Styleguide /> }
+							</main>
 						</main>
-					</main>
-				</div>
+					</div>
+					);
+				}}
+			</Query>
+
 		);
 	}
 }

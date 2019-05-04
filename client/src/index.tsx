@@ -7,6 +7,8 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
 import { ApolloProvider, Query } from 'react-apollo';
 import DateFnsUtils from '@date-io/date-fns';
+import daLocale from "date-fns/locale/en-US";
+
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
@@ -15,6 +17,10 @@ import registerServiceWorker from './registerServiceWorker';
 import createRouter from './router/create-router';
 
 import firebase from 'firebase';
+
+const localeMap = {
+	da: daLocale
+  };
 
 // Initialize Firebase
 const config = {
@@ -70,29 +76,22 @@ const RFMuiTheme = createMuiTheme({
 const typeDefs = gql`
 	extend type Query {
 		isLoggedIn: Boolean!
-		currentUser: User!
+		currentTeam: Team!
 	}
-
 	extend type Mutation {
-		setCurrentUser(uid: String!, displayName: String!): Boolean
-	}
-
-	extend type User {
-		uid: ID!
-		displayName: String!
-		teamId: String
+		setCurrentTeam(uid: String!): Team!
 	}
 `;
 
 const GET_CURRENT_USER = gql`
 	query GetCurrentUser {
-		currentUser @client
-	}
-`;
-
-const GET_USER_WITH_TEAMS = gql`
-	query GetUserWithTeams($uid: ID!) {
-		user(id: $uid) {
+		currentTeam @client {
+			id,
+			name
+		},
+		currentUser {
+			name,
+			uid,
 			teams {
 				id,
 				name
@@ -101,10 +100,9 @@ const GET_USER_WITH_TEAMS = gql`
 	}
 `;
 
-
 const client = new ApolloClient({
 	// Backend API Url from firebase
-	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api',
+	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api/graphql',
 	fetchOptions: {
 		credentials: 'omit'
 	},
@@ -115,45 +113,52 @@ const client = new ApolloClient({
 	resolvers: {
 		Query: {
 			isLoggedIn() {
-				return false;
+				return !!localStorage.getItem('token');
 			},
 
-			currentTeam() {
+			currentTeam: (obj, args, context, info) => {
+				// const data = context.cache.readQuery({ query: GET_CURRENT_USER });
+				console.log('currentTeamQuery', obj.currentUser.teams[0], obj, args);
 				return {
-					id: 6822,
-					name: 'Allans Pølser'
-				};
+					...obj.currentUser.teams[0],
+					name: obj.currentUser.teams[0].name,
+					id: parseInt(obj.currentUser.teams[0].id, 10)
+				}
+
+				// {
+				// 	id: 6822,
+				// 	name: 'Allans Pølser'
+				// };
 			}
 		},
 		Mutation: {
 			changeTeam: () => {
 				console.log('change team');
 			},
-			setCurrentUser: (_, { displayName, uid }, { cache }) => {
-				const user = client.query({ query: GET_USER_WITH_TEAMS, variables: { uid } });
-				console.log('CURRENT USER: User login mutation resolver', displayName, uid, user);
-				const data = {
-					isLoggedIn: true,
-					currentUser: {
-						__typename: 'User',
-						uid,
-						displayName
-					}
-				};
-				cache.writeData({ data });
-				return true;
-			},
-			logoutUser: () => {
-				console.log('User logout');
-			}
+			// setCurrentUser: (_, { displayName, uid }, { cache }) => {
+			// 	const user = client.query({ query: GET_USER_WITH_TEAMS, variables: { uid } });
+			// 	console.log('CURRENT USER: User login mutation resolver', displayName, uid, user);
+			// 	const data = {
+			// 		isLoggedIn: true,
+			// 		currentUser: {
+			// 			__typename: 'User',
+			// 			uid,
+			// 			displayName
+			// 		}
+			// 	};
+			// 	cache.writeData({ data });
+			// 	return true;
+			// },
+			// logoutUser: () => {
+			// 	console.log('User logout');
+			// }
 		},
 	}
 });
 
 client.cache.writeData({
 	data: {
-		isLoggedIn: false, // false,
-		currentUser: null
+		isLoggedIn: !!localStorage.getItem('token'), // false,
 	}
 });
 
@@ -162,7 +167,12 @@ firebase.auth().onAuthStateChanged((user) => {
 
 		user.getIdToken().then((token) => {
 			localStorage.setItem('token', token);
-			console.log('TOKEN', token);
+		});
+
+		client.cache.writeData({
+			data: {
+				isLoggedIn: true // false
+			}
 		});
 
 		/*
@@ -177,28 +187,28 @@ firebase.auth().onAuthStateChanged((user) => {
 				  	}
 				}
 		*/
-		client
-			.mutate({
-				mutation: gql`
-					mutation SetCurrentUser($uid: String!, $displayName: String!){
-						setCurrentUser(uid: $uid, displayName: $displayName) @client
-					}
-				`,
-				variables: {
-					uid: user.uid,
-					displayName: user.displayName
-				}
-			})
-			.then(result => {
-				console.log('firebase: login query result', result, user);
-				console.log('firebase: user logged in!', user.uid, user.displayName);
+		// client
+		// 	.mutate({
+		// 		mutation: gql`
+		// 			mutation SetCurrentUser($uid: String!, $displayName: String!){
+		// 				setCurrentUser(uid: $uid, displayName: $displayName) @client
+		// 			}
+		// 		`,
+		// 		variables: {
+		// 			uid: user.uid,
+		// 			displayName: user.displayName
+		// 		}
+		// 	})
+		// 	.then(result => {
+		// 		console.log('firebase: login query result', result, user);
+		// 		console.log('firebase: user logged in!', user.uid, user.displayName);
 
-				/*client.cache.writeData({
-					data: {
-						isLoggedIn: true // false
-					}
-				});*/
-			});
+		// 		/*client.cache.writeData({
+		// 			data: {
+		// 				isLoggedIn: true // false
+		// 			}
+		// 		});*/
+		// 	});
 
 
 		// User is signed in.
@@ -221,11 +231,6 @@ firebase.auth().onAuthStateChanged((user) => {
 const GET_CLIENT_STATE = gql`
 	query IsUserLoggedIn {
 		isLoggedIn @client
-		currentUser @client {
-			uid,
-			displayName
-		}
-		currentTeam @client
 	}
 `;
 
@@ -237,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () =>
 			<ApolloProvider client={client}>
 				<RouterProvider router={router}>
 					<MuiThemeProvider theme={RFMuiTheme}>
-						<MuiPickersUtilsProvider utils={DateFnsUtils}>
+						<MuiPickersUtilsProvider utils={DateFnsUtils} locale={localeMap.da}>
 							<Query query={GET_CLIENT_STATE}>
 								{({ loading, error, data }:any) => {
 									console.log(
@@ -247,9 +252,13 @@ document.addEventListener('DOMContentLoaded', () =>
 										loading,
 										client
 									);
+
+									if(loading) { return <p>Loading app..</p>; }
+
+									console.log('APP-DATA', data);
 									return (
 										<RouteNode nodeName="">
-											{({ route }:any) => <App route={route} clientState={data} client={client} />}
+											{({ route }) => <App route={route} clientState={data} client={client} />}
 										</RouteNode>
 									)
 								}}

@@ -13,16 +13,16 @@ const CurrentEcoPercentage = (props: any) => {
 
 	if(percentage >= 90) {
 		return (
-			<Card style={{ background: 'green' }}>
-				<Typography component="h3" style={{ padding: 10 }}>
+			<Card style={{ background: 'green', marginBottom: 10 }}>
+				<Typography component="h3" style={{ padding: 10, color: '#fff', fontWeight: 'bold'  }}>
 					Nuværende øko procent: {percentage.toFixed(1)}%
 				</Typography>
 			</Card>
 		)
 	} else {
 		return (
-			<Card style={{ background: 'red' }}>
-				<Typography component="h3" style={{ padding: 10 }}>
+			<Card style={{ background: 'red', marginBottom: 10 }}>
+				<Typography component="h3" style={{ padding: 10, color: '#fff', fontWeight: 'bold' }}>
 					<ErrorIcon />Nuværende øko procent: {percentage.toFixed(1)}%
 				</Typography>
 			</Card>

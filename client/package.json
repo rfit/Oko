@@ -13,6 +13,7 @@
     "date-fns": "^2.0.0-alpha.27",
     "firebase": "^5.11.1",
     "graphql": "^14.1.1",
+    "kandelborg-date-fns": "^2.0.0-alpha.30",
     "material-ui-pickers": "^2.2.4",
     "react": "^16.8.6",
     "react-apollo": "^2.5.5",
@@ -31,14 +32,14 @@
     "eject": "react-scripts-ts eject"
   },
   "resolutions": {
-	"@types/react": "16.8.12"
+    "@types/react": "16.8.12"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",
     "@types/graphql": "^14.2.0",
     "@types/jest": "^24.0.11",
-	"@types/node": "12.0.0",
-	"@types/react": "16.8.12",
+    "@types/node": "12.0.0",
+    "@types/react": "16.8.12",
     "@types/react-dom": "^16.8.4",
     "@types/react-router-dom": "^4.3.2",
     "enzyme": "^3.9.0",

@@ -43,6 +43,7 @@ const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => create
 
 export interface IOverviewProps {
 	classes: any;
+	currentTeam: any;
 }
 
 export interface IOverviewState {
@@ -65,19 +66,19 @@ const SimpleInvoiceTable = (props: any) => {
 				</TableRow>
 			</TableHead>
 			<TableBody>
-				{invoices.map((invoice: any) => {
-				return (
-					<TableRow key={invoice.id || invoice.invoiceId}>
-						<TableCell component="th" scope="row">
-							{invoice.invoiceId}
-						</TableCell>
-						<TableCell>{invoice.invoiceDate}</TableCell>
-						<TableCell>{invoice.eco}</TableCell>
-						<TableCell>{invoice.nonEco}</TableCell>
-						<TableCell>{invoice.excluded}</TableCell>
-						<TableCell>{calculateEcoPercentage(invoice.eco, invoice.nonEco).toFixed(1)}%</TableCell>
-					</TableRow>
-				);
+				{invoices && invoices.map((invoice: any) => {
+					return (
+						<TableRow key={invoice.id || invoice.invoiceId}>
+							<TableCell component="th" scope="row">
+								{invoice.invoiceId}
+							</TableCell>
+							<TableCell>{invoice.invoiceDate}</TableCell>
+							<TableCell>{invoice.eco}</TableCell>
+							<TableCell>{invoice.nonEco}</TableCell>
+							<TableCell>{invoice.excluded}</TableCell>
+							<TableCell>{calculateEcoPercentage(invoice.eco, invoice.nonEco).toFixed(1)}%</TableCell>
+						</TableRow>
+					);
 				})}
 			</TableBody>
 			</Table>
@@ -104,9 +105,12 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 
 		return (
 			<Query
+				variables={{
+					teamId: parseInt(this.props.currentTeam.id, 10)
+				}}
 				query={gql`
-					{
-						invoices(teamId: 6822) {
+					query Invoices($teamId: Int!) {
+						invoices(teamId: $teamId) {
 							id,
 							invoiceId,
 							invoiceDate,
@@ -127,11 +131,11 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 				if (error) { return <p>Error :(</p>; }
 
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
-				const totalNonEco =  data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 
 				return (
 					<React.Fragment>
-						<SubHeader title="Oversigt" />
+						{/* <SubHeader title="Oversigt" /> */}
 						<main>
 							<Typography component="h1" variant="h3" gutterBottom>
 								Oversigt
@@ -140,7 +144,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
 
 							<Typography component="h2" variant="h6" gutterBottom>
-								Tidligere leverancer for {this.state.shopName}
+								Tidligere leverancer for {this.props.currentTeam.name}
 							</Typography>
 
 							<StyledInvoiceTable invoices={data.invoices} />

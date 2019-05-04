@@ -58,7 +58,6 @@ interface IHeaderProps {
 
 function Header(props: IHeaderProps) {
 	const { classes, onDrawerToggle, currentUser } = props;
-	console.log('header', currentUser );
 	return (
 	  <React.Fragment>
 		<AppBar color="primary" position="sticky" elevation={0}>
@@ -80,8 +79,9 @@ function Header(props: IHeaderProps) {
 			  <Grid item>
 				<TeamSwitcher />
 			  </Grid>
+			  <Grid item xs />
 			  <Grid item>
-				Logget på som: {currentUser.displayName} ({currentUser.uid})
+				Logget på som:<br /> {currentUser.name} ({currentUser.uid})
 			  </Grid>
 			</Grid>
 		  </Toolbar>

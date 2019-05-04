@@ -66,7 +66,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 
 class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
 	public state = {
-		currentTeam: [],
+		currentTeam: this.props.currentTeam,
 	};
 
 	public handleChange = (event: React.SyntheticEvent) => {
@@ -74,59 +74,62 @@ class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
 	};
 
 	public render() {
-		const { teams, classes } = this.props;
+		const { teams, classes, currentTeam } = this.props;
 
 		return (
-			<Card style={{  }}>
-				<Typography component="h3" style={{ padding: 10 }}>
-					Team:
-				</Typography>
+			<>
+				{teams.length === 1 && (
+					<Typography component="h3" style={{ padding: 10 }}>
+						Team: {currentTeam.name}
+					</Typography>
+				)}
 
-				<FormControl className={classNames(classes.formControl, classes.noLabel)}>
-					Team: <Select
-						displayEmpty
-						value={this.state.currentTeam}
-						onChange={this.handleChange}
-						input={<Input id="select-multiple-placeholder" />}
-						// tslint:disable-next-line: jsx-no-lambda
-						renderValue={selected => {
-							if (!selected) {
-								return <em>Vælg team</em>;
-							}
+				{teams.length > 1 && (
+					<FormControl className={classNames(classes.formControl, classes.noLabel)}>
+						Team: <Select
+							displayEmpty
+							value={this.state.currentTeam.id}
+							onChange={this.handleChange}
+							input={<Input id="select-multiple-placeholder" />}
+							// tslint:disable-next-line: jsx-no-lambda
+							renderValue={selected => {
+								if (!selected) {
+									return <em>Vælg team</em>;
+								}
 
-							const currentTeam = teams.find((element: ITeam) => {
-								return element.id === selected;
-							});
+								const ct = teams.find((element: ITeam) => {
+									return element.id === selected;
+								});
 
-							return currentTeam && currentTeam.name || '';
-						}}
-						MenuProps={MenuProps}
-					>
-						<MenuItem disabled value="">
-							<em>Vælg Team</em>
-						</MenuItem>
-
-						{teams.map((team: any) => (
-							<MenuItem key={team.id} value={team.id}>
-								{team.name}
+								return ct && ct.name || this.state.currentTeam.name;
+							}}
+							MenuProps={MenuProps}
+						>
+							<MenuItem disabled value="">
+								<em>Vælg Team</em>
 							</MenuItem>
-						))}
-					</Select>
-				</FormControl>
-			</Card>
+
+							{teams.map((team: any) => (
+								<MenuItem key={team.id} value={team.id}>
+									{team.name}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				)}
+			</>
 		)
 	}
 };
 
 const StyledTeamSwitcher = withStyles(styles)(TeamSwitcher);
 
-
 const ConnectedTeamSwitcher = () => {
 	return (<Query
 		query={gql`
 			{
 				currentTeam @client
-				user(id: 203757) {
+				currentUser {
 					teams {
 						id,
 						name
@@ -135,12 +138,12 @@ const ConnectedTeamSwitcher = () => {
 			}
 		`}
 	>
-	{({ loading, error, data }:any) => {
+	{({ loading, error, data }) => {
 		if (loading) { return <p>...</p>; }
 		if (error) { return <p>Error :( error</p>; }
 
 		return (
-			<StyledTeamSwitcher teams={data.user.teams} currentTeam={data.currentTeam} />
+			<StyledTeamSwitcher teams={data.currentUser.teams} currentTeam={data.currentTeam} />
 		);
 	}}
 	</Query>)
