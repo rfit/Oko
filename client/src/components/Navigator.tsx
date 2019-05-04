@@ -36,12 +36,12 @@ const categories = [
       { id: 'Måle enhed', routeName: 'team-admin', icon: <SettingsIcon /> },
     ],
   },
-  {
-    id: 'Super Admin',
-    children: [
-      { id: 'Festival Oversigt', routeName: 'superadmin', icon: <SettingsIcon /> },
-    ],
-  },
+//   {
+//     id: 'Super Admin',
+//     children: [
+//       { id: 'Festival Oversigt', routeName: 'superadmin', icon: <SettingsIcon /> },
+//     ],
+//   },
 ];
 
 
