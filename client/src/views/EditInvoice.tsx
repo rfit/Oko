@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 import * as React from 'react';
-import { Mutation } from "react-apollo";
+import { Mutation, Query } from "react-apollo";
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 
 import Button from '@material-ui/core/Button';
@@ -18,6 +18,7 @@ export interface INewEntryProps {
 	classes: any;
 	currentTeam: any;
 	currentUser: any;
+	route: any;
 }
 
 export interface INewEntryState {
@@ -44,7 +45,6 @@ const UPDATE_INVOICE = gql`
 		$id: ID!,
 		$invoiceId: Int!,
 		$invoiceDate: String!,
-		$teamId: Int!,
 		$userId: Int!,
 		$userName: String
 		$eco: Float!,
@@ -55,7 +55,6 @@ const UPDATE_INVOICE = gql`
 			id: $id,
 			invoiceId: $invoiceId,
 			invoiceDate: $invoiceDate,
-			teamId: $teamId
 			userId: $userId
 			userName: $userName
 			eco: $eco,
@@ -80,7 +79,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 });
 
-class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
+class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 	public state: INewEntryState = {
 		created: false,
 		invoiceDate: new Date(),
@@ -109,9 +108,10 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 
 			CreateInvoice({
 				variables: {
+					id: this.props.route.params.invoiceId,
 					invoiceDate: this.state.invoiceDate,
 					invoiceId: parseInt(this.state.invoiceId + '', 10),
-					teamId: this.props.currentTeam.id,
+					// teamId: this.props.currentTeam.id,
 					userId: this.props.currentUser.uid,
 					userName: this.props.currentUser.name,
 					eco: parseFloat(this.state.ecoAmount),
@@ -122,82 +122,117 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		}
 	}
 	public render() {
-		const { classes } = this.props;
+		const { classes, route } = this.props;
 		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
 
+		console.log(this.props);
+
 		return (
-			<Mutation
-				mutation={UPDATE_INVOICE}
-				onCompleted={this.handleComplete}
-				>
-				{(UpdateInvoice, { data }) => (
-					<form
-						// tslint:disable-next-line: jsx-no-lambda
-						onSubmit={this.onCreate(UpdateInvoice)}
+			<Query
+				variables={{
+					id: route.params.invoiceId
+				}}
+				query={gql`
+					query Invoice($id: ID!) {
+						invoice(id: $id) {
+							id,
+							invoiceId,
+							invoiceDate,
+							createdDate,
+							eco,
+							nonEco,
+							excluded,
+							total
+						}
+					}
+				`}
+			>
+			{({ loading, error, data }) => {
+				if(error) { return error }
+				if(loading) { return '...'; }
+
+				console.log(data, this.props.currentTeam.measurement);
+				// this.setState({
+				// 	invoiceId: data.invoice.invoiceId
+				// });
+
+				return (
+					<Mutation
+						mutation={UPDATE_INVOICE}
+						onCompleted={this.handleComplete}
 					>
-						<Paper className={classes.paper}>
-							<div className={classes.contentWrapper}>
-								<Typography component="h1" variant="h3" gutterBottom>
-									Redigér faktura
-								</Typography>
+						{(UpdateInvoice, {  }) => (
+							<form
+								// tslint:disable-next-line: jsx-no-lambda
+								onSubmit={this.onCreate(UpdateInvoice)}
+							>
+								<Paper className={classes.paper}>
+									<div className={classes.contentWrapper}>
+										<Typography component="h1" variant="h3" gutterBottom>
+											Redigér faktura {data.invoice.invoiceId}
+										</Typography>
 
-								<DatePicker
-									variant="filled"
-									label="Faktura dato"
-									value={this.state.invoiceDate}
-									onChange={this.handleDateChange} />
-								<br />
-								<TextField
-									value={this.state.invoiceId || ''}
-									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ invoiceId: e.target.value})}
-									variant="filled"
-									type="number"
-									id="invoice-number"
-									label="Faktura/bilag nummer"
-									margin="normal"
-								/><br />
-								<TextField
-									type="number"
-									variant="filled"
-									id="total"
-									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ totalAmount: e.target.value})}
-									label={`Samlet i ${unit}`}
-									margin="normal"
-								/><br />
-								<TextField
-									type="number"
-									variant="filled"
-									id="non-eco"
-									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ excludedAmount: e.target.value})}
-									label={`Ikke omfattet andel i ${unit}`}
-									margin="normal"
-								/>
-								<br />
-								<TextField
-									type="number"
-									variant="filled"
-									id="non-eco"
-									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ ecoAmount: e.target.value})}
-									label={`Økologisk andel i ${unit}`}
-									margin="normal"
-								/><br />
-								<Button type="submit" variant="contained" color="primary">Opret</Button>
+										<DatePicker
+											variant="filled"
+											label="Faktura dato"
+											value={this.state.invoiceDate}
+											onChange={this.handleDateChange} />
+										<br />
+										<TextField
+											value={this.state.invoiceId || data.invoice.invoiceId}
+											// tslint:disable-next-line: jsx-no-lambda
+											onChange={(e) => this.setState({ invoiceId: e.target.value})}
+											variant="filled"
+											type="number"
+											id="invoice-number"
+											label="Faktura/bilag nummer"
+											margin="normal"
+										/><br />
+										<TextField
+											value={this.state.totalAmount || data.invoice.total}
+											type="number"
+											variant="filled"
+											// tslint:disable-next-line: jsx-no-lambda
+											onChange={(e) => this.setState({ totalAmount: e.target.value})}
+											label={`Samlet i ${unit}`}
+											margin="normal"
+										/><br />
+										<TextField
+											value={this.state.excludedAmount || data.invoice.excluded}
+											type="number"
+											variant="filled"
+											id="non-eco"
+											// tslint:disable-next-line: jsx-no-lambda
+											onChange={(e) => this.setState({ excludedAmount: e.target.value})}
+											label={`Ikke omfattet andel i ${unit}`}
+											margin="normal"
+										/>
+										<br />
+										<TextField
+											value={this.state.ecoAmount || data.invoice.eco}
+											type="number"
+											variant="filled"
+											// tslint:disable-next-line: jsx-no-lambda
+											onChange={(e) => this.setState({ ecoAmount: e.target.value})}
+											label={`Økologisk andel i ${unit}`}
+											margin="normal"
+										/><br />
+										<Button type="submit" variant="contained" color="primary">Opret</Button>
 
-								{this.state.created && (
-									<p>Opdateret! {this.state.lastCreated}!</p>
-								)}
-							</div>
-						</Paper>
+										{this.state.created && (
+											<p>Opdateret! {this.state.lastCreated}!</p>
+										)}
+									</div>
+								</Paper>
 
-					</form>
-				)}
-			</Mutation>
+							</form>
+						)}
+					</Mutation>
+				);
+			}}
+		</Query>
 		);
 	}
 }
 
-export default withStyles(styles)(NewEntry);
+export default withStyles(styles)(EditInvoice);

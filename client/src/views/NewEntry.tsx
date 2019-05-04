@@ -94,7 +94,10 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 			'lastCreated': addInvoice.invoiceId,
 
 			// Reset
-			'invoiceId': undefined
+			invoiceId: '',
+			totalAmount: '',
+			excludedAmount: '',
+			ecoAmount: ''
 		});
 	}
 	public onCreate = (CreateInvoice: any) => {
@@ -156,6 +159,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									margin="normal"
 								/><br />
 								<TextField
+									value={this.state.totalAmount || ''}
 									type="number"
 									variant="filled"
 									id="total"
@@ -165,6 +169,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									margin="normal"
 								/><br />
 								<TextField
+									value={this.state.excludedAmount || ''}
 									type="number"
 									variant="filled"
 									id="non-eco"
@@ -175,6 +180,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 								/>
 								<br />
 								<TextField
+									value={this.state.ecoAmount || ''}
 									type="number"
 									variant="filled"
 									id="non-eco"
