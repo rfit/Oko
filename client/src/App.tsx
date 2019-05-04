@@ -15,6 +15,7 @@ import Help from './views/help';
 import Styleguide from './views/Styleguide';
 import Login from './views/login';
 import NewEntry from './views/NewEntry';
+import EditInvoice from './views/EditInvoice';
 import Overview from './views/Overview';
 import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
@@ -72,11 +73,13 @@ const GET_CURRENT_USER = gql`
 			name,
 			uid,
 			teams {
+				measurement,
 				id,
 				name
 			}
 		}
 		currentTeam @client {
+			measurement,
 			name,
 			id
 		}
@@ -152,6 +155,7 @@ class App extends React.Component<IAppProps, IAppState> {
 								{topRouteName === 'overview' && <Overview {...data} /> }
 								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
 								{topRouteName === 'add-invoice' && <NewEntry {...data} /> }
+								{topRouteName === 'edit-invoice' && <EditInvoice {...data} /> }
 								{topRouteName === 'dashboard' && <Dashboard /> }
 								{topRouteName === 'help' && <Help /> }
 								{topRouteName === 'styleguide' && <Styleguide /> }

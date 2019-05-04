@@ -93,6 +93,7 @@ const GET_CURRENT_USER = gql`
 			name,
 			uid,
 			teams {
+				measurement,
 				id,
 				name
 			}

@@ -67,16 +67,19 @@ const SimpleInvoiceTable = (props: any) => {
 			</TableHead>
 			<TableBody>
 				{invoices && invoices.map((invoice: any) => {
+					const { id, invoiceId, invoiceDate, eco, nonEco, excluded } = invoice;
 					return (
 						<TableRow key={invoice.id || invoice.invoiceId}>
 							<TableCell component="th" scope="row">
-								{invoice.invoiceId}
+								<Link routeName="edit-invoice" routeParams={{ invoiceId: id }}>
+									{invoiceId}
+								</Link>
 							</TableCell>
-							<TableCell>{invoice.invoiceDate}</TableCell>
-							<TableCell>{invoice.eco}</TableCell>
-							<TableCell>{invoice.nonEco}</TableCell>
-							<TableCell>{invoice.excluded}</TableCell>
-							<TableCell>{calculateEcoPercentage(invoice.eco, invoice.nonEco).toFixed(1)}%</TableCell>
+							<TableCell>{invoiceDate}</TableCell>
+							<TableCell>{eco}</TableCell>
+							<TableCell>{nonEco}</TableCell>
+							<TableCell>{excluded}</TableCell>
+							<TableCell>{calculateEcoPercentage(eco, nonEco).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
 				})}

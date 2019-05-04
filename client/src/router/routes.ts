@@ -8,6 +8,10 @@ export default [
 		name: 'add-invoice',
 		path: '/add-invoice'
 	},
+	{
+		name: 'edit-invoice',
+		path: '/edit-invoice/:invoiceId'
+	},
     {
 		name: 'help',
 		path: '/help'
