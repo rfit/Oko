@@ -45,6 +45,9 @@ const resolvers = {
             })
         },
         currentUser: (root, args, context) => {
+            // If we are not logged in, just return null
+            if(!context.currentUser) { return null };
+    
             console.log('currentUser', context, context.currentUser);
             return db.collection('users').doc(`${context.currentUser.uid}`).get()
                 .then(doc => {
