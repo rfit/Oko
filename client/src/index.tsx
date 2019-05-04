@@ -160,6 +160,11 @@ client.cache.writeData({
 firebase.auth().onAuthStateChanged((user) => {
 	if (user) {
 
+		user.getIdToken().then((token) => {
+			localStorage.setItem('token', token);
+			console.log('TOKEN', token);
+		});
+
 		/*
 
 		{
@@ -185,7 +190,7 @@ firebase.auth().onAuthStateChanged((user) => {
 				}
 			})
 			.then(result => {
-				console.log('firebase: login query result', result, user, user.getIdToken().then((token) => localStorage.setItem('token', token)));
+				console.log('firebase: login query result', result, user);
 				console.log('firebase: user logged in!', user.uid, user.displayName);
 
 				/*client.cache.writeData({
