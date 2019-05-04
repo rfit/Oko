@@ -4,6 +4,7 @@ const typeDefs = gql`
 
 type Query {
     user(id: ID!): User
+    currentUser: User
     users: [User]
     team(id: ID!): Team
     teams: [Team]

@@ -2,7 +2,6 @@ const admin = require('firebase-admin');
 var FieldValue = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 var db = admin.firestore();
 
-
 const request = require('request');
 const rp = require('request-promise-native');
 const keys = require('../../serviceAccountKey');
@@ -44,6 +43,23 @@ const resolvers = {
                 console.log('Error getting document', err);
                 return err;
             })
+        },
+        currentUser: (root, args, context) => {
+            console.log('currentUser', context, context.currentUser);
+            return db.collection('users').doc(`${context.currentUser.uid}`).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        console.log('No such document!');
+                        return null;
+                    } else {
+                        //console.log('Document data:', doc.data());
+                        return doc.data();
+                    }
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return err;
+                });
         },
         teams: () => {
             return db.collection('teams').get()
