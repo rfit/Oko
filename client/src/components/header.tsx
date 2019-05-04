@@ -51,13 +51,14 @@ interface IHeaderState {
 
 interface IHeaderProps {
 	classes: any;
+	currentUser: any;
 	onDrawerToggle: any;
 	children?: React.ReactNode;
 }
 
 function Header(props: IHeaderProps) {
-	const { classes, onDrawerToggle } = props;
-
+	const { classes, onDrawerToggle, currentUser } = props;
+	console.log('header', currentUser );
 	return (
 	  <React.Fragment>
 		<AppBar color="primary" position="sticky" elevation={0}>
@@ -80,16 +81,7 @@ function Header(props: IHeaderProps) {
 				<TeamSwitcher />
 			  </Grid>
 			  <Grid item>
-				<Tooltip title="Alerts • No alters">
-				  <IconButton color="inherit">
-					<NotificationsIcon />
-				  </IconButton>
-				</Tooltip>
-			  </Grid>
-			  <Grid item>
-				<IconButton color="inherit" className={classes.iconButtonAvatar}>
-				  <Avatar className={classes.avatar} src="https://api.adorable.io/avatars/285/111100.png" />
-				</IconButton>
+				Logget på som: {currentUser.displayName} ({currentUser.uid})
 			  </Grid>
 			</Grid>
 		  </Toolbar>

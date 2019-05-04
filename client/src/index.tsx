@@ -14,6 +14,19 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import createRouter from './router/create-router';
 
+import firebase from 'firebase';
+
+// Initialize Firebase
+const config = {
+	apiKey: "AIzaSyCqo4feuGuO8Djm3d4ltS5gC9l48pPz_vw",
+	authDomain: "okoapp-staging.firebaseapp.com",
+	databaseURL: "https://okoapp-staging.firebaseio.com",
+	projectId: "okoapp-staging",
+	storageBucket: "okoapp-staging.appspot.com",
+	messagingSenderId: "91562819892"
+};
+firebase.initializeApp(config);
+
 const RFMuiTheme = createMuiTheme({
 	palette: {
 		primary: {
@@ -57,56 +70,156 @@ const RFMuiTheme = createMuiTheme({
 const typeDefs = gql`
 	extend type Query {
 		isLoggedIn: Boolean!
-		currentUser: [currentUser]!
+		currentUser: User!
 	}
 
-	extend type currentUser {
-		name: String!
-		token: String!
-		teamId: string!
+	extend type Mutation {
+		setCurrentUser(uid: String!, displayName: String!): Boolean
+	}
+
+	extend type User {
+		uid: ID!
+		displayName: String!
+		teamId: String
 	}
 `;
 
-const cache = new InMemoryCache();
+const GET_CURRENT_USER = gql`
+	query GetCurrentUser {
+		currentUser @client
+	}
+`;
+
+const GET_USER_WITH_TEAMS = gql`
+	query GetUserWithTeams($uid: ID!) {
+		user(id: $uid) {
+			teams {
+				id,
+				name
+			}
+		}
+	}
+`;
+
+
 const client = new ApolloClient({
-	cache,
 	// Backend API Url from firebase
 	uri: 'https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql',
 	fetchOptions: {
 		credentials: 'omit'
 	},
+	headers: {
+		authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : "",
+	},
 	typeDefs,
 	resolvers: {
 		Query: {
-			//   isLoggedIn() {
-			// 	return false;
-			//   },
-			currentUser() {
-				return {
-					teamId: 6822,
-					name: 'Allan'
-				};
+			isLoggedIn() {
+				return false;
 			},
+
 			currentTeam() {
 				return {
 					id: 6822,
 					name: 'Allans Pølser'
 				};
 			}
-		}
+		},
+		Mutation: {
+			changeTeam: () => {
+				console.log('change team');
+			},
+			setCurrentUser: (_, { displayName, uid }, { cache }) => {
+				const user = client.query({ query: GET_USER_WITH_TEAMS, variables: { uid } });
+				console.log('CURRENT USER: User login mutation resolver', displayName, uid, user);
+				const data = {
+					isLoggedIn: true,
+					currentUser: {
+						__typename: 'User',
+						uid,
+						displayName
+					}
+				};
+				cache.writeData({ data });
+				return true;
+			},
+			logoutUser: () => {
+				console.log('User logout');
+			}
+		},
 	}
 });
 
-cache.writeData({
+client.cache.writeData({
 	data: {
-		isLoggedIn: true // false
+		isLoggedIn: false, // false,
+		currentUser: null
+	}
+});
+
+firebase.auth().onAuthStateChanged((user) => {
+	if (user) {
+
+		/*
+
+		{
+					mutation LoginUser(
+							$uid: String!,
+							$displayName: String!
+						) {
+							setCurrentUser(uid: $type,  displayName: $displayName) @client {
+						}
+				  	}
+				}
+		*/
+		client
+			.mutate({
+				mutation: gql`
+					mutation SetCurrentUser($uid: String!, $displayName: String!){
+						setCurrentUser(uid: $uid, displayName: $displayName) @client
+					}
+				`,
+				variables: {
+					uid: user.uid,
+					displayName: user.displayName
+				}
+			})
+			.then(result => {
+				console.log('firebase: login query result', result, user, user.getIdToken().then((token) => localStorage.setItem('token', token)));
+				console.log('firebase: user logged in!', user.uid, user.displayName);
+
+				/*client.cache.writeData({
+					data: {
+						isLoggedIn: true // false
+					}
+				});*/
+			});
+
+
+		// User is signed in.
+		//   var displayName = user.displayName;
+		//   var email = user.email;
+		//   var emailVerified = user.emailVerified;
+		//   var photoURL = user.photoURL;
+		//   var isAnonymous = user.isAnonymous;
+		//   var uid = user.uid;
+		//   var providerData = user.providerData;
+		// ...
+	} else {
+		console.log('User signed out.');
+		localStorage.setItem('token', '')
+		// User is signed out.
+		// ...
 	}
 });
 
 const GET_CLIENT_STATE = gql`
 	query IsUserLoggedIn {
 		isLoggedIn @client
-		currentUser @client
+		currentUser @client {
+			uid,
+			displayName
+		}
 		currentTeam @client
 	}
 `;
@@ -121,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () =>
 					<MuiThemeProvider theme={RFMuiTheme}>
 						<MuiPickersUtilsProvider utils={DateFnsUtils}>
 							<Query query={GET_CLIENT_STATE}>
-								{({ loading, error, data }) => {
+								{({ loading, error, data }:any) => {
 									console.log(
 										'GET_CLIENT_STATE',
 										error,
@@ -131,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () =>
 									);
 									return (
 										<RouteNode nodeName="">
-											{({ route }) => <App route={route} clientState={data} client={client} />}
+											{({ route }:any) => <App route={route} clientState={data} client={client} />}
 										</RouteNode>
 									)
 								}}

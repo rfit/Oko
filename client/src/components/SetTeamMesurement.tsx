@@ -101,7 +101,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 
 		return (
 			<Mutation mutation={SET_TEAM_MEASUREMENT}>
-			{(setTeamMeasurement) => (
+			{(setTeamMeasurement:any) => (
 				<form
 					// tslint:disable-next-line: jsx-no-lambda
 					onSubmit={e => {

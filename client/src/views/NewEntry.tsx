@@ -95,7 +95,7 @@ class NewEntry extends React.Component<INewEntryProps, {}> {
 
 		return (
 			<Mutation mutation={ADD_INVOICE}>
-				{(CreateInvoice, { data }) => (
+				{(CreateInvoice: any, { data }: any) => (
 					<form
 						// tslint:disable-next-line: jsx-no-lambda
 						onSubmit={e => {

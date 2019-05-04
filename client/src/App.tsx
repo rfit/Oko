@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import Hidden from '@material-ui/core/Hidden';
 import Navigator from './components/Navigator';
-import Header from './components/Header';
+import Header from './components/header';
 
 import Dashboard from './views/dashboard';
 import Help from './views/help';
@@ -19,7 +19,6 @@ import { ApolloClient } from 'apollo-boost';
 
 interface IAppState {
 	open: boolean;
-	loggedin: boolean;
 	mobileOpen: boolean;
 }
 
@@ -69,7 +68,6 @@ class App extends React.Component<IAppProps, IAppState> {
 	public state: Readonly<IAppState> = {
 		open: false,
 		mobileOpen: false,
-		loggedin: true // false when deploy
 	};
 	public handleDrawerOpen = () => {
 		this.setState({ open: true });
@@ -90,7 +88,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	public render() {
 		const { classes, route } = this.props;
-		console.log('route!', this.props);
+		// console.log('route!', this.props);
 		const topRouteName = route.name.split('.')[0]
 
 		console.log('clientState', this.props.clientState);
@@ -124,7 +122,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						</Hidden>
 					</nav>
 					<main className={classes.appContent}>
-						<Header onDrawerToggle={this.handleDrawerToggle} />
+						<Header onDrawerToggle={this.handleDrawerToggle} currentUser={this.props.clientState.currentUser} />
 						<main className={classes.mainContent}>
 							{/* <Content />*/}
 							{topRouteName === 'overview' && <Overview /> }

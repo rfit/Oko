@@ -135,7 +135,7 @@ const ConnectedTeamSwitcher = () => {
 			}
 		`}
 	>
-	{({ loading, error, data }) => {
+	{({ loading, error, data }:any) => {
 		if (loading) { return <p>...</p>; }
 		if (error) { return <p>Error :( error</p>; }
 
