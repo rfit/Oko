@@ -32,8 +32,8 @@ const getPeopleData = require("./startup/index");
 const server = configureServer();
 
 // create and export the api
-const api = functions.https.onRequest(server);
-const login = functions.https.onRequest(peopleLogin);
-const startup = functions.https.onRequest(getPeopleData);
+const api = functions.region('europe-west1').https.onRequest(server);
+const login = functions.region('europe-west1').https.onRequest(peopleLogin);
+const startup = functions.region('europe-west1').https.onRequest(getPeopleData);
 
 module.exports = { api, login, startup };
