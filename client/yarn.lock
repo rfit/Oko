@@ -5650,6 +5650,11 @@ jss@^9.8.7:
     symbol-observable "^1.1.0"
     warning "^3.0.0"
 
+kandelborg-date-fns@^2.0.0-alpha.30:
+  version "2.0.0-alpha.30"
+  resolved "https://registry.yarnpkg.com/kandelborg-date-fns/-/kandelborg-date-fns-2.0.0-alpha.30.tgz#ccd8a217d8e13253088b7229a285af2d34fd774e"
+  integrity sha512-htSW3hAjLAwVlGGDt4lCH5AwTuSJ/+ytWsfr6FxhtQ7u733FVbWXiIM7vOYFIqUQL7XSS6gOtMASIg+eZODRFA==
+
 killable@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/killable/-/killable-1.0.1.tgz#4c8ce441187a061c7474fb87ca08e2a638194892"
