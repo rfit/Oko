@@ -130,12 +130,14 @@
     "requiredAdmins": [
         111100,
         1756, 
-        203757
+        203757,
+        100930
     ],
     "__commentAdmins": {
         "Stine Eisen": 111100,
         "Mikael Langrand Sørensen": 1756, 
-        "Allan Kimmer Jensen": 203757 
+        "Allan Kimmer Jensen": 203757,
+        "Jesper Ankerstjerne Boje" : 100930
     }
 
 }
