@@ -38,6 +38,7 @@ export interface IAdminProps {
 	classes: any;
 	unitValue?: 'kr' | 'kg';
 	unitHasBeenPicked?: boolean;
+	currentTeam: any;
 }
 
 
@@ -81,13 +82,17 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 	public render() {
 		return (
 			<Query
+				variables={{
+					teamId: parseInt(this.props.currentTeam.id, 10)
+				}}
 				query={gql`
-					{
-						team(id: 6822) {
+					query Team($teamId: ID!) {
+						team(id: $teamId) {
 							measurement,
 							users {
 								name,
 								email,
+								id,
 								peopleId
 							}
 						}
@@ -117,7 +122,6 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Styr dine indstillinger og rettigheder.
 							</Typography>
 
-
 							<SetTeamMesurement unitValue={data.team.measurement} />
 
 							<hr />
@@ -125,18 +129,18 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Personer med adgang
 							</Typography>
 
-							<PersonList persons={data.team.users} onDeletePerson={handleDelete} />
+							{data.team.users && <PersonList persons={data.team.users} onDeletePerson={handleDelete} />}
 
 							<Paper className={classes.addBox}>
 								<FormControl className={classes.margin}>
 									<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
 									<Input
-									id="input-with-icon-adornment"
-									startAdornment={
-										<InputAdornment position="start">
-											<AccountCircle />
-										</InputAdornment>
-									}
+										id="input-with-icon-adornment"
+										startAdornment={
+											<InputAdornment position="start">
+												<AccountCircle />
+											</InputAdornment>
+										}
 									/>
 								</FormControl>
 								<Button variant="contained" color="primary"><AddIcon />Tilføj adgang</Button>

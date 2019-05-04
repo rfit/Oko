@@ -150,7 +150,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							<main className={classes.mainContent}>
 								{/* <Content />*/}
 								{topRouteName === 'overview' && <Overview {...data} /> }
-								{topRouteName === 'team-admin' && <TeamAdmin /> }
+								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
 								{topRouteName === 'add-invoice' && <NewEntry {...data} /> }
 								{topRouteName === 'dashboard' && <Dashboard /> }
 								{topRouteName === 'help' && <Help /> }
