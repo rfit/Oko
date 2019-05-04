@@ -232,10 +232,11 @@ const resolvers = {
                         }
                     });
                 });
+
                 return userArray;
             })
             .catch(err => {
-                console.log('Error getting document', err);
+                console.error('Error getting document', err);
                 return err;
             })
         },
@@ -254,7 +255,7 @@ const resolvers = {
                 return invoiceArray;
             })
             .catch(err => {
-                console.log('Error getting document', err);
+                console.error('Error getting document', err);
                 return err;
             })
         },
@@ -267,9 +268,7 @@ const resolvers = {
             return db.collection('users').where('email', '==', args.email).get() 
             .then(snapshot => {
                 if (snapshot.size === 0) {
-                    var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=' + args.teamId + '&ApiKey=';
-                    var myURL = RestMember + keys.RestAPIKey;
-
+                    var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${keys.RestAPIKey}`
                     rp(myURL)
                     .then(function (response) {
                         const PeopleData = JSON.parse(response);
