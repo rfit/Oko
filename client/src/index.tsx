@@ -104,7 +104,7 @@ const GET_USER_WITH_TEAMS = gql`
 
 const client = new ApolloClient({
 	// Backend API Url from firebase
-	uri: 'https://us-central1-okoapp-staging.cloudfunctions.net/api/graphql',
+	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api',
 	fetchOptions: {
 		credentials: 'omit'
 	},
