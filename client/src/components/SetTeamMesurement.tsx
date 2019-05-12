@@ -60,7 +60,7 @@ interface ISetTeamMeasurementState {
 
 const SET_TEAM_MEASUREMENT = gql`
 	mutation SetTeamMeasurement(
-		$teamId: Int!
+		$teamId: ID!
 		$measurement: String!
 	){
 		setTeamMeasurement(
@@ -77,7 +77,7 @@ const SET_TEAM_MEASUREMENT = gql`
 class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetTeamMeasurementState> {
 	constructor(props: ISetTeamMeasurementProps) {
 		super(props);
-
+		console.log(props.unitValue === ('KG' || 'KR') ? true : false, props.unitValue);
 		this.state = {
 			unitValue: props.unitValue,
 			unitHasBeenPicked: props.unitValue === ('KG' || 'KR') ? true : false
@@ -87,6 +87,8 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 		this.setState({ unitValue: event.target.value });
 	}
 	public onSave = (event: any, setTeamMeasurement: any) => {
+		event.preventDefault();
+
 		if(!this.state.unitValue) {
 			alert('Du skal vælge en enhed.')
 			return;

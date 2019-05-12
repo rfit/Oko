@@ -84,7 +84,7 @@ const SimpleInvoiceTable = (props: any) => {
 							<TableCell align="right">{nonEco} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell>{calculateEcoPercentage(eco, nonEco).toFixed(1)}%</TableCell>
+							<TableCell>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
 				})}
@@ -133,6 +133,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+				const totalExcluded = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
 
 				if(!currentTeam.measurement || currentTeam.measurement === "" || currentTeam.measurement === "null" ) {
 					return (
@@ -178,7 +179,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 								Oversigt
 							</Typography>
 
-							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
+							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
 
 							<Typography component="h2" variant="h6" gutterBottom>
 								Tidligere leverancer for {currentTeam.name}

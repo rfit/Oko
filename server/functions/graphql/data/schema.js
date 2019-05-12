@@ -39,7 +39,7 @@ type Query {
     ): Invoice
     deleteInvoice(id: ID!): Boolean!
     setTeamMeasurement(teamId: ID!, measurement: String): Team
-    setCurrentTeam(id: ID!): Team
+    setCurrentTeam(id: ID!): User
   }
 
   type User {

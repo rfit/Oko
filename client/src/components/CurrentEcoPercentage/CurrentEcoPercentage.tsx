@@ -8,8 +8,8 @@ import ErrorIcon from '@material-ui/icons/Error';
 import calculateEcoPercentage from '../../utils/calculateEcoPercentage';
 
 const CurrentEcoPercentage = (props: any) => {
-	const { eco, nonEco } = props;
-	const percentage = calculateEcoPercentage(eco, nonEco);// .toFixed(1)
+	const { eco, nonEco, excluded } = props;
+	const percentage = calculateEcoPercentage(eco, nonEco, excluded);// .toFixed(1)
 
 	if(percentage >= 90) {
 		return (

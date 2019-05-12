@@ -72,9 +72,9 @@ class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
 	public handleChange = (event: any) => {
 		console.log('check', event.target.value);
 		this.props.changeTeam({ variables: { id: event.target.value } }).then((ref: any) => {
-			console.log('CHANGED!', ref);
+			console.log('CHANGED!', ref.data);
+			// this.setState({ currentTeam: ref.curre });
 		});
-		// this.setState({ currentTeam: (event.target as HTMLInputElement).value });
 	};
 
 	public render() {
@@ -131,9 +131,11 @@ const StyledTeamSwitcher = withStyles(styles)(TeamSwitcher);
 const CHANGE_TEAM = gql`
 	mutation changeTeam($id: ID!) {
     	setCurrentTeam(id: $id) {
-			id,
-			name,
-			measurement
+			currentTeam {
+				id,
+				name,
+				measurement
+			}
 		}
   	}
 `;

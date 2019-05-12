@@ -16,7 +16,6 @@ import {
 
 export interface INewEntryProps {
 	classes: any;
-	currentTeam: any;
 	currentUser: any;
 	route: any;
 }
@@ -87,16 +86,7 @@ const GET_INVOICE_QUERY = gql`
 
 const DELETE_INVOICE_MUTATION = gql`
 	mutation DeleteInvoice($id: ID!) {
-		deleteInvoice(id: $id) {
-			id,
-			invoiceId,
-			invoiceDate,
-			createdDate,
-			eco,
-			nonEco,
-			excluded,
-			total
-		}
+		deleteInvoice(id: $id)
 	}
 `
 
@@ -163,8 +153,9 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 		}
 	}
 	public render() {
-		const { classes, route } = this.props;
-		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
+		const { classes, route, currentUser } = this.props;
+		const { currentTeam } = currentUser;
+		const unit = currentTeam.measurement; // Get from team settings can be "kg" | "kr"
 
 		console.log(this.props);
 
@@ -179,7 +170,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 				if(error) { return error }
 				if(loading) { return '...'; }
 
-				console.log(data, this.props.currentTeam.measurement);
+				console.log(data, currentTeam.measurement);
 				// this.setState({
 				// 	invoiceId: data.invoice.invoiceId
 				// });
@@ -266,11 +257,9 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 							// tslint:disable-next-line: jsx-no-lambda
 							onSubmit={this.onDelete(DeleteInvoice)}
 						>
-							<Paper className={classes.paper}>
+							<Paper className={classes.paper} style={{ marginTop: 20 }}>
 								<div className={classes.contentWrapper}>
-
-									<Button type="submit" variant="contained" color="primary">Opret</Button>
-
+									<Button type="submit" variant="contained" color="secondary">Slet</Button>
 								</div>
 							</Paper>
 

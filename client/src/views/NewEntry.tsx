@@ -16,7 +16,6 @@ import {
 
 export interface INewEntryProps {
 	classes: any;
-	currentTeam: any;
 	currentUser: any;
 	route: any;
 	router: any;
@@ -45,9 +44,7 @@ const ADD_INVOICE = gql`
 	mutation addInvoice(
 		$invoiceId: Int!,
 		$invoiceDate: String!,
-		$teamId: Int!,
-		$userId: Int!,
-		$userName: String
+		$teamId: ID!,
 		$eco: Float!,
 		$nonEco: Float!,
 		$excluded: Float!
@@ -56,8 +53,6 @@ const ADD_INVOICE = gql`
 			invoiceId: $invoiceId,
 			invoiceDate: $invoiceDate,
 			teamId: $teamId
-			userId: $userId
-			userName: $userName
 			eco: $eco,
 			nonEco: $nonEco,
 			excluded: $excluded
@@ -127,8 +122,6 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 					invoiceDate: this.state.invoiceDate,
 					invoiceId: parseInt(this.state.invoiceId + '', 10),
 					teamId: currentTeam.id,
-					userId: currentUser.uid,
-					userName: currentUser.name,
 					eco: parseFloat(this.state.ecoAmount),
 					nonEco: nonEcoAmount,
 					excluded: parseFloat(this.state.excludedAmount)
