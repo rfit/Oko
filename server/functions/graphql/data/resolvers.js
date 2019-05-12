@@ -84,7 +84,7 @@ const resolvers = {
                 return err;
             })
         },
-        team: (parent,args) => {
+        team: (parent, args) => {
             return db.collection('teams').doc(`${args.id}`).get()
             .then(doc => {
                 if (!doc.exists) {
@@ -124,7 +124,7 @@ const resolvers = {
                 return err;
             })
         },
-        invoices: (parent,args) => {
+        invoices: (parent, args) => {
             return db.collection('invoices').where('teamId', '==', args.teamId).get()
             .then(snapshot => {
                 if (snapshot.empty) {
@@ -489,35 +489,34 @@ const resolvers = {
       
       setTeamMeasurement: (parent, args) => {
         return db.collection('teams').doc(`${args.teamId}`).get()
-        .then(doc => {
-                  if (!doc.exists) {
-                      console.log('No such document!');
-                      return null;
-                  } else {
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log('setTeamMeasurement: No such document!');
+                    return null;
+                }
                     
-                    if (args.measurement === 'KG' || args.measurement === 'KR') {
-                            console.log('Team Document data:', doc.data());
-                            return updateMeasurement = db.collection('teams').doc(`${args.teamId}`).update({
-                                measurement: args.measurement
-                            })
-                            .then(ref => {
-                                console.log("Measurement Changed");
-                                return true;
-                            })
-                            .catch(err => {
-                                console.log('Error getting document', err);
-                                return true;
-                            });
-                        } else {
-                            return true;
-                        } 
-                  }
-              })
-              .catch(err => {
-                  //console.log('Error getting document', err);
-                  return err;
-              })
-          },
+                if (args.measurement === 'KG' || args.measurement === 'KR') {
+                    return updateMeasurement = db.collection('teams').doc(`${args.teamId}`).update({
+                        measurement: args.measurement
+                    })
+                    .then(document => {
+                        console.log(`Measurement Changed for ${args.teamId} to ${args.measurement}`);
+                        return document.data();
+                    })
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                        return true;
+                    });
+                }
+
+                console.log('Tried to set measurement, but its already set');
+                return doc.data();
+            })
+            .catch(err => {
+                //console.log('Error getting document', err);
+                return err;
+            })
+        },
     },
 };
   

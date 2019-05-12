@@ -5,9 +5,9 @@ const { ApolloServer } = require("apollo-server-express");
 // cors allows our server to accept requests from different origins
 const cors = require("cors");
 
-function tradeTokenForUser (token) {
+function tradeTokenForUser(token) {
 	return admin.auth().verifyIdToken(token)
-    	.then(function(decodedToken) {
+		.then(function(decodedToken) {
 			return decodedToken;
 		}).catch(function(error) {
 			console.log('Token not valid!', error);
@@ -17,32 +17,32 @@ function tradeTokenForUser (token) {
 }
 
 function configureServer() {
-    // invoke express to create our server
-    const app = express();
-    
-    //use the cors middleware
-    app.use(cors());
+	// invoke express to create our server
+	const app = express();
+	
+	//use the cors middleware
+	app.use(cors());
 
-    const typeDefs = require('./data/schema');
-    const resolvers = require('./data/resolvers');
-    
-    const server = new ApolloServer({
-        cors: true,
-        typeDefs,
-        resolvers,
-        engine: {
-          apiKey: "service:oeko-app:_VDrVCXARLxxk4sHbdDP8g"
-        },
-        introspection: true,
-        playground: true,
-        /* Add this line to disable upload support! */
-        /* https://www.apollographql.com/docs/apollo-server/v2/migration-file-uploads.html */
-        uploads: false,
-        // Add current user / auth to context
-        context: async ({ req }) => {
+	const typeDefs = require('./data/schema');
+	const resolvers = require('./data/resolvers');
+		
+	const server = new ApolloServer({
+		cors: true,
+		typeDefs,
+		resolvers,
+		engine: {
+			apiKey: "service:oeko-app:_VDrVCXARLxxk4sHbdDP8g"
+		},
+		introspection: true,
+		playground: true,
+		/* Add this line to disable upload support! */
+		/* https://www.apollographql.com/docs/apollo-server/v2/migration-file-uploads.html */
+		uploads: false,
+		// Add current user / auth to context
+		context: async ({ req }) => {
 			let authToken = null;
 			let currentUser = null;
-    
+		
 			try {
 				authToken = req.headers['authorization'].replace('Bearer ', '');
 				if (authToken) {
@@ -51,16 +51,19 @@ function configureServer() {
 			} catch (e) {
 				console.log(`Unable to authenticate using auth token: ${authToken}`, e);
 			}
-    
+		
 			return {
 				authToken,
 				currentUser,
 			};
-       },
-    });
-    // now we take our newly instantiated ApolloServer and apply the   // previously configured express application
-    server.applyMiddleware({ app });
-    // finally return the application
-    return app;
+		}
+	});
+
+	// now we take our newly instantiated ApolloServer and apply the   // previously configured express application
+	server.applyMiddleware({ app });
+
+	// finally return the application
+	return app;
 }
+
 module.exports = configureServer;

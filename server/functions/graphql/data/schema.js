@@ -40,7 +40,7 @@ type Query {
       excluded: Float
     ): Invoice
     deleteInvoice(id: ID!): Boolean!
-    setTeamMeasurement(teamId: Int!, measurement: String): Boolean
+    setTeamMeasurement(teamId: Int!, measurement: String): Team
   }
 
   type User {
