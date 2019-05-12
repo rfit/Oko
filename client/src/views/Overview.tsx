@@ -46,7 +46,7 @@ const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => create
 
 export interface IOverviewProps {
 	classes: any;
-	currentTeam: any;
+	currentUser: any;
 }
 
 export interface IOverviewState {
@@ -98,6 +98,7 @@ const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
 
 class Overview extends React.Component<IOverviewProps, IOverviewState> {
 	public render() {
+		const currentTeam = this.props.currentUser.currentTeam;
 		// const {
 		// 	classes
 		// } = this.props;
@@ -105,10 +106,10 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 		return (
 			<Query
 				variables={{
-					teamId: parseInt(this.props.currentTeam.id, 10)
+					teamId: parseInt(currentTeam.id, 10)
 				}}
 				query={gql`
-					query Invoices($teamId: Int!) {
+					query Invoices($teamId: ID!) {
 						invoices(teamId: $teamId) {
 							id,
 							invoiceId,
@@ -127,17 +128,46 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 			>
 			{({ loading, error, data }) => {
 
-				console.log('Overview data', data);
-
 				if (loading) { return <Loading />; }
 				if (error) { return <p>Error :(</p>; }
 
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 
+				if(!currentTeam.measurement || currentTeam.measurement === "" || currentTeam.measurement === "null" ) {
+					return (
+						<main>
+							<Typography component="h1" variant="h3" gutterBottom>
+								Oversigt
+							</Typography>
 
-				if(!this.props.currentTeam.measurement) {
-					return 'Din leder skal vælge om boden registere i kilo eller kroner.';
+							<Typography variant="body1" gutterBottom>
+							Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
+							</Typography>
+						</main>
+					)
+				}
+
+				console.log('Overview data', data);
+
+				if(!data.invoices) {
+					return (
+						<main>
+							<Typography component="h1" variant="h3" gutterBottom>
+								Oversigt
+							</Typography>
+
+							<Typography variant="body1" gutterBottom>
+								Der er endnu ikke oprettet en fraktura. Gør dette for at se overblik.
+							</Typography>
+
+							{/* tslint:disable-next-line:jsx-no-lambda */}
+							<Button variant="contained" color="secondary" component={(props: any) => <Link routeName="add-invoice" {...props} />}>
+								Tilføj faktura
+								<AddIcon />
+							</Button>
+						</main>
+					)
 				}
 
 				return (
@@ -151,10 +181,10 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
 
 							<Typography component="h2" variant="h6" gutterBottom>
-								Tidligere leverancer for {this.props.currentTeam.name}
+								Tidligere leverancer for {currentTeam.name}
 							</Typography>
 
-							<StyledInvoiceTable invoices={data.invoices} measurement={this.props.currentTeam.measurement} />
+							<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
 
 							<br />
 

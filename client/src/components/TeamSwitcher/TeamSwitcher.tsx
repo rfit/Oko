@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
+import { Query, Mutation } from "react-apollo";
 import { Link } from 'react-router5'
 
 import Card from '@material-ui/core/Card';
@@ -19,16 +19,15 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
 
-
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-PaperProps: {
-	style: {
-	maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-	width: 250,
+	PaperProps: {
+		style: {
+		maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+		width: 250,
+		},
 	},
-},
 };
 
 interface ITeam {
@@ -39,6 +38,7 @@ interface ITeam {
 interface ITeamSwitcherProps {
 	currentTeam: any;
 	teams: ITeam[];
+	changeTeam: any;
 	classes: any;
 }
 
@@ -46,22 +46,22 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	root: {
 		display: 'flex',
 		flexWrap: 'wrap',
-	  },
-	  formControl: {
+	},
+	formControl: {
 		margin: spacing.unit,
 		minWidth: 120,
 		maxWidth: 300,
-	  },
-	  chips: {
+	},
+	chips: {
 		display: 'flex',
 		flexWrap: 'wrap',
-	  },
-	  chip: {
+	},
+	chip: {
 		margin: spacing.unit / 4,
-	  },
-	  noLabel: {
+	},
+	noLabel: {
 		marginTop: spacing.unit * 3,
-	  },
+	},
 });
 
 class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
@@ -69,8 +69,12 @@ class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
 		currentTeam: this.props.currentTeam,
 	};
 
-	public handleChange = (event: React.SyntheticEvent) => {
-		this.setState({ currentTeam: (event.target as HTMLInputElement).value });
+	public handleChange = (event: any) => {
+		console.log('check', event.target.value);
+		this.props.changeTeam({ variables: { id: event.target.value } }).then((ref: any) => {
+			console.log('CHANGED!', ref);
+		});
+		// this.setState({ currentTeam: (event.target as HTMLInputElement).value });
 	};
 
 	public render() {
@@ -124,33 +128,49 @@ class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
 
 const StyledTeamSwitcher = withStyles(styles)(TeamSwitcher);
 
+const CHANGE_TEAM = gql`
+	mutation changeTeam($id: ID!) {
+    	setCurrentTeam(id: $id) {
+			id,
+			name,
+			measurement
+		}
+  	}
+`;
+
 const ConnectedTeamSwitcher = () => {
-	return (<Query
-		query={gql`
-			{
-				currentTeam @client {
-					name,
-					id
-				}
-				currentUser {
-					teams {
-						id,
-						name
-					}
-				}
-			}
-		`}
-	>
-	{({ loading, error, data }) => {
-		if (loading) { return <p>...</p>; }
-		if (error) { return <p>Error :( error</p>; }
+	return (
+		<Mutation mutation={CHANGE_TEAM}>
+			{(changeTeam) => (
+				<Query
+					query={gql`
+						{
+							currentUser {
+								currentTeam {
+									name,
+									id
+								},
+								teams {
+									id,
+									name
+								}
+							}
+						}
+					`}
+				>
+				{({ loading, error, data }) => {
+					if (loading) { return <p>...</p>; }
+					if (error) { return <p>Error :( error</p>; }
 
-		return (
-			<StyledTeamSwitcher teams={data.currentUser.teams} currentTeam={data.currentTeam} />
-		);
-	}}
-	</Query>)
+						console.log(data);
+					return (
+						<StyledTeamSwitcher teams={data.currentUser.teams} currentTeam={data.currentUser.currentTeam} changeTeam={changeTeam} />
+					);
+				}}
+				</Query>
+			)}
+		</Mutation>
+	)
 }
-
 
 export default ConnectedTeamSwitcher;

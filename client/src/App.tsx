@@ -19,6 +19,7 @@ import EditInvoice from './views/EditInvoice';
 import Overview from './views/Overview';
 import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
+import Loading from './components/Loading';
 
 interface IAppState {
 	open: boolean;
@@ -72,16 +73,16 @@ const GET_CURRENT_USER = gql`
 		currentUser {
 			name,
 			uid,
+			currentTeam {
+				measurement,
+				id,
+				name
+			},
 			teams {
 				measurement,
 				id,
 				name
 			}
-		}
-		currentTeam @client {
-			measurement,
-			name,
-			id
 		}
 	}
 `;
@@ -130,8 +131,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		return (
 			<Query query={GET_CURRENT_USER}>
 				{({ loading, error, data }) => {
-					if(loading) { return <p>Loading...</p>}
-					console.log(data);
+					if(loading) { return <Loading />; }
 					return (
 						<div className={classes.root}>
 						<CssBaseline />

@@ -75,11 +75,9 @@ function Header(props: IHeaderProps) {
 				  </IconButton>
 				</Grid>
 			  </Hidden>
-			  <Grid item xs />
 			  <Grid item>
 				<TeamSwitcher />
 			  </Grid>
-			  <Grid item xs />
 			  <Grid item>
 				Logget på som:<br /> {currentUser.name} ({currentUser.uid})
 			  </Grid>

@@ -70,6 +70,36 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 });
 
+const GET_INVOICE_QUERY = gql`
+	query Invoice($id: ID!) {
+		invoice(id: $id) {
+			id,
+			invoiceId,
+			invoiceDate,
+			createdDate,
+			eco,
+			nonEco,
+			excluded,
+			total
+		}
+	}
+`
+
+const DELETE_INVOICE_MUTATION = gql`
+	mutation DeleteInvoice($id: ID!) {
+		deleteInvoice(id: $id) {
+			id,
+			invoiceId,
+			invoiceDate,
+			createdDate,
+			eco,
+			nonEco,
+			excluded,
+			total
+		}
+	}
+`
+
 class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 	public state: INewEntryState = {
 		created: false,
@@ -88,6 +118,23 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 			// Reset
 			'invoiceId': undefined
 		});
+	}
+
+	public onDelete = (DeleteInvoice: any) => {
+		return (e: React.SyntheticEvent) => {
+			e.preventDefault();
+
+			const choice = confirm('Er du sikker på at du vil slette denne faktura?');
+			if(choice) {
+				DeleteInvoice({
+					variables: { id: this.props.route.params.invoiceId }
+				}).then((ethen: any) => {
+					console.log('DELETED', ethen);
+					// myRouter.navigate('section', {section: 'contact'});
+
+				});
+			}
+		}
 	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
@@ -126,20 +173,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 				variables={{
 					id: route.params.invoiceId
 				}}
-				query={gql`
-					query Invoice($id: ID!) {
-						invoice(id: $id) {
-							id,
-							invoiceId,
-							invoiceDate,
-							createdDate,
-							eco,
-							nonEco,
-							excluded,
-							total
-						}
-					}
-				`}
+				query={GET_INVOICE_QUERY}
 			>
 			{({ loading, error, data }) => {
 				if(error) { return error }
@@ -151,6 +185,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 				// });
 
 				return (
+					<>
 					<Mutation
 						mutation={UPDATE_INVOICE}
 						onCompleted={this.handleComplete}
@@ -222,6 +257,27 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 							</form>
 						)}
 					</Mutation>
+					<Mutation
+						mutation={DELETE_INVOICE_MUTATION}
+						onCompleted={this.handleComplete}
+					>
+					{(DeleteInvoice, {  }) => (
+						<form
+							// tslint:disable-next-line: jsx-no-lambda
+							onSubmit={this.onDelete(DeleteInvoice)}
+						>
+							<Paper className={classes.paper}>
+								<div className={classes.contentWrapper}>
+
+									<Button type="submit" variant="contained" color="primary">Opret</Button>
+
+								</div>
+							</Paper>
+
+						</form>
+					)}
+				</Mutation>
+				</>
 				);
 			}}
 		</Query>

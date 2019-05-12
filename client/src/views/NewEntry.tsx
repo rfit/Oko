@@ -116,7 +116,8 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
 			e.preventDefault();
-
+			const { currentUser } = this.props;
+			const { currentTeam } = currentUser;
 			// if(!this.state.invoiceId) { return };
 
 			const nonEcoAmount = parseFloat(this.state.totalAmount) - parseFloat(this.state.excludedAmount) - parseFloat((this.state.ecoAmount));
@@ -125,9 +126,9 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 				variables: {
 					invoiceDate: this.state.invoiceDate,
 					invoiceId: parseInt(this.state.invoiceId + '', 10),
-					teamId: this.props.currentTeam.id,
-					userId: this.props.currentUser.uid,
-					userName: this.props.currentUser.name,
+					teamId: currentTeam.id,
+					userId: currentUser.uid,
+					userName: currentUser.name,
 					eco: parseFloat(this.state.ecoAmount),
 					nonEco: nonEcoAmount,
 					excluded: parseFloat(this.state.excludedAmount)
@@ -137,9 +138,9 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	}
 	public render() {
 		const { classes } = this.props;
-		const unit = this.props.currentTeam.measurement; // Get from team settings can be "kg" | "kr"
+		const unit = this.props.currentUser.currentTeam.measurement; // Get from team settings can be "kg" | "kr"
 
-		if(!this.props.currentTeam.measurement) {
+		if(!unit || unit === "" || unit === "null" ) {
 			return 'Din leder skal vælge om boden registere i kilo eller kroner.';
 		}
 

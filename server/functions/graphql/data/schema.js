@@ -9,7 +9,7 @@ type Query {
     team(id: ID!): Team
     teams: [Team]
     invoice(id: ID!): Invoice
-    invoices(teamId: Int!): [Invoice]
+    invoices(teamId: ID!): [Invoice]
     allinvoices: [Invoice]
   }
 
@@ -22,9 +22,7 @@ type Query {
     addInvoice(
       invoiceId: Int!,
       invoiceDate: String!,
-      teamId: Int!,
-      userId: Int!,
-      userName: String,
+      teamId: ID!,
       eco: Float!,
       nonEco: Float!,
       excluded: Float!
@@ -33,14 +31,15 @@ type Query {
       id: ID!,
       invoiceId: Int,
       invoiceDate: String,
-      userId: Int!,
+      userId: Int,
       userName: String,
       eco: Float,
       nonEco: Float,
       excluded: Float
     ): Invoice
     deleteInvoice(id: ID!): Boolean!
-    setTeamMeasurement(teamId: Int!, measurement: String): Team
+    setTeamMeasurement(teamId: ID!, measurement: String): Team
+    setCurrentTeam(id: ID!): Team
   }
 
   type User {
@@ -50,6 +49,7 @@ type Query {
     name: String!
     email: String!
     role: String!
+    currentTeam: Team
     teams: [Team]
     invoices: [Invoice]
   }
