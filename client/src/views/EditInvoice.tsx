@@ -10,6 +10,8 @@ import Paper from '@material-ui/core/Paper';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
+import { GET_ALL_INVOICES } from '../queries';
+
 import {
 	DatePicker
 } from "material-ui-pickers";
@@ -18,6 +20,7 @@ export interface INewEntryProps {
 	classes: any;
 	currentUser: any;
 	route: any;
+	router: any;
 }
 
 export interface INewEntryState {
@@ -120,7 +123,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 					variables: { id: this.props.route.params.invoiceId }
 				}).then((ethen: any) => {
 					console.log('DELETED', ethen);
-					// myRouter.navigate('section', {section: 'contact'});
+					this.props.router.navigate('overview');
 
 				});
 			}
@@ -237,7 +240,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 											label={`Økologisk andel i ${unit}`}
 											margin="normal"
 										/><br />
-										<Button type="submit" variant="contained" color="primary">Opret</Button>
+										<Button type="submit" variant="contained" color="primary">Ret</Button>
 
 										{this.state.created && (
 											<p>Opdateret! {this.state.lastCreated}!</p>
@@ -250,7 +253,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 					</Mutation>
 					<Mutation
 						mutation={DELETE_INVOICE_MUTATION}
-						onCompleted={this.handleComplete}
+						refetchQueries={[{ query: GET_ALL_INVOICES, variables: { id: currentTeam.id } }]}
 					>
 					{(DeleteInvoice, {  }) => (
 						<form

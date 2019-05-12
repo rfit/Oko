@@ -19,6 +19,8 @@ import AddIcon from '@material-ui/icons/Add';
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
+import { GET_ALL_INVOICES } from '../queries';
+
 import SubHeader from '../components/SubHeader';
 import Loading from '../components/Loading';
 
@@ -105,26 +107,11 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 
 		return (
 			<Query
+				fetchPolicy="cache-and-network"
 				variables={{
 					teamId: parseInt(currentTeam.id, 10)
 				}}
-				query={gql`
-					query Invoices($teamId: ID!) {
-						invoices(teamId: $teamId) {
-							id,
-							invoiceId,
-							createdDate,
-							invoiceDate,
-							teamId,
-							userId,
-							userName,
-							eco,
-							nonEco,
-							excluded,
-							total
-						}
-					}
-				`}
+				query={GET_ALL_INVOICES}
 			>
 			{({ loading, error, data }) => {
 
