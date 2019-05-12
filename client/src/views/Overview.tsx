@@ -64,10 +64,10 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell>Nummer</TableCell>
 					<TableCell>Faktura dato</TableCell>
-					<TableCell>Økologisk Andel</TableCell>
-					<TableCell>Ikke Økologisk</TableCell>
-					<TableCell>Undtaget</TableCell>
-					<TableCell>Total</TableCell>
+					<TableCell align="right">Økologisk Andel</TableCell>
+					<TableCell align="right">Ikke Økologisk</TableCell>
+					<TableCell align="right">Undtaget</TableCell>
+					<TableCell align="right">Total</TableCell>
 					<TableCell>Øko %</TableCell>
 				</TableRow>
 			</TableHead>

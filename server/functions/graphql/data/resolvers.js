@@ -447,14 +447,12 @@ const resolvers = {
                         excluded: doc.data().excluded
                     };
 
-                    if( args.invoiceId !== undefined ) { invoice.invoiceId = args.invoiceId; }
-                    if( args.invoiceDate !== undefined ) { invoice.invoiceDate = args.invoiceDate; }
+                    if( args.invoiceId ) { invoice.invoiceId = args.invoiceId; }
+                    if( args.invoiceDate ) { invoice.invoiceDate = args.invoiceDate; }
                     // firebase.firestore.Timestamp.fromDate(new Date(args.invoiceDate)),
-                    if( args.userId !== undefined ) { invoice.userId = args.userId; }
-                    if( args.userName !== undefined ) { invoice.userName = args.userName; }
-                    if( args.eco !== undefined ) { invoice.eco = args.eco; }
-                    if( args.nonEco !== undefined ) { invoice.nonEco = args.nonEco; }
-                    if( args.excluded !== undefined ) { invoice.excluded = args.excluded; }
+                    if( args.eco ) { invoice.eco = args.eco; }
+                    if( args.nonEco ) { invoice.nonEco = args.nonEco; }
+                    if( args.excluded ) { invoice.excluded = args.excluded; }
                     invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
 
                     return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
