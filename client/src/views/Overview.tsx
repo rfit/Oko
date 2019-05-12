@@ -38,6 +38,9 @@ const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => create
 	},
 	table: {
 		minWidth: 700,
+	},
+	unit: {
+		color: '#ccc'
 	}
 });
 
@@ -51,7 +54,7 @@ export interface IOverviewState {
 }
 
 const SimpleInvoiceTable = (props: any) => {
-	const { classes, invoices = [] } = props;
+	const { classes, measurement, invoices = [] } = props;
 	return (
 		<Paper className={classes.root}>
 			<Table className={classes.table}>
@@ -59,8 +62,8 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell>Nummer</TableCell>
 					<TableCell>Faktura dato</TableCell>
-					<TableCell>Øko Andel</TableCell>
-					<TableCell>Ikke Øko</TableCell>
+					<TableCell>Økologisk Andel</TableCell>
+					<TableCell>Ikke Økologisk</TableCell>
 					<TableCell>Undtaget</TableCell>
 					<TableCell>Total</TableCell>
 					<TableCell>Øko %</TableCell>
@@ -76,11 +79,11 @@ const SimpleInvoiceTable = (props: any) => {
 									{invoiceId}
 								</Link>
 							</TableCell>
-							<TableCell>{invoiceDate}</TableCell>
-							<TableCell>{eco}</TableCell>
-							<TableCell>{nonEco}</TableCell>
-							<TableCell>{excluded}</TableCell>
-							<TableCell>{total}</TableCell>
+							<TableCell>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+							<TableCell align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{nonEco} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell>{calculateEcoPercentage(eco, nonEco).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
@@ -109,8 +112,11 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 						invoices(teamId: $teamId) {
 							id,
 							invoiceId,
-							invoiceDate,
 							createdDate,
+							invoiceDate,
+							teamId,
+							userId,
+							userName,
 							eco,
 							nonEco,
 							excluded,
@@ -129,6 +135,11 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 
+
+				if(!this.props.currentTeam.measurement) {
+					return 'Din leder skal vælge om boden registere i kilo eller kroner.';
+				}
+
 				return (
 					<React.Fragment>
 						{/* <SubHeader title="Oversigt" /> */}
@@ -143,7 +154,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 								Tidligere leverancer for {this.props.currentTeam.name}
 							</Typography>
 
-							<StyledInvoiceTable invoices={data.invoices} />
+							<StyledInvoiceTable invoices={data.invoices} measurement={this.props.currentTeam.measurement} />
 
 							<br />
 

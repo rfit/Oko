@@ -18,6 +18,8 @@ export interface INewEntryProps {
 	classes: any;
 	currentTeam: any;
 	currentUser: any;
+	route: any;
+	router: any;
 }
 
 export interface INewEntryState {
@@ -60,9 +62,17 @@ const ADD_INVOICE = gql`
 			nonEco: $nonEco,
 			excluded: $excluded
 		) {
+			id,
 			invoiceId,
 			createdDate,
-	  		id
+			invoiceDate,
+			teamId,
+			userId,
+			userName,
+			eco,
+			nonEco,
+			excluded,
+			total
 		}
 	}
 `;
@@ -99,6 +109,9 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 			excludedAmount: '',
 			ecoAmount: ''
 		});
+
+		// Go back to the overview
+		this.props.router.navigate('overview');
 	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
@@ -124,7 +137,11 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	}
 	public render() {
 		const { classes } = this.props;
-		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
+		const unit = this.props.currentTeam.measurement; // Get from team settings can be "kg" | "kr"
+
+		if(!this.props.currentTeam.measurement) {
+			return 'Din leder skal vælge om boden registere i kilo eller kroner.';
+		}
 
 		return (
 			<Mutation

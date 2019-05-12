@@ -109,7 +109,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	};
 
 	public render() {
-		const { classes, route } = this.props;
+		const { classes, route, router } = this.props;
 		// console.log('route!', this.props);
 		const topRouteName = route.name.split('.')[0]
 
@@ -154,7 +154,7 @@ class App extends React.Component<IAppProps, IAppState> {
 								{/* <Content />*/}
 								{topRouteName === 'overview' && <Overview {...data} /> }
 								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-								{topRouteName === 'add-invoice' && <NewEntry {...data} /> }
+								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
 								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} /> }
 								{topRouteName === 'dashboard' && <Dashboard /> }
 								{topRouteName === 'help' && <Help /> }

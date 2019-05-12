@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () =>
 									console.log('APP-DATA', data);
 									return (
 										<RouteNode nodeName="">
-											{({ route }) => <App route={route} clientState={data} client={client} />}
+											{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
 										</RouteNode>
 									)
 								}}

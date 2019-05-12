@@ -66,7 +66,11 @@ const SET_TEAM_MEASUREMENT = gql`
 		setTeamMeasurement(
 			teamId: $teamId
 			measurement: $measurement
-		)
+		) {
+			id,
+			name,
+			measurement
+		}
 	}
 `;
 
@@ -82,7 +86,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 	public handleUnitChange = (event: any) => {
 		this.setState({ unitValue: event.target.value });
 	}
-	public handleUnitSave = () => {
+	public onSave = (event: any, setTeamMeasurement: any) => {
 		if(!this.state.unitValue) {
 			alert('Du skal vælge en enhed.')
 			return;
@@ -90,11 +94,18 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 
 		const choice = confirm('Er du sikker? Dette kan kun vælges én gang.');
 		if(choice) {
-			this.setState({
-				unitHasBeenPicked: true
-			})
+			setTeamMeasurement({
+				variables: {
+					teamId: this.props.teamId,
+					measurement: this.state.unitValue
+				}
+			}).then((ethen: any) => {
+				console.log('loled', ethen);
+				this.setState({
+					unitHasBeenPicked: true
+				});
+			});
 		}
-		return this;
 	}
 	public render() {
 		const { classes } = this.props;
@@ -105,16 +116,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 			{(setTeamMeasurement) => (
 				<form
 					// tslint:disable-next-line: jsx-no-lambda
-					onSubmit={e => {
-						e.preventDefault();
-
-						setTeamMeasurement({
-							variables: {
-								teamId: this.props.teamId,
-								measurement: this.state.unitValue
-							}
-						});
-					}}
+					onSubmit={e => { this.onSave(e, setTeamMeasurement); }}
 				>
 					<Typography component="h1" variant="h6" gutterBottom>
 						Faktura mål
@@ -132,14 +134,14 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 							onChange={this.handleUnitChange}
 						>
 							<FormControlLabel
-								value="kr"
+								value="KR"
 								control={<Radio color="primary" />}
 								label="kr - Pris"
 								disabled={unitHasBeenPicked}
 								labelPlacement="end"
 							/>
 							<FormControlLabel
-								value="kg"
+								value="KG"
 								disabled={unitHasBeenPicked}
 								control={<Radio color="primary" />}
 								label="kg - Kilo"
@@ -148,7 +150,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 						</RadioGroup>
 					</FormControl>
 					<br />
-					<Button variant="contained" color="primary" disabled={unitHasBeenPicked} onClick={this.handleUnitSave}><Save />Gem valg</Button>
+					<Button type="submit" variant="contained" color="primary" disabled={unitHasBeenPicked}><Save />Gem valg</Button>
 
 				</form>
 			)}

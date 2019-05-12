@@ -112,7 +112,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 						unitHasBeenPicked
 					} = this.state;
 
-					console.log('TeamADminData', data);
+					console.log('TeamAdminData', data);
 
 					return (
 						<main>
@@ -123,7 +123,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Styr dine indstillinger og rettigheder.
 							</Typography>
 
-							<SetTeamMesurement unitValue={data.team.measurement} teamId={this.props.currentTeam.id} />
+							<SetTeamMesurement unitValue={data.team.measurement} teamId={parseInt(this.props.currentTeam.id, 10)} />
 
 							<hr />
 							<Typography component="h1" variant="h6" gutterBottom>
