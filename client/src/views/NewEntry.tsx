@@ -11,6 +11,8 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
+import calculateEcoPercentage from '../utils/calculateEcoPercentage';
+
 import {
 	DatePicker
 } from "material-ui-pickers";
@@ -156,12 +158,13 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	public render() {
 		const { classes } = this.props;
 		const unit = this.props.currentUser.currentTeam.measurement; // Get from team settings can be "kg" | "kr"
+		const currentPercentage = calculateEcoPercentage(this.state.ecoAmount, this.state.nonEcoAmount, this.state.excludedAmount );
 
 		if(!unit || unit === "" || unit === "null" ) {
 			return 'Din leder skal vælge om boden registere i kilo eller kroner.';
 		}
 
-		console.log('valid statae', this.state.validState)
+		console.log('state', this.state)
 
 		return (
 			<Mutation
@@ -248,21 +251,12 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									}}
 								/><br />
 
-								<TextField
-									value={this.state.nonEcoAmount || ''}
-									type="number"
-									variant="outlined"
-									id="non-eco"
-									disabled
-									label={`Ikke økologisk andel i ${unit}`}
-									margin="normal"
-								/><br />
-
-
+								<p>Ikke økologisk andel: {this.state.nonEcoAmount} {unit}</p>
+								<p>Øko procent for faktura: {currentPercentage}%</p>
 
 								<Button
 									disabled={!this.state.validState}
-									type="submit" variant="contained" color="primary">Opret</Button>
+									type="submit" variant="contained" color="primary">Opret faktura</Button>
 
 								{this.state.created && (
 									<p>Oprettede faktura # {this.state.lastCreated}!</p>
