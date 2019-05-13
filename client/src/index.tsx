@@ -15,12 +15,13 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import createRouter from './router/create-router';
+import Loading from './components/Loading';
 
 import firebase from 'firebase';
 
 const localeMap = {
 	da: daLocale
-  };
+};
 
 // Initialize Firebase
 const config = {
@@ -79,7 +80,7 @@ const typeDefs = gql`
 		currentTeam: Team!
 	}
 	extend type Mutation {
-		setCurrentTeam(uid: String!): Team!
+		changeTeam(id: String!): Team!
 	}
 `;
 
@@ -87,7 +88,8 @@ const GET_CURRENT_USER = gql`
 	query GetCurrentUser {
 		currentTeam @client {
 			id,
-			name
+			name,
+			measurement
 		},
 		currentUser {
 			name,
@@ -117,43 +119,36 @@ const client = new ApolloClient({
 				return !!localStorage.getItem('token');
 			},
 
-			currentTeam: (obj, args, context, info) => {
-				// const data = context.cache.readQuery({ query: GET_CURRENT_USER });
-				console.log('currentTeamQuery', obj.currentUser.teams[0], obj, args);
-				return {
-					...obj.currentUser.teams[0],
-					name: obj.currentUser.teams[0].name,
-					id: parseInt(obj.currentUser.teams[0].id, 10)
-				}
+		},
+		// Mutation: {
+		// 	changeTeam: (root, args, context) => {
+		// 		console.log('change team', root, args, context);
 
-				// {
-				// 	id: 6822,
-				// 	name: 'Allans Pølser'
-				// };
-			}
-		},
-		Mutation: {
-			changeTeam: () => {
-				console.log('change team');
-			},
-			// setCurrentUser: (_, { displayName, uid }, { cache }) => {
-			// 	const user = client.query({ query: GET_USER_WITH_TEAMS, variables: { uid } });
-			// 	console.log('CURRENT USER: User login mutation resolver', displayName, uid, user);
-			// 	const data = {
-			// 		isLoggedIn: true,
-			// 		currentUser: {
-			// 			__typename: 'User',
-			// 			uid,
-			// 			displayName
-			// 		}
-			// 	};
-			// 	cache.writeData({ data });
-			// 	return true;
-			// },
-			// logoutUser: () => {
-			// 	console.log('User logout');
-			// }
-		},
+		// 		const { currentUser } = context.cache.readQuery({ query: gql`
+		// 			query {
+		// 				currentUser {
+		// 					teams {
+		// 						measurement,
+		// 						id,
+		// 						name
+		// 					}
+		// 				}
+		// 			}
+		// 		` });
+
+		// 		const newTeam = currentUser.teams.find((element: any) => {
+		// 			return '' + element.id === '' + args.id;
+		// 		});
+
+		// 		const data = {
+		// 			currentTeam: newTeam
+		// 		};
+
+		// 		context.cache.writeData({ data });
+
+		// 		return newTeam;
+		// 	},
+		// },
 	}
 });
 
@@ -176,51 +171,6 @@ firebase.auth().onAuthStateChanged((user) => {
 			}
 		});
 
-		/*
-
-		{
-					mutation LoginUser(
-							$uid: String!,
-							$displayName: String!
-						) {
-							setCurrentUser(uid: $type,  displayName: $displayName) @client {
-						}
-				  	}
-				}
-		*/
-		// client
-		// 	.mutate({
-		// 		mutation: gql`
-		// 			mutation SetCurrentUser($uid: String!, $displayName: String!){
-		// 				setCurrentUser(uid: $uid, displayName: $displayName) @client
-		// 			}
-		// 		`,
-		// 		variables: {
-		// 			uid: user.uid,
-		// 			displayName: user.displayName
-		// 		}
-		// 	})
-		// 	.then(result => {
-		// 		console.log('firebase: login query result', result, user);
-		// 		console.log('firebase: user logged in!', user.uid, user.displayName);
-
-		// 		/*client.cache.writeData({
-		// 			data: {
-		// 				isLoggedIn: true // false
-		// 			}
-		// 		});*/
-		// 	});
-
-
-		// User is signed in.
-		//   var displayName = user.displayName;
-		//   var email = user.email;
-		//   var emailVerified = user.emailVerified;
-		//   var photoURL = user.photoURL;
-		//   var isAnonymous = user.isAnonymous;
-		//   var uid = user.uid;
-		//   var providerData = user.providerData;
-		// ...
 	} else {
 		console.log('User signed out.');
 		localStorage.setItem('token', '')
@@ -254,12 +204,11 @@ document.addEventListener('DOMContentLoaded', () =>
 										client
 									);
 
-									if(loading) { return <p>Loading app..</p>; }
+									if(loading) { return <Loading />; }
 
-									console.log('APP-DATA', data);
 									return (
 										<RouteNode nodeName="">
-											{({ route }) => <App route={route} clientState={data} client={client} />}
+											{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
 										</RouteNode>
 									)
 								}}

@@ -10,15 +10,17 @@ import Paper from '@material-ui/core/Paper';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
+import { GET_ALL_INVOICES } from '../queries';
+
 import {
 	DatePicker
 } from "material-ui-pickers";
 
 export interface INewEntryProps {
 	classes: any;
-	currentTeam: any;
 	currentUser: any;
 	route: any;
+	router: any;
 }
 
 export interface INewEntryState {
@@ -70,6 +72,27 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 });
 
+const GET_INVOICE_QUERY = gql`
+	query Invoice($id: ID!) {
+		invoice(id: $id) {
+			id,
+			invoiceId,
+			invoiceDate,
+			createdDate,
+			eco,
+			nonEco,
+			excluded,
+			total
+		}
+	}
+`
+
+const DELETE_INVOICE_MUTATION = gql`
+	mutation DeleteInvoice($id: ID!) {
+		deleteInvoice(id: $id)
+	}
+`
+
 class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 	public state: INewEntryState = {
 		created: false,
@@ -88,6 +111,23 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 			// Reset
 			'invoiceId': undefined
 		});
+	}
+
+	public onDelete = (DeleteInvoice: any) => {
+		return (e: React.SyntheticEvent) => {
+			e.preventDefault();
+
+			const choice = confirm('Er du sikker på at du vil slette denne faktura?');
+			if(choice) {
+				DeleteInvoice({
+					variables: { id: this.props.route.params.invoiceId }
+				}).then((ethen: any) => {
+					console.log('DELETED', ethen);
+					this.props.router.navigate('overview');
+
+				});
+			}
+		}
 	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
@@ -116,8 +156,9 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 		}
 	}
 	public render() {
-		const { classes, route } = this.props;
-		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
+		const { classes, route, currentUser } = this.props;
+		const { currentTeam } = currentUser;
+		const unit = currentTeam.measurement; // Get from team settings can be "kg" | "kr"
 
 		console.log(this.props);
 
@@ -126,31 +167,19 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 				variables={{
 					id: route.params.invoiceId
 				}}
-				query={gql`
-					query Invoice($id: ID!) {
-						invoice(id: $id) {
-							id,
-							invoiceId,
-							invoiceDate,
-							createdDate,
-							eco,
-							nonEco,
-							excluded,
-							total
-						}
-					}
-				`}
+				query={GET_INVOICE_QUERY}
 			>
 			{({ loading, error, data }) => {
 				if(error) { return error }
 				if(loading) { return '...'; }
 
-				console.log(data, this.props.currentTeam.measurement);
+				console.log(data, currentTeam.measurement);
 				// this.setState({
 				// 	invoiceId: data.invoice.invoiceId
 				// });
 
 				return (
+					<>
 					<Mutation
 						mutation={UPDATE_INVOICE}
 						onCompleted={this.handleComplete}
@@ -211,7 +240,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 											label={`Økologisk andel i ${unit}`}
 											margin="normal"
 										/><br />
-										<Button type="submit" variant="contained" color="primary">Opret</Button>
+										<Button type="submit" variant="contained" color="primary">Ret</Button>
 
 										{this.state.created && (
 											<p>Opdateret! {this.state.lastCreated}!</p>
@@ -222,6 +251,25 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 							</form>
 						)}
 					</Mutation>
+					<Mutation
+						mutation={DELETE_INVOICE_MUTATION}
+						refetchQueries={[{ query: GET_ALL_INVOICES, variables: { id: currentTeam.id } }]}
+					>
+					{(DeleteInvoice, {  }) => (
+						<form
+							// tslint:disable-next-line: jsx-no-lambda
+							onSubmit={this.onDelete(DeleteInvoice)}
+						>
+							<Paper className={classes.paper} style={{ marginTop: 20 }}>
+								<div className={classes.contentWrapper}>
+									<Button type="submit" variant="contained" color="secondary">Slet</Button>
+								</div>
+							</Paper>
+
+						</form>
+					)}
+				</Mutation>
+				</>
 				);
 			}}
 		</Query>

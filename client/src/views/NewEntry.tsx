@@ -16,8 +16,9 @@ import {
 
 export interface INewEntryProps {
 	classes: any;
-	currentTeam: any;
 	currentUser: any;
+	route: any;
+	router: any;
 }
 
 export interface INewEntryState {
@@ -43,9 +44,7 @@ const ADD_INVOICE = gql`
 	mutation addInvoice(
 		$invoiceId: Int!,
 		$invoiceDate: String!,
-		$teamId: Int!,
-		$userId: Int!,
-		$userName: String
+		$teamId: ID!,
 		$eco: Float!,
 		$nonEco: Float!,
 		$excluded: Float!
@@ -54,15 +53,21 @@ const ADD_INVOICE = gql`
 			invoiceId: $invoiceId,
 			invoiceDate: $invoiceDate,
 			teamId: $teamId
-			userId: $userId
-			userName: $userName
 			eco: $eco,
 			nonEco: $nonEco,
 			excluded: $excluded
 		) {
+			id,
 			invoiceId,
 			createdDate,
-	  		id
+			invoiceDate,
+			teamId,
+			userId,
+			userName,
+			eco,
+			nonEco,
+			excluded,
+			total
 		}
 	}
 `;
@@ -99,11 +104,15 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 			excludedAmount: '',
 			ecoAmount: ''
 		});
+
+		// Go back to the overview
+		this.props.router.navigate('overview');
 	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
 			e.preventDefault();
-
+			const { currentUser } = this.props;
+			const { currentTeam } = currentUser;
 			// if(!this.state.invoiceId) { return };
 
 			const nonEcoAmount = parseFloat(this.state.totalAmount) - parseFloat(this.state.excludedAmount) - parseFloat((this.state.ecoAmount));
@@ -112,9 +121,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 				variables: {
 					invoiceDate: this.state.invoiceDate,
 					invoiceId: parseInt(this.state.invoiceId + '', 10),
-					teamId: this.props.currentTeam.id,
-					userId: this.props.currentUser.uid,
-					userName: this.props.currentUser.name,
+					teamId: currentTeam.id,
 					eco: parseFloat(this.state.ecoAmount),
 					nonEco: nonEcoAmount,
 					excluded: parseFloat(this.state.excludedAmount)
@@ -124,7 +131,11 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	}
 	public render() {
 		const { classes } = this.props;
-		const unit = 'kg'; // Get from team settings can be "kg" | "kr"
+		const unit = this.props.currentUser.currentTeam.measurement; // Get from team settings can be "kg" | "kr"
+
+		if(!unit || unit === "" || unit === "null" ) {
+			return 'Din leder skal vælge om boden registere i kilo eller kroner.';
+		}
 
 		return (
 			<Mutation

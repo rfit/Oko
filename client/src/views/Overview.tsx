@@ -19,6 +19,8 @@ import AddIcon from '@material-ui/icons/Add';
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
+import { GET_ALL_INVOICES } from '../queries';
+
 import SubHeader from '../components/SubHeader';
 import Loading from '../components/Loading';
 
@@ -38,12 +40,15 @@ const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => create
 	},
 	table: {
 		minWidth: 700,
+	},
+	unit: {
+		color: '#ccc'
 	}
 });
 
 export interface IOverviewProps {
 	classes: any;
-	currentTeam: any;
+	currentUser: any;
 }
 
 export interface IOverviewState {
@@ -51,7 +56,7 @@ export interface IOverviewState {
 }
 
 const SimpleInvoiceTable = (props: any) => {
-	const { classes, invoices = [] } = props;
+	const { classes, measurement, invoices = [] } = props;
 	return (
 		<Paper className={classes.root}>
 			<Table className={classes.table}>
@@ -59,10 +64,10 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell>Nummer</TableCell>
 					<TableCell>Faktura dato</TableCell>
-					<TableCell>Øko Andel</TableCell>
-					<TableCell>Ikke Øko</TableCell>
-					<TableCell>Undtaget</TableCell>
-					<TableCell>Total</TableCell>
+					<TableCell align="right">Økologisk Andel</TableCell>
+					<TableCell align="right">Ikke Økologisk</TableCell>
+					<TableCell align="right">Undtaget</TableCell>
+					<TableCell align="right">Total</TableCell>
 					<TableCell>Øko %</TableCell>
 				</TableRow>
 			</TableHead>
@@ -76,12 +81,12 @@ const SimpleInvoiceTable = (props: any) => {
 									{invoiceId}
 								</Link>
 							</TableCell>
-							<TableCell>{invoiceDate}</TableCell>
-							<TableCell>{eco}</TableCell>
-							<TableCell>{nonEco}</TableCell>
-							<TableCell>{excluded}</TableCell>
-							<TableCell>{total}</TableCell>
-							<TableCell>{calculateEcoPercentage(eco, nonEco).toFixed(1)}%</TableCell>
+							<TableCell>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+							<TableCell align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{nonEco} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
 				})}
@@ -95,39 +100,63 @@ const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
 
 class Overview extends React.Component<IOverviewProps, IOverviewState> {
 	public render() {
+		const currentTeam = this.props.currentUser.currentTeam;
 		// const {
 		// 	classes
 		// } = this.props;
 
 		return (
 			<Query
+				fetchPolicy="cache-and-network"
 				variables={{
-					teamId: parseInt(this.props.currentTeam.id, 10)
+					teamId: parseInt(currentTeam.id, 10)
 				}}
-				query={gql`
-					query Invoices($teamId: Int!) {
-						invoices(teamId: $teamId) {
-							id,
-							invoiceId,
-							invoiceDate,
-							createdDate,
-							eco,
-							nonEco,
-							excluded,
-							total
-						}
-					}
-				`}
+				query={GET_ALL_INVOICES}
 			>
 			{({ loading, error, data }) => {
-
-				console.log('Overview data', data);
 
 				if (loading) { return <Loading />; }
 				if (error) { return <p>Error :(</p>; }
 
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+				const totalExcluded = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
+
+				if(!currentTeam.measurement || currentTeam.measurement === "" || currentTeam.measurement === "null" ) {
+					return (
+						<main>
+							<Typography component="h1" variant="h3" gutterBottom>
+								Oversigt
+							</Typography>
+
+							<Typography variant="body1" gutterBottom>
+							Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
+							</Typography>
+						</main>
+					)
+				}
+
+				console.log('Overview data', data);
+
+				if(!data.invoices) {
+					return (
+						<main>
+							<Typography component="h1" variant="h3" gutterBottom>
+								Oversigt
+							</Typography>
+
+							<Typography variant="body1" gutterBottom>
+								Der er endnu ikke oprettet en fraktura. Gør dette for at se overblik.
+							</Typography>
+
+							{/* tslint:disable-next-line:jsx-no-lambda */}
+							<Button variant="contained" color="secondary" component={(props: any) => <Link routeName="add-invoice" {...props} />}>
+								Tilføj faktura
+								<AddIcon />
+							</Button>
+						</main>
+					)
+				}
 
 				return (
 					<React.Fragment>
@@ -137,13 +166,13 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 								Oversigt
 							</Typography>
 
-							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} />
+							<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
 
 							<Typography component="h2" variant="h6" gutterBottom>
-								Tidligere leverancer for {this.props.currentTeam.name}
+								Tidligere leverancer for {currentTeam.name}
 							</Typography>
 
-							<StyledInvoiceTable invoices={data.invoices} />
+							<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
 
 							<br />
 

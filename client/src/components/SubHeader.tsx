@@ -52,11 +52,11 @@ function SubHeader(props: IHeaderProps) {
 	return (
 	  <React.Fragment>
 		<AppBar
-		  component="div"
-		  className={classes.secondaryBar}
-		  color="primary"
-		  position="static"
-		  elevation={0}
+			component="div"
+			className={classes.secondaryBar}
+			color="primary"
+			position="static"
+			elevation={0}
 		>
 		  <Toolbar>
 			<Grid container alignItems="center" spacing={8}>
@@ -76,12 +76,12 @@ function SubHeader(props: IHeaderProps) {
 		  position="static"
 		  elevation={0}
 		>
-		  <Tabs value={0} textColor="inherit">
-			<Tab textColor="inherit" label="Users" />
-			<Tab textColor="inherit" label="Sign-in method" />
-			<Tab textColor="inherit" label="Templates" />
-			<Tab textColor="inherit" label="Usage" />
-		  </Tabs>
+			<Tabs value={0} textColor="inherit">
+				<Tab textColor="inherit" label="Users" />
+				<Tab textColor="inherit" label="Sign-in method" />
+				<Tab textColor="inherit" label="Templates" />
+				<Tab textColor="inherit" label="Usage" />
+			</Tabs>
 		</AppBar>
 		}
 	  </React.Fragment>

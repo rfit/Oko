@@ -39,7 +39,7 @@ export interface IAdminProps {
 	classes: any;
 	unitValue?: 'kr' | 'kg';
 	unitHasBeenPicked?: boolean;
-	currentTeam: any;
+	currentUser: any;
 }
 
 
@@ -81,10 +81,11 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 		return this;
 	}
 	public render() {
+		const { currentTeam } = this.props.currentUser;
 		return (
 			<Query
 				variables={{
-					teamId: parseInt(this.props.currentTeam.id, 10)
+					teamId: currentTeam.id
 				}}
 				query={gql`
 					query Team($teamId: ID!) {
@@ -112,7 +113,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 						unitHasBeenPicked
 					} = this.state;
 
-					console.log('TeamADminData', data);
+					console.log('TeamAdminData', data);
 
 					return (
 						<main>
@@ -123,7 +124,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 								Styr dine indstillinger og rettigheder.
 							</Typography>
 
-							<SetTeamMesurement unitValue={data.team.measurement} teamId={this.props.currentTeam.id} />
+							<SetTeamMesurement unitValue={data.team.measurement} teamId={currentTeam.id} />
 
 							<hr />
 							<Typography component="h1" variant="h6" gutterBottom>

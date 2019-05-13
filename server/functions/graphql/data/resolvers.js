@@ -6,6 +6,13 @@ const request = require('request');
 const rp = require('request-promise-native');
 const keys = require('../../serviceAccountKey');
 
+const errorHandler = (name) => {
+    return (err) => {
+        console.error('ERROR', name, err);
+        return err;
+    }
+}
+
 const resolvers = {
     Query: {
         users: () => {
@@ -40,7 +47,7 @@ const resolvers = {
                 }
             })
             .catch(err => {
-                console.log('Error getting document', err);
+                //console.log('Error getting document', err);
                 return err;
             })
         },
@@ -48,21 +55,20 @@ const resolvers = {
             // If we are not logged in, just return null
             if(!context.currentUser) { return null; }
     
-            console.log('currentUser', context, context.currentUser);
+            // console.log('currentUser', context, context.currentUser);
             return db.collection('users').doc(`${context.currentUser.uid}`).get()
                 .then(doc => {
                     if (!doc.exists) {
                         console.log('No such document!');
                         return null;
-                    } else {
-                        //console.log('Document data:', doc.data());
-                        return doc.data();
                     }
+
+                    return doc.data();
                 })
                 .catch(err => {
-                    console.log('Error getting document', err);
+                    //console.log('Error getting document', err);
                     return err;
-                });
+                })
         },
         teams: () => {
             return db.collection('teams').get()
@@ -80,11 +86,11 @@ const resolvers = {
                 return teamArray;
             })
             .catch(err => {
-                console.log('Error getting document', err);
+                //console.log('Error getting document', err);
                 return err;
             })
         },
-        team: (parent,args) => {
+        team: (parent, args) => {
             return db.collection('teams').doc(`${args.id}`).get()
             .then(doc => {
                 if (!doc.exists) {
@@ -104,7 +110,7 @@ const resolvers = {
             return db.collection('invoices').get()
             .then(snapshot => {
                 if (snapshot.empty) {
-                    console.log('No such document!');
+                    console.log('allinvoices - No such document!');
                     return;
                 } 
                 
@@ -120,11 +126,11 @@ const resolvers = {
                 return invoiceArray;
             })
             .catch(err => {
-                console.log('Error getting document', err);
+                //console.log('Error getting document', err);
                 return err;
             })
         },
-        invoices: (parent,args) => {
+        invoices: (parent, args) => {
             return db.collection('invoices').where('teamId', '==', args.teamId).get()
             .then(snapshot => {
                 if (snapshot.empty) {
@@ -166,6 +172,25 @@ const resolvers = {
         },
     },
     User: {
+        currentTeam: user => {
+            const teamId = user.currentTeam || user.teams[0]
+
+            return db.collection('teams').doc(`${teamId}`).get()
+                .then(teamDoc => {
+                    if (!teamDoc.exists) {
+                        console.log(`No such document: teams/${teamId}`);
+                        return null;
+                    } 
+
+                    const teamData = teamDoc.data();
+                    console.log('Resolved currentTeam to', JSON.stringify(teamData));
+                    return teamData;
+                })
+                .catch(err => {
+                    //console.log('Error getting document', err);
+                    return err;
+                })
+        },
         //Eksempel på custom felter, udfra de eksisterende
         teams: user => {
             return db.collection('teams').get()
@@ -262,7 +287,6 @@ const resolvers = {
     },
     
     Mutation: {
-       
         addUser: (parent, args) => {
             //console.log('args.email: ', args.email);
             return db.collection('users').where('email', '==', args.email).get() 
@@ -338,7 +362,6 @@ const resolvers = {
             })
         },
         removeUser: (parent, args) => {
-            
             return db.collection('users').doc(`${args.id}`).get()
             .then(doc => {
                 if (!doc.exists) {
@@ -364,15 +387,15 @@ const resolvers = {
                 //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
             })
         },
-        addInvoice: (parent, args) => {
-            
+        addInvoice: (parent, args, context) => {
+            if(!context.currentUser) { return null; }
+
             const invoice = {
                 invoiceId: args.invoiceId, 
                 createdDate: FieldValue,
                 invoiceDate: args.invoiceDate,
                 teamId: args.teamId,
-                userId: args.userId,
-                userName: args.userName,
+                userId: context.currentUser.uid,
                 eco: args.eco,
                 nonEco: args.nonEco,
                 excluded: args.excluded,
@@ -403,7 +426,7 @@ const resolvers = {
                     return err;
                 });
         },
-        updateInvoice: (parent, args) => {
+        updateInvoice: (parent, args, context) => {
             
             return db.collection('invoices').doc(`${args.id}`).get()
             .then(doc => {
@@ -424,13 +447,12 @@ const resolvers = {
                         excluded: doc.data().excluded
                     };
 
-                    if( args.invoiceId !== undefined ) { invoice.invoiceId = args.invoiceId; }
-                    if( args.invoiceDate !== undefined ) { invoice.invoiceDate = args.invoiceDate; }
-                    if( args.userId !== undefined ) { invoice.userId = args.userId; }
-                    if( args.userName !== undefined ) { invoice.userName = args.userName; }
-                    if( args.eco !== undefined ) { invoice.eco = args.eco; }
-                    if( args.nonEco !== undefined ) { invoice.nonEco = args.nonEco; }
-                    if( args.excluded !== undefined ) { invoice.excluded = args.excluded; }
+                    if( args.invoiceId ) { invoice.invoiceId = args.invoiceId; }
+                    if( args.invoiceDate ) { invoice.invoiceDate = args.invoiceDate; }
+                    // firebase.firestore.Timestamp.fromDate(new Date(args.invoiceDate)),
+                    if( args.eco ) { invoice.eco = args.eco; }
+                    if( args.nonEco ) { invoice.nonEco = args.nonEco; }
+                    if( args.excluded ) { invoice.excluded = args.excluded; }
                     invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
 
                     return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
@@ -463,7 +485,9 @@ const resolvers = {
                 return err; 
             })
         },
-        deleteInvoice: (parent, args) => {
+        deleteInvoice: (parent, args, context) => {
+            if(!context.currentUser) { return null; }
+
             return db.collection('invoices').doc(`${args.id}`).get()
             .then(doc => {
                 if (!doc.exists) {
@@ -487,37 +511,58 @@ const resolvers = {
             })
         },
       
-      setTeamMeasurement: (parent, args) => {
-        return db.collection('teams').doc(`${args.teamId}`).get()
-        .then(doc => {
-                  if (!doc.exists) {
-                      console.log('No such document!');
-                      return null;
-                  } else {
-                    
-                    if (args.measurement === 'KG' || args.measurement === 'KR') {
-                            console.log('Team Document data:', doc.data());
-                            return updateMeasurement = db.collection('teams').doc(`${args.teamId}`).update({
-                                measurement: args.measurement
-                            })
-                            .then(ref => {
-                                console.log("Measurement Changed");
-                                return true;
+        setTeamMeasurement: (parent, args, context) => {
+            if(!context.currentUser) { return null; }
+
+            const docRef = db.collection('teams').doc(`${args.teamId}`);
+
+            if (args.measurement === 'KG' || args.measurement === 'KR') {
+                return docRef.update({
+                        measurement: args.measurement
+                    })
+                    .then(time => {
+                        console.log(`Measurement Changed for ${args.teamId} to ${args.measurement} by ${context.currentUser.uid}`);
+
+                        return docRef.get()
+                            .then(doc => {
+                                return doc.data();
                             })
                             .catch(err => {
-                                console.log('Error getting document', err);
-                                return true;
-                            });
-                        } else {
-                            return true;
-                        } 
-                  }
-              })
-              .catch(err => {
-                  //console.log('Error getting document', err);
-                  return err;
-              })
-          },
+                                //console.log('Error getting document', err);
+                                return err;
+                            })
+                    })
+                    .catch(err => {
+                        console.log('Error getting document', err);
+                        return true;
+                    });
+            }
+
+            return 'Wrong args.';
+
+        },
+
+        // Set Current Team for user, used if there are more then one team on a user. This allows changing between them.
+        setCurrentTeam: (parent, args, context) => {
+            if(!context.currentUser) { return null; }
+            
+            const ref = db.collection('users').doc(`${context.currentUser.uid}`)
+
+            return ref.update({
+                currentTeam: args.id
+            }).then(() => {
+                return ref.get()
+                    .then(doc => {
+                        console.log('Updated current team:', doc.id, args.id);
+                        return doc.data();
+                    })
+                    .catch(err => {
+                        console.log('Error setCurrentTeam', err);
+                        return err;
+                    })
+            })
+ 
+        },
     },
 };
   

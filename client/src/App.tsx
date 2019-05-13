@@ -19,6 +19,7 @@ import EditInvoice from './views/EditInvoice';
 import Overview from './views/Overview';
 import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
+import Loading from './components/Loading';
 
 interface IAppState {
 	open: boolean;
@@ -72,16 +73,16 @@ const GET_CURRENT_USER = gql`
 		currentUser {
 			name,
 			uid,
+			currentTeam {
+				measurement,
+				id,
+				name
+			},
 			teams {
 				measurement,
 				id,
 				name
 			}
-		}
-		currentTeam @client {
-			measurement,
-			name,
-			id
 		}
 	}
 `;
@@ -109,7 +110,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	};
 
 	public render() {
-		const { classes, route } = this.props;
+		const { classes, route, router } = this.props;
 		// console.log('route!', this.props);
 		const topRouteName = route.name.split('.')[0]
 
@@ -130,8 +131,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		return (
 			<Query query={GET_CURRENT_USER}>
 				{({ loading, error, data }) => {
-					if(loading) { return <p>Loading...</p>}
-					console.log(data);
+					if(loading) { return <Loading />; }
 					return (
 						<div className={classes.root}>
 						<CssBaseline />
@@ -154,8 +154,8 @@ class App extends React.Component<IAppProps, IAppState> {
 								{/* <Content />*/}
 								{topRouteName === 'overview' && <Overview {...data} /> }
 								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-								{topRouteName === 'add-invoice' && <NewEntry {...data} /> }
-								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} /> }
+								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
+								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
 								{topRouteName === 'dashboard' && <Dashboard /> }
 								{topRouteName === 'help' && <Help /> }
 								{topRouteName === 'styleguide' && <Styleguide /> }

@@ -20,30 +20,29 @@ import SettingsIcon from '@material-ui/icons/Settings';
 // import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 
 const categories = [
-  {
-    id: 'Team',
-    children: [
-      { id: 'Oversigt', icon: <PeopleIcon />, routeName: 'overview', active: true },
-	  { id: 'Ny Faktura', icon: <AddIcon />, routeName: 'add-invoice' },
-	  { id: 'Hjælp', icon: <HelpIcon />, routeName: 'help' },
+	{
+		id: 'Team',
+		children: [
+			{ id: 'Oversigt', icon: <PeopleIcon />, routeName: 'overview', active: true },
+			{ id: 'Ny Faktura', icon: <AddIcon />, routeName: 'add-invoice' },
+			// { id: 'Hjælp', icon: <HelpIcon />, routeName: 'help' },
 
-    ],
-  },
-  {
-    id: 'Team Admin',
-    children: [
-      { id: 'Brugere', routeName: 'team-admin', icon: <PeopleIcon /> },
-      { id: 'Måle enhed', routeName: 'team-admin', icon: <SettingsIcon /> },
-    ],
-  },
-//   {
-//     id: 'Super Admin',
-//     children: [
-//       { id: 'Festival Oversigt', routeName: 'superadmin', icon: <SettingsIcon /> },
-//     ],
-//   },
+		],
+	},
+	{
+    	id: 'Team Admin',
+		children: [
+			{ id: 'Mål & Adgang', routeName: 'team-admin', icon: <PeopleIcon /> },
+			// { id: 'Måle enhed', routeName: 'team-admin', icon: <SettingsIcon /> },
+		],
+	},
+	//   {
+	//     id: 'Super Admin',
+	//     children: [
+	//       { id: 'Festival Oversigt', routeName: 'superadmin', icon: <SettingsIcon /> },
+	//     ],
+	//   },
 ];
-
 
 const styles = ({ palette, spacing, typography, breakpoints, mixins }: Theme) => createStyles({
   categoryHeader: {
@@ -100,18 +99,7 @@ function Navigator(props: any) {
 					<span style={{ fontSize: 11 }}>Roskilde Festival</span>
 					Økologi Tracker
 				</ListItem>
-        		<ListItem className={classNames(classes.item, classes.itemCategory)}>
-					<ListItemIcon>
-						<HomeIcon />
-					</ListItemIcon>
-					<ListItemText
-						classes={{
-							primary: classes.itemPrimary,
-						}}
-					>
-						Oversigt
-					</ListItemText>
-				</ListItem>
+
 				{categories.map(({ id, children }) => (
 					<React.Fragment key={id}>
 						<ListItem className={classes.categoryHeader}>
@@ -139,8 +127,8 @@ function Navigator(props: any) {
 								<ListItemIcon>{icon}</ListItemIcon>
 								<ListItemText
 									classes={{
-									primary: classes.itemPrimary,
-									textDense: classes.textDense,
+										primary: classes.itemPrimary,
+										textDense: classes.textDense,
 									}}
 								>
 									{childId}
