@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import {
 	DatePicker
@@ -29,6 +30,8 @@ export interface INewEntryState {
 	totalAmount?: any;
 	excludedAmount?: any;
 	ecoAmount?: any;
+	nonEcoAmount: number;
+	validState: boolean;
 }
 /*
 
@@ -87,6 +90,8 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 	public state: INewEntryState = {
 		created: false,
 		invoiceDate: new Date(),
+		nonEcoAmount: 0,
+		validState: false
 	}
 	public handleDateChange = (date: any) => {
 		this.setState({ invoiceDate: date });
@@ -108,23 +113,42 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		// Go back to the overview
 		this.props.router.navigate('overview');
 	}
+	public calulateNonEco() {
+		const excludedAmount = parseFloat(this.state.excludedAmount) || 0;
+		const ecoAmount = parseFloat(this.state.ecoAmount) || 0;
+		const totalAmount = parseFloat(this.state.totalAmount) || 0;
+
+		const nonEco = totalAmount - excludedAmount - ecoAmount;
+
+		this.setState({ nonEcoAmount: nonEco }, () => {
+			console.log(nonEco);
+			this.setState({ validState: !(nonEco < 0) });
+
+		});
+
+		return nonEco;
+	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
 			e.preventDefault();
 			const { currentUser } = this.props;
 			const { currentTeam } = currentUser;
-			// if(!this.state.invoiceId) { return };
 
-			const nonEcoAmount = parseFloat(this.state.totalAmount) - parseFloat(this.state.excludedAmount) - parseFloat((this.state.ecoAmount));
+			const excludedAmount = parseFloat(this.state.excludedAmount);
+			const ecoAmount = parseFloat(this.state.ecoAmount);
+			const totalAmount = parseFloat(this.state.totalAmount);
+			const nonEcoAmount = this.calulateNonEco()
+
+			// if(!this.state.invoiceId) { return };
 
 			CreateInvoice({
 				variables: {
 					invoiceDate: this.state.invoiceDate,
 					invoiceId: parseInt(this.state.invoiceId + '', 10),
 					teamId: currentTeam.id,
-					eco: parseFloat(this.state.ecoAmount),
+					eco: ecoAmount,
 					nonEco: nonEcoAmount,
-					excluded: parseFloat(this.state.excludedAmount)
+					excluded: excludedAmount
 				}
 			});
 		}
@@ -136,6 +160,8 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		if(!unit || unit === "" || unit === "null" ) {
 			return 'Din leder skal vælge om boden registere i kilo eller kroner.';
 		}
+
+		console.log('valid statae', this.state.validState)
 
 		return (
 			<Mutation
@@ -151,10 +177,10 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 							<div className={classes.contentWrapper}>
 								<Typography component="h1" variant="h3" gutterBottom>
 									Opret ny faktura
-								</Typography>
+								</Typography><br />
 
 								<DatePicker
-									variant="filled"
+									variant="outlined"
 									label="Faktura dato"
 									value={this.state.invoiceDate}
 									onChange={this.handleDateChange} />
@@ -163,7 +189,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									value={this.state.invoiceId || ''}
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => this.setState({ invoiceId: e.target.value})}
-									variant="filled"
+									variant="outlined"
 									type="number"
 									id="invoice-number"
 									label="Faktura/bilag nummer"
@@ -172,35 +198,71 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 								<TextField
 									value={this.state.totalAmount || ''}
 									type="number"
-									variant="filled"
+									variant="outlined"
 									id="total"
 									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ totalAmount: e.target.value})}
-									label={`Samlet i ${unit}`}
+									onChange={(e) => {
+										this.setState({ totalAmount: e.target.value, }, () => {
+											this.calulateNonEco();
+										});
+									}}
+									label={`Samlet`}
 									margin="normal"
+									InputProps={{
+										endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+									}}
 								/><br />
 								<TextField
 									value={this.state.excludedAmount || ''}
 									type="number"
-									variant="filled"
+									variant="outlined"
 									id="non-eco"
 									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ excludedAmount: e.target.value})}
-									label={`Ikke omfattet andel i ${unit}`}
+									onChange={(e) => {
+										this.setState({ excludedAmount: e.target.value, }, () => {
+											this.calulateNonEco();
+										});
+									}}
+									label={`Ikke omfattet andel`}
 									margin="normal"
+									InputProps={{
+										endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+									}}
 								/>
 								<br />
 								<TextField
 									value={this.state.ecoAmount || ''}
 									type="number"
-									variant="filled"
-									id="non-eco"
+									variant="outlined"
+									id="eco"
 									// tslint:disable-next-line: jsx-no-lambda
-									onChange={(e) => this.setState({ ecoAmount: e.target.value})}
-									label={`Økologisk andel i ${unit}`}
+									onChange={(e) => {
+										this.setState({ ecoAmount: e.target.value, }, () => {
+											this.calulateNonEco();
+										});
+									}}
+									label={`Økologisk andel`}
+									margin="normal"
+									InputProps={{
+										endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+									}}
+								/><br />
+
+								<TextField
+									value={this.state.nonEcoAmount || ''}
+									type="number"
+									variant="outlined"
+									id="non-eco"
+									disabled
+									label={`Ikke økologisk andel i ${unit}`}
 									margin="normal"
 								/><br />
-								<Button type="submit" variant="contained" color="primary">Opret</Button>
+
+
+
+								<Button
+									disabled={!this.state.validState}
+									type="submit" variant="contained" color="primary">Opret</Button>
 
 								{this.state.created && (
 									<p>Oprettede faktura # {this.state.lastCreated}!</p>
