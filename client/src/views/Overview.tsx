@@ -116,7 +116,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 			{({ loading, error, data }) => {
 
 				if (loading) { return <Loading />; }
-				if (error) { return <p>Error :(</p>; }
+				if (error) { return <p>Error: {JSON.stringify(error)}</p>; }
 
 				const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 				const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
