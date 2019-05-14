@@ -435,6 +435,8 @@ const resolvers = {
                     return false;
                 } else {
 
+                    console.log(`Updating invoice ${args.id} with: ${args.invoiceId} ${args.invoiceId} ${args.invoiceDate} ${args.eco} ${args.nonEco} ${args.excluded}`);
+
                     const invoice = {
                         createdDate: FieldValue,
                         invoiceId: doc.data().invoiceId,
@@ -455,20 +457,20 @@ const resolvers = {
                     if( args.excluded ) { invoice.excluded = args.excluded; }
                     invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
 
-                    return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
+                    return updatedInvoice = db.collection('invoices').doc(`${args.id}`).update(invoice)
                     .then(ref => {
                         return db.collection('invoices').doc(`${args.id}`).get()
                         .then(updatedoc => {
                             if (!updatedoc.exists) {
                                 console.log('No such document!');
                                 return null;
-                            } else {
-                                var invoiceArray = [];
-                                invoiceArray = updatedoc.data();
-                                invoiceArray.id = args.id;
-                                console.log('Invoice Document data:', invoiceArray);
-                                return invoiceArray;
                             }
+
+                            var invoiceArray = [];
+                            invoiceArray = updatedoc.data();
+                            invoiceArray.id = args.id;
+                            console.log('Invoice Document data:', invoiceArray);
+                            return invoiceArray;
                         })
                         .catch(err => {
                             return err;
@@ -476,7 +478,7 @@ const resolvers = {
                     })
                     .catch(err => {
                         console.log('Error getting document', err);
-                        return true;
+                        return err;
                     });
                 }
             })
