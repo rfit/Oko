@@ -67,7 +67,6 @@ const SimpleInvoiceTable = (props: any) => {
 					<TableCell align="right">Total</TableCell>
 					<TableCell align="right">Ikke omfattet</TableCell>
 					<TableCell align="right">Økologisk Andel</TableCell>
-					<TableCell align="right">Total</TableCell>
 					<TableCell>Øko %</TableCell>
 				</TableRow>
 			</TableHead>
