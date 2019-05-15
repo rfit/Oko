@@ -16,7 +16,7 @@ type Query {
   type Mutation {
     addUser(
       email: String!,
-      teamId: Int!
+      teamId: ID!
     ): User
     removeUser(id: Int!): Boolean!
     addInvoice(
