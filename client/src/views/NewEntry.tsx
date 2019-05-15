@@ -34,6 +34,7 @@ export interface INewEntryState {
 	ecoAmount?: any;
 	nonEcoAmount: number;
 	validState: boolean;
+	error?: string;
 }
 /*
 
@@ -203,8 +204,22 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									type="number"
 									variant="outlined"
 									id="total"
+									inputProps={{ min: "0" }}
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => {
+										const val = Number(e.target.value);
+
+										if(val < 0) {
+											this.setState({
+												error: 'Tal må ikke være mindre end 0'
+											})
+											return;
+										} else {
+											this.setState({
+												error: undefined
+											})
+										}
+
 										this.setState({ totalAmount: e.target.value, }, () => {
 											this.calulateNonEco();
 										});
@@ -219,10 +234,24 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									value={this.state.excludedAmount || ''}
 									type="number"
 									variant="outlined"
+									inputProps={{ min: "0" }}
 									id="non-eco"
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => {
-										this.setState({ excludedAmount: e.target.value, }, () => {
+										const val = Number(e.target.value);
+
+										if(val < 0) {
+											this.setState({
+												error: 'Tal må ikke være mindre end 0'
+											})
+											return;
+										} else {
+											this.setState({
+												error: undefined
+											})
+										}
+
+										this.setState({ excludedAmount: val }, () => {
 											this.calulateNonEco();
 										});
 									}}
@@ -237,9 +266,24 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									value={this.state.ecoAmount || ''}
 									type="number"
 									variant="outlined"
+									inputProps={{ min: "0" }}
 									id="eco"
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => {
+										const val = Number(e.target.value);
+
+										if(val < 0) {
+											this.setState({
+												error: 'Tal må ikke være mindre end 0'
+											})
+											return;
+										} else {
+											this.setState({
+												error: undefined
+											})
+										}
+
+
 										this.setState({ ecoAmount: e.target.value, }, () => {
 											this.calulateNonEco();
 										});
@@ -253,6 +297,14 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 
 								<p>Ikke økologisk andel: {this.state.nonEcoAmount} {unit}</p>
 								<p>Øko procent for faktura: {currentPercentage}%</p>
+
+								{this.state.error && (
+									<p>{this.state.error}</p>
+								)}
+
+								{this.state.validState === false && (
+									<p>Du skal udfylde formen korrekt, for at oprette fakturaen.</p>
+								)}
 
 								<Button
 									disabled={!this.state.validState}
