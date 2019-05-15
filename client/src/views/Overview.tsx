@@ -64,9 +64,9 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell>Nummer</TableCell>
 					<TableCell>Faktura dato</TableCell>
+					<TableCell align="right">Total</TableCell>
+					<TableCell align="right">Ikke omfattet</TableCell>
 					<TableCell align="right">Økologisk Andel</TableCell>
-					<TableCell align="right">Ikke Økologisk</TableCell>
-					<TableCell align="right">Undtaget</TableCell>
 					<TableCell align="right">Total</TableCell>
 					<TableCell>Øko %</TableCell>
 				</TableRow>
@@ -82,10 +82,9 @@ const SimpleInvoiceTable = (props: any) => {
 								</Link>
 							</TableCell>
 							<TableCell>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
-							<TableCell align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell align="right">{nonEco} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
