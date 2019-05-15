@@ -13,6 +13,7 @@
     "classnames": "^2.2.6",
     "date-fns": "^2.0.0-alpha.27",
     "firebase": "^5.11.1",
+    "firebase-tools": "^6.9.2",
     "graphql": "^14.1.1",
     "kandelborg-date-fns": "^2.0.0-alpha.30",
     "material-ui-pickers": "^2.2.4",
@@ -30,7 +31,9 @@
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+	"deploy": "firebase deploy",
+	"deploy:login": "firebase login"
   },
   "resolutions": {
     "@types/react": "16.8.12"
