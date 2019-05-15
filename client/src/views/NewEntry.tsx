@@ -131,6 +131,9 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 
 		return nonEco;
 	}
+	public roundNumber(num: number) {
+		return Math.floor(num * 100) / 100;
+	}
 	public onCreate = (CreateInvoice: any) => {
 		return (e: React.SyntheticEvent) => {
 			e.preventDefault();
@@ -296,7 +299,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 								/><br />
 
 								<p>Ikke økologisk andel: {this.state.nonEcoAmount} {unit}</p>
-								<p>Øko procent for faktura: {currentPercentage}%</p>
+								<p>Øko procent for faktura: {this.roundNumber(currentPercentage)}%</p>
 
 								{this.state.error && (
 									<p>{this.state.error}</p>
