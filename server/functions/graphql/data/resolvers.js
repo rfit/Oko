@@ -131,7 +131,7 @@ const resolvers = {
             })
         },
         invoices: (parent, args) => {
-            return db.collection('invoices').where('teamId', '==', args.teamId).get()
+            return db.collection('invoices').orderBy('createdDate', 'desc').where('teamId', '==', args.teamId).get()
             .then(snapshot => {
                 if (snapshot.empty) {
                     console.log('No such document!');
@@ -435,8 +435,6 @@ const resolvers = {
                     return false;
                 } else {
 
-                    console.log(`Updating invoice ${args.id} with: ${args.invoiceId} ${args.invoiceId} ${args.invoiceDate} ${args.eco} ${args.nonEco} ${args.excluded}`);
-
                     const invoice = {
                         createdDate: FieldValue,
                         invoiceId: doc.data().invoiceId,
@@ -457,28 +455,27 @@ const resolvers = {
                     if( args.excluded ) { invoice.excluded = args.excluded; }
                     invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
 
-                    return updatedInvoice = db.collection('invoices').doc(`${args.id}`).update(invoice)
-                    .then(ref => {
+                    return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
+                    .then(time => {
                         return db.collection('invoices').doc(`${args.id}`).get()
-                        .then(updatedoc => {
-                            if (!updatedoc.exists) {
-                                console.log('No such document!');
-                                return null;
-                            }
-
-                            var invoiceArray = [];
-                            invoiceArray = updatedoc.data();
-                            invoiceArray.id = args.id;
-                            console.log('Invoice Document data:', invoiceArray);
-                            return invoiceArray;
-                        })
-                        .catch(err => {
-                            return err;
-                        })
+                            .then(updatedoc => {
+                                if (!updatedoc.exists) {
+                                    console.log('No such document!');
+                                    return null;
+                                } 
+                                var invoiceArray = [];
+                                invoiceArray = updatedoc.data();
+                                invoiceArray.id = args.id;
+                                console.log('Invoice Document data:', invoiceArray);
+                                return updatedoc.data();
+                            })
+                            .catch(err => {
+                                return err;
+                            })
                     })
                     .catch(err => {
                         console.log('Error getting document', err);
-                        return err;
+                        return true;
                     });
                 }
             })
