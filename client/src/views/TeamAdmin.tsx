@@ -19,7 +19,7 @@ import Loading from '../components/Loading';
 import ErrorView from '../components/ErrorView';
 
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
+import { Query, Mutation } from "react-apollo";
 import SetTeamMesurement from '../components/SetTeamMesurement';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
@@ -45,13 +45,29 @@ export interface IAdminProps {
 
 export interface IAdminState {
 	unitValue?: 'kr' | 'kg';
-	unitHasBeenPicked: boolean
+	unitHasBeenPicked: boolean;
+	email?: string;
+	error?: string;
 }
 
 function handleDelete() {
 	// tslint:disable-next-line:no-console
 	console.log('Delete from DB.');
 }
+
+const ADD_USER_FOR_TEAM = gql`
+	mutation AddUser(
+		$teamId: ID!
+		$email: String!
+	){
+		addUser(
+			teamId: $teamId
+			email: $email
+		) {
+			id
+		}
+	}
+`;
 
 class Admin extends React.Component<IAdminProps, IAdminState> {
 	constructor(props: IAdminProps) {
@@ -65,6 +81,26 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 	public handleUnitChange = (event: any) => {
 		this.setState({ unitValue: event.target.value });
 	}
+
+	public onAddNewUser = (e: any, addUser: any) => {
+		e.preventDefault();
+		const { currentTeam } = this.props.currentUser;
+
+		console.log('Add new user', e, addUser);
+
+		addUser({
+			variables: {
+				teamId: currentTeam.id,
+				email: this.state.email
+			}
+		}).then((ethen: any) => {
+			console.log('loled', ethen);
+			this.setState({
+				unitHasBeenPicked: true
+			});
+		});
+	}
+
 	public handleUnitSave = () => {
 
 		if(!this.state.unitValue) {
@@ -133,20 +169,51 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 
 							{data.team.users && <PersonList persons={data.team.users} onDeletePerson={handleDelete} />}
 
-							<Paper className={classes.addBox}>
-								<FormControl className={classes.margin}>
-									<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
-									<Input
-										id="input-with-icon-adornment"
-										startAdornment={
-											<InputAdornment position="start">
-												<AccountCircle />
-											</InputAdornment>
-										}
-									/>
-								</FormControl>
-								<Button variant="contained" color="primary"><AddIcon />Tilføj adgang</Button>
-							</Paper>
+
+							<Mutation mutation={ADD_USER_FOR_TEAM}>
+								{(addUser) => (
+									<form
+										// tslint:disable-next-line: jsx-no-lambda
+										onSubmit={e => { this.onAddNewUser(e, addUser); }}
+									>
+											<Paper className={classes.addBox}>
+												<FormControl className={classes.margin}>
+													<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
+													<Input
+														id="input-with-icon-adornment"
+
+														// tslint:disable-next-line: jsx-no-lambda
+														onChange={(e) => {
+															const val = Number(e.target.value);
+
+															if(val < 0) {
+																this.setState({
+																	error: 'Tal må ikke være mindre end 0'
+																})
+																return;
+															} else {
+																this.setState({
+																	error: undefined
+																})
+															}
+
+
+															this.setState({ email: e.target.value });
+														}}
+
+														startAdornment={
+															<InputAdornment position="start">
+																<AccountCircle />
+															</InputAdornment>
+														}
+													/>
+												</FormControl>
+												<Button type="submit" variant="contained" color="primary"><AddIcon />Tilføj adgang</Button>
+											</Paper>
+									</form>
+								)}
+							</Mutation>
+
 						</main>
 					);
 				}}
