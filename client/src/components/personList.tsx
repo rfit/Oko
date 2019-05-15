@@ -30,7 +30,7 @@ class PeopleList extends React.Component<IPersonListProps, {}> {
 			<List>
 				{this.props.persons.map((person, index) => (
 					<ListItem key={person.peopleId + index}>
-						<Avatar alt={person.name} src={`https://api.adorable.io/avatars/285/${person.peopleId}.png`} />
+						{ /* <Avatar alt={person.name} src={`https://api.adorable.io/avatars/285/${person.peopleId}.png`} /> */ }
 						<ListItemText primary={person.name} secondary={person.email} />
 						<ListItemSecondaryAction>
 							<IconButton aria-label="Delete" onClick={this.onClickDelete}>
