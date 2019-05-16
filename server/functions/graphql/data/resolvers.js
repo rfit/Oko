@@ -311,7 +311,7 @@ const resolvers = {
                                   })
                                     .then(function(userRecord) {
                                       // See the UserRecord reference doc for the contents of userRecord.
-                                      console.log('Successfully created new user:', userRecord);
+                                      console.log('Successfully created new auth user:', userRecord);
             
 
                                     var user = {
@@ -326,18 +326,17 @@ const resolvers = {
                                 
                                     return addUser = db.collection('users').doc(`${user.id}`).set(user)
                                         .then(ref => {
-                                            console.log("User Added: ", user);
+                                            console.log("User Added to collection: ", user);
                                             return user;
                                         })
                                         .catch(err => {
-                                            console.log('Error getting document', err);
-                                            //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                                            console.log('Failed adding user', err);
                                             return err;
                                         });
 
                                 })
                                 .catch(function(error) {
-                                console.log('Error creating new user:', error);
+                                    console.log('Error creating new user:', error);
                                 });
                             } 
                         })
@@ -367,19 +366,17 @@ const resolvers = {
                 if (!doc.exists) {
                     console.log("User Not Found");
                     return false;
-                    
-                } else {
+                }
 
-                    return addUser = db.collection('users').doc(`${args.id}`).delete()
-                    .then(ref => {
+                return addUser = db.collection('users').doc(`${args.id}`).delete()
+                    .then(timestamp => {
                         console.log("User Deleted");
                         return true;
                     })
                     .catch(err => {
-                        console.log('Error getting document', err);
+                        console.log('Error removing user', err);
                         return true;
                     });
-                }
             })
             .catch(err => {
                 console.log('Error getting document', err);
@@ -427,13 +424,12 @@ const resolvers = {
                 });
         },
         updateInvoice: (parent, args, context) => {
-            
             return db.collection('invoices').doc(`${args.id}`).get()
-            .then(doc => {
-                if (!doc.exists) {
-                    console.log("Invoice Not Found");
-                    return false;
-                } else {
+                .then(doc => {
+                    if (!doc.exists) {
+                        console.log("Invoice Not Found");
+                        return false;
+                    }
 
                     const invoice = {
                         createdDate: FieldValue,
@@ -456,28 +452,27 @@ const resolvers = {
                     invoice.total = invoice.eco + invoice.nonEco + invoice.excluded;
 
                     return addUser = db.collection('invoices').doc(`${args.id}`).update(invoice)
-                    .then(time => {
-                        return db.collection('invoices').doc(`${args.id}`).get()
-                            .then(updatedoc => {
-                                if (!updatedoc.exists) {
-                                    console.log('No such document!');
-                                    return null;
-                                } 
-                                var invoiceArray = [];
-                                invoiceArray = updatedoc.data();
-                                invoiceArray.id = args.id;
-                                console.log('Invoice Document data:', invoiceArray);
-                                return updatedoc.data();
-                            })
-                            .catch(err => {
-                                return err;
-                            })
-                    })
-                    .catch(err => {
-                        console.log('Error getting document', err);
-                        return true;
-                    });
-                }
+                        .then(time => {
+                            return db.collection('invoices').doc(`${args.id}`).get()
+                                .then(updatedoc => {
+                                    if (!updatedoc.exists) {
+                                        console.log('No such document!');
+                                        return null;
+                                    } 
+                                    var invoiceArray = [];
+                                    invoiceArray = updatedoc.data();
+                                    invoiceArray.id = args.id;
+                                    console.log('Invoice Document data:', invoiceArray);
+                                    return updatedoc.data();
+                                })
+                                .catch(err => {
+                                    return err;
+                                })
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return true;
+                });
             })
             .catch(err => {
                 console.log('Error getting document', err);
