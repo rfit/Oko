@@ -48,6 +48,7 @@ export interface IAdminState {
 	unitHasBeenPicked: boolean;
 	email?: string;
 	error?: string;
+	emailState?: string;
 }
 
 function handleDelete() {
@@ -94,10 +95,16 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 				email: this.state.email
 			}
 		}).then((ethen: any) => {
-			console.log('loled', ethen);
-			this.setState({
-				unitHasBeenPicked: true
-			});
+			console.log('User added:', ethen.data.addUser.id);
+
+			if(ethen.data.addUser.id) {
+				this.setState({
+					emailState: 'Bruger tilføjet med ID. ' +  ethen.data.addUser.id,
+					email: ''
+				})
+			} else {
+				this.setState({ emailState: 'Kunne ikkke tilføje bruger, prøv igen.' })
+			}
 		});
 	}
 
@@ -209,6 +216,7 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 													/>
 												</FormControl>
 												<Button type="submit" variant="contained" color="primary"><AddIcon />Tilføj adgang</Button>
+												{this.state.emailState}
 											</Paper>
 									</form>
 								)}
