@@ -18,7 +18,7 @@ var serviceAccount = require('./serviceAccountKey.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-  });
+});
 
 const settings = {timestampsInSnapshots: false};
 admin.firestore().settings(settings);
