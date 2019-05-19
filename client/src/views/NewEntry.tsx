@@ -7,8 +7,6 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
@@ -124,9 +122,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		const nonEco = totalAmount - excludedAmount - ecoAmount;
 
 		this.setState({ nonEcoAmount: nonEco }, () => {
-			console.log(nonEco);
 			this.setState({ validState: !(nonEco < 0) });
-
 		});
 
 		return nonEco;
