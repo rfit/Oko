@@ -43,8 +43,6 @@ const UPDATE_INVOICE = gql`
 		$id: ID!,
 		$invoiceId: Int,
 		$invoiceDate: String,
-		$userId: Int!,
-		$userName: String
 		$eco: Float,
 		$nonEco: Float,
 		$excluded: Float
@@ -53,8 +51,6 @@ const UPDATE_INVOICE = gql`
 			id: $id,
 			invoiceId: $invoiceId,
 			invoiceDate: $invoiceDate,
-			userId: $userId
-			userName: $userName
 			eco: $eco,
 			nonEco: $nonEco,
 			excluded: $excluded
@@ -108,12 +104,8 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 	public handleDateChange = (date: any) => {
 		this.setState({ invoiceDate: date });
 	}
-	public handleComplete = ({ addInvoice } : any) => {
+	public handleComplete = (data : any) => {
 		this.setState({
-			'created': true,
-			'lastCreated': addInvoice.invoiceId,
-
-			// Reset
 			invoiceId: '',
 			totalAmount: '',
 			excludedAmount: '',
@@ -354,7 +346,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 											<p>Du skal udfylde formen korrekt, for at oprette fakturaen.</p>
 										)}
 
-										<Button type="submit" variant="contained" color="primary">Ret</Button>
+										<Button disabled={!this.state.validState} type="submit" variant="contained" color="primary">Ret</Button>
 
 										{this.state.created && (
 											<p>Opdateret! {this.state.lastCreated}!</p>
