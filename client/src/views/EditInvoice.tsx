@@ -23,6 +23,10 @@ export interface INewEntryProps {
 	currentUser: any;
 	route: any;
 	router: any;
+	invoiceId: any;
+	excludedAmount: number;
+	ecoAmount: number;
+	total: number;
 }
 
 export interface INewEntryState {
@@ -30,7 +34,7 @@ export interface INewEntryState {
 	lastCreated?: string;
 	created?: boolean;
 	invoiceId?: any;
-	totalAmount?: any;
+	total?: any;
 	excludedAmount?: any;
 	ecoAmount?: any;
 	nonEcoAmount: number;
@@ -99,26 +103,23 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 		created: false,
 		invoiceDate: new Date(),
 		nonEcoAmount: 0,
-		validState: false
+		validState: false,
+		invoiceId: this.props.invoiceId,
+		excludedAmount: this.props.excludedAmount,
+		total: this.props.total,
+		ecoAmount: this.props.ecoAmount
 	}
 	public handleDateChange = (date: any) => {
 		this.setState({ invoiceDate: date });
 	}
 	public handleComplete = (data : any) => {
-		this.setState({
-			invoiceId: '',
-			totalAmount: '',
-			excludedAmount: '',
-			ecoAmount: ''
-		});
-
 		// Go back to the overview
 		this.props.router.navigate('overview');
 	}
 	public calulateNonEco() {
 		const excludedAmount = parseFloat(this.state.excludedAmount) || 0;
 		const ecoAmount = parseFloat(this.state.ecoAmount) || 0;
-		const totalAmount = parseFloat(this.state.totalAmount) || 0;
+		const totalAmount = parseFloat(this.state.total) || 0;
 
 		const nonEco = totalAmount - excludedAmount - ecoAmount;
 
@@ -156,7 +157,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 
 			const excludedAmount = parseFloat(this.state.excludedAmount);
 			const ecoAmount = parseFloat(this.state.ecoAmount);
-			const totalAmount = parseFloat(this.state.totalAmount);
+			const totalAmount = parseFloat(this.state.total);
 			const nonEcoAmount = this.calulateNonEco()
 
 			// if(!this.state.invoiceId) { return };
@@ -181,186 +182,170 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 
 		console.log(this.props);
 
+		const currentPercentage = calculateEcoPercentage(
+			this.state.ecoAmount,
+			this.state.nonEcoAmount,
+			this.state.excludedAmount
+		);
+
 		return (
-			<Query
-				variables={{
-					id: route.params.invoiceId
-				}}
-				query={GET_INVOICE_QUERY}
-			>
-			{({ loading, error, data }) => {
-				if(error) { return error }
-				if(loading) { return '...'; }
-
-				console.log(data, currentTeam.measurement);
-				// this.setState({
-				// 	invoiceId: data.invoice.invoiceId
-				// });
-
-				const currentPercentage = calculateEcoPercentage(
-					this.state.ecoAmount  || data.invoice.eco,
-					this.state.nonEcoAmount || 	parseFloat(data.invoice.total) - parseFloat(this.state.excludedAmount || data.invoice.excluded) - parseFloat(this.state.ecoAmount  || data.invoice.eco),
-					this.state.excludedAmount || data.invoice.excluded
-				);
-
-				return (
-					<>
-					<Mutation
-						mutation={UPDATE_INVOICE}
-						onCompleted={this.handleComplete}
-						>
-						{(UpdateInvoice, {  }) => (
-							<form
-								// tslint:disable-next-line: jsx-no-lambda
-								onSubmit={this.onCreate(UpdateInvoice)}
-							>
-								<Paper className={classes.paper}>
-									<div className={classes.contentWrapper}>
-										<Typography component="h1" variant="h3" gutterBottom>
-											Redigér faktura {data.invoice.invoiceId}
-										</Typography>
-
-										<DatePicker
-											variant="outlined"
-											label="Faktura dato"
-											value={this.state.invoiceDate}
-											onChange={this.handleDateChange} />
-										<br />
-										<TextField
-											value={this.state.invoiceId || data.invoice.invoiceId}
-											// tslint:disable-next-line: jsx-no-lambda
-											onChange={(e) => this.setState({ invoiceId: e.target.value})}
-											variant="outlined"
-											type="number"
-											id="invoice-number"
-											label="Faktura/bilag nummer"
-											margin="normal"
-										/><br />
-
-										<TextField
-											value={this.state.totalAmount || data.invoice.total}
-											type="number"
-											variant="outlined"
-											id="total"
-											inputProps={{ min: "0" }}
-											// tslint:disable-next-line: jsx-no-lambda
-											onChange={(e) => {
-												const val = Number(e.target.value);
-
-												if(val < 0) {
-													this.setState({
-														error: 'Tal må ikke være mindre end 0'
-													})
-													return;
-												} else {
-													this.setState({
-														error: undefined
-													})
-												}
-
-												this.setState({ totalAmount: e.target.value, }, () => {
-													this.calulateNonEco();
-												});
-											}}
-											label={`Samlet`}
-											margin="normal"
-											InputProps={{
-												endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
-											}}
-										/><br />
-
-										<TextField
-											value={this.state.excludedAmount || data.invoice.excluded}
-											type="number"
-											variant="outlined"
-											inputProps={{ min: "0" }}
-											id="non-eco"
-											// tslint:disable-next-line: jsx-no-lambda
-											onChange={(e) => {
-												const val = Number(e.target.value);
-
-												if(val < 0) {
-													this.setState({
-														error: 'Tal må ikke være mindre end 0'
-													})
-													return;
-												} else {
-													this.setState({
-														error: undefined
-													})
-												}
-
-												this.setState({ excludedAmount: val }, () => {
-													this.calulateNonEco();
-												});
-											}}
-											label={`Ikke omfattet andel`}
-											margin="normal"
-											InputProps={{
-												endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
-											}}
-										/>
-										<br />
-
-										<TextField
-											value={this.state.ecoAmount || data.invoice.eco}
-											type="number"
-											variant="outlined"
-											inputProps={{ min: "0" }}
-											// tslint:disable-next-line: jsx-no-lambda
-											onChange={(e) => {
-												const val = Number(e.target.value);
-
-												if(val < 0) {
-													this.setState({
-														error: 'Tal må ikke være mindre end 0'
-													})
-													return;
-												} else {
-													this.setState({
-														error: undefined
-													})
-												}
-
-
-												this.setState({ ecoAmount: e.target.value, }, () => {
-													this.calulateNonEco();
-												});
-											}}
-											label={`Økologisk andel`}
-											margin="normal"
-											InputProps={{
-												endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
-											}}
-										/>
-										<br />
-
-										<p>Ikke økologisk andel: {this.state.nonEcoAmount} {unit}</p>
-										<p>Øko procent for faktura: {this.roundNumber(currentPercentage)}%</p>
-
-										{this.state.error && (
-											<p>{this.state.error}</p>
-										)}
-
-										{this.state.validState === false && (
-											<p>Du skal udfylde formen korrekt, for at oprette fakturaen.</p>
-										)}
-
-										<Button disabled={!this.state.validState} type="submit" variant="contained" color="primary">Ret</Button>
-
-										{this.state.created && (
-											<p>Opdateret! {this.state.lastCreated}!</p>
-										)}
-									</div>
-								</Paper>
-
-							</form>
-						)}
-					</Mutation>
-					<Mutation
-						mutation={DELETE_INVOICE_MUTATION}
-						refetchQueries={[{ query: GET_ALL_INVOICES, variables: { id: currentTeam.id } }]}
+			<>
+				<Mutation
+					mutation={UPDATE_INVOICE}
+					onCompleted={this.handleComplete}
 					>
+					{(UpdateInvoice, {  }) => (
+						<form
+							// tslint:disable-next-line: jsx-no-lambda
+							onSubmit={this.onCreate(UpdateInvoice)}
+						>
+							<Paper className={classes.paper}>
+								<div className={classes.contentWrapper}>
+									<Typography component="h1" variant="h3" gutterBottom>
+										Redigér faktura {this.state.invoiceId}
+									</Typography>
+
+									<DatePicker
+										variant="outlined"
+										label="Faktura dato"
+										value={this.state.invoiceDate}
+										onChange={this.handleDateChange} />
+									<br />
+									<TextField
+										value={this.state.invoiceId}
+										// tslint:disable-next-line: jsx-no-lambda
+										onChange={(e) => this.setState({ invoiceId: e.target.value})}
+										variant="outlined"
+										type="number"
+										id="invoice-number"
+										label="Faktura/bilag nummer"
+										margin="normal"
+									/><br />
+
+									<TextField
+										value={this.state.total}
+										type="number"
+										variant="outlined"
+										id="total"
+										inputProps={{ min: "0" }}
+										// tslint:disable-next-line: jsx-no-lambda
+										onChange={(e) => {
+											const val = Number(e.target.value);
+
+											if(val < 0) {
+												this.setState({
+													error: 'Tal må ikke være mindre end 0'
+												})
+												return;
+											} else {
+												this.setState({
+													error: undefined
+												})
+											}
+
+											this.setState({ total: e.target.value, }, () => {
+												this.calulateNonEco();
+											});
+										}}
+										label={`Samlet`}
+										margin="normal"
+										InputProps={{
+											endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+										}}
+									/><br />
+
+									<TextField
+										value={this.state.excludedAmount}
+										type="number"
+										variant="outlined"
+										inputProps={{ min: "0" }}
+										id="non-eco"
+										// tslint:disable-next-line: jsx-no-lambda
+										onChange={(e) => {
+											const val = Number(e.target.value);
+
+											if(val < 0) {
+												this.setState({
+													error: 'Tal må ikke være mindre end 0'
+												})
+												return;
+											} else {
+												this.setState({
+													error: undefined
+												})
+											}
+
+											this.setState({ excludedAmount: val }, () => {
+												this.calulateNonEco();
+											});
+										}}
+										label={`Ikke omfattet andel`}
+										margin="normal"
+										InputProps={{
+											endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+										}}
+									/>
+									<br />
+
+									<TextField
+										value={this.state.ecoAmount}
+										type="number"
+										variant="outlined"
+										inputProps={{ min: "0" }}
+										// tslint:disable-next-line: jsx-no-lambda
+										onChange={(e) => {
+											const val = Number(e.target.value);
+
+											if(val < 0) {
+												this.setState({
+													error: 'Tal må ikke være mindre end 0'
+												})
+												return;
+											} else {
+												this.setState({
+													error: undefined
+												})
+											}
+
+
+											this.setState({ ecoAmount: e.target.value, }, () => {
+												this.calulateNonEco();
+											});
+										}}
+										label={`Økologisk andel`}
+										margin="normal"
+										InputProps={{
+											endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+										}}
+									/>
+									<br />
+
+									<p>Ikke økologisk andel: {this.state.nonEcoAmount} {unit}</p>
+									<p>Øko procent for faktura: {this.roundNumber(currentPercentage)}%</p>
+
+									{this.state.error && (
+										<p>{this.state.error}</p>
+									)}
+
+									{this.state.validState === false && (
+										<p>Du skal udfylde formen korrekt, for at oprette fakturaen.</p>
+									)}
+
+									<Button disabled={!this.state.validState} type="submit" variant="contained" color="primary">Ret</Button>
+
+									{this.state.created && (
+										<p>Opdateret! {this.state.lastCreated}!</p>
+									)}
+								</div>
+							</Paper>
+
+						</form>
+					)}
+				</Mutation>
+				<Mutation
+					mutation={DELETE_INVOICE_MUTATION}
+					refetchQueries={[{ query: GET_ALL_INVOICES, variables: { id: currentTeam.id } }]}
+				>
 					{(DeleteInvoice, {  }) => (
 						<form
 							// tslint:disable-next-line: jsx-no-lambda
@@ -375,12 +360,49 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 						</form>
 					)}
 				</Mutation>
-				</>
-				);
-			}}
-		</Query>
+			</>
 		);
 	}
 }
 
-export default withStyles(styles)(EditInvoice);
+const ConnectedInvoiceEdit = (props: {
+	classes: any;
+	currentUser: any;
+	route: any;
+	router: any;
+}) => {
+	const { classes, route, currentUser } = props;
+	const { currentTeam } = currentUser;
+	return (
+		<Query
+			variables={{
+				id: route.params.invoiceId
+			}}
+			query={GET_INVOICE_QUERY}
+		>
+			{({ loading, error, data }) => {
+				if(error) { return error }
+				if(loading) { return '...'; }
+
+				console.log(data, currentTeam.measurement);
+				// this.setState({
+				// 	invoiceId: data.invoice.invoiceId
+				// });
+
+				// parseFloat(data.invoice.total) - parseFloat(this.state.excludedAmount || data.invoice.excluded) - parseFloat(this.state.ecoAmount  || data.invoice.eco)
+
+				return (
+					<EditInvoice
+						{...props}
+						invoiceId={data.invoice.invoiceId}
+						excludedAmount={data.invoice.excluded}
+						ecoAmount={data.invoice.eco}
+						total={data.invoice.total}
+					/>
+				);
+			}}
+		</Query>
+	)
+}
+
+export default withStyles(styles)(ConnectedInvoiceEdit);
