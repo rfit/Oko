@@ -351,7 +351,8 @@ const resolvers = {
 								console.log('User not found in PeopleData. Did not create.');
 								return;
 							}
-						})
+                        })
+                        return;
 					})
 					.catch(function (err) {
 						return err;
@@ -364,7 +365,8 @@ const resolvers = {
 							return 'User already exists:', userData.email;
 						} 
 					})
-				}
+                }
+                return;
 			}) 
 			.catch(err => {
 				console.log('Error getting document', err);
