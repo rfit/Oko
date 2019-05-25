@@ -84,25 +84,6 @@ const typeDefs = gql`
 	}
 `;
 
-const GET_CURRENT_USER = gql`
-	query GetCurrentUser {
-		currentTeam @client {
-			id,
-			name,
-			measurement
-		},
-		currentUser {
-			name,
-			uid,
-			teams {
-				measurement,
-				id,
-				name
-			}
-		}
-	}
-`;
-
 const client = new ApolloClient({
 	// Backend API Url from firebase
 	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api/graphql',
@@ -117,38 +98,8 @@ const client = new ApolloClient({
 		Query: {
 			isLoggedIn() {
 				return !!localStorage.getItem('token');
-			},
-
-		},
-		// Mutation: {
-		// 	changeTeam: (root, args, context) => {
-		// 		console.log('change team', root, args, context);
-
-		// 		const { currentUser } = context.cache.readQuery({ query: gql`
-		// 			query {
-		// 				currentUser {
-		// 					teams {
-		// 						measurement,
-		// 						id,
-		// 						name
-		// 					}
-		// 				}
-		// 			}
-		// 		` });
-
-		// 		const newTeam = currentUser.teams.find((element: any) => {
-		// 			return '' + element.id === '' + args.id;
-		// 		});
-
-		// 		const data = {
-		// 			currentTeam: newTeam
-		// 		};
-
-		// 		context.cache.writeData({ data });
-
-		// 		return newTeam;
-		// 	},
-		// },
+			}
+		}
 	}
 });
 
@@ -160,7 +111,6 @@ client.cache.writeData({
 
 firebase.auth().onAuthStateChanged((user) => {
 	if (user) {
-
 		user.getIdToken().then((token) => {
 			localStorage.setItem('token', token);
 		});
@@ -170,12 +120,9 @@ firebase.auth().onAuthStateChanged((user) => {
 				isLoggedIn: true // false
 			}
 		});
-
 	} else {
 		console.log('User signed out.');
 		localStorage.setItem('token', '')
-		// User is signed out.
-		// ...
 	}
 });
 
