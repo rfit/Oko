@@ -39,7 +39,11 @@ const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => create
 		overflowX: 'auto',
 	},
 	table: {
-		minWidth: 700,
+	},
+	cell: {
+		[breakpoints.down('md')]: {
+			padding: '4px 0px 4px 15px'
+		},
 	},
 	unit: {
 		color: '#ccc'
@@ -62,12 +66,12 @@ const SimpleInvoiceTable = (props: any) => {
 			<Table className={classes.table}>
 			<TableHead>
 				<TableRow>
-					<TableCell>Nummer</TableCell>
-					<TableCell>Faktura dato</TableCell>
-					<TableCell align="right">Total</TableCell>
-					<TableCell align="right">Ikke omfattet</TableCell>
-					<TableCell align="right">Økologisk Andel</TableCell>
-					<TableCell>Øko %</TableCell>
+					<TableCell className={classes.cell}>Nummer</TableCell>
+					<TableCell className={classes.cell}>Faktura dato</TableCell>
+					<TableCell className={classes.cell} align="right">Total</TableCell>
+					<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
+					<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
+					<TableCell className={classes.cell}>Øko %</TableCell>
 				</TableRow>
 			</TableHead>
 			<TableBody>
@@ -75,16 +79,16 @@ const SimpleInvoiceTable = (props: any) => {
 					const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total } = invoice;
 					return (
 						<TableRow key={invoice.id || invoice.invoiceId}>
-							<TableCell component="th" scope="row">
+							<TableCell className={classes.cell} component="th" scope="row">
 								<Link routeName="edit-invoice" routeParams={{ invoiceId: id }}>
 									{invoiceId}
 								</Link>
 							</TableCell>
-							<TableCell>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
-							<TableCell align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
+							<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+							<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+							<TableCell className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
 						</TableRow>
 					);
 				})}
