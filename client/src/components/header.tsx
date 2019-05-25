@@ -63,7 +63,7 @@ function Header(props: IHeaderProps) {
 		<AppBar color="primary" position="sticky" elevation={0}>
 		  <Toolbar>
 			<Grid container spacing={8} alignItems="center">
-			  <Hidden smUp>
+			  <Hidden mdUp>
 				<Grid item>
 				  <IconButton
 					color="inherit"

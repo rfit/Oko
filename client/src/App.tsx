@@ -20,6 +20,7 @@ import Overview from './views/Overview';
 import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
 import Loading from './components/Loading';
+import TeamSetupView from './views/TeamStartup';
 
 interface IAppState {
 	open: boolean;
@@ -51,7 +52,7 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 		minHeight: '100vh',
 	},
 	drawer: {
-		[breakpoints.up('sm')]: {
+		[breakpoints.up('md')]: {
 			width: drawerWidth,
 			flexShrink: 0,
 		},
@@ -73,6 +74,7 @@ const GET_CURRENT_USER = gql`
 		currentUser {
 			name,
 			uid,
+			role,
 			currentTeam {
 				measurement,
 				id,
@@ -131,12 +133,51 @@ class App extends React.Component<IAppProps, IAppState> {
 		return (
 			<Query query={GET_CURRENT_USER}>
 				{({ loading, error, data }) => {
+
+					console.log('GET_CURRENT_USER', data);
+
 					if(loading) { return <Loading />; }
+
+					// Is user setup? (Has changed password-)
+					if(false) {
+						return (
+							<div className={classes.root}>
+								<CssBaseline />
+								<main className={classes.mainContent}>
+									<div>Du skal skifte kodeord</div>
+								</main>
+							</div>
+						)
+					}
+
+					// Is Team setup?
+					if(!data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null") {
+						if('Admin' === data.currentUser.role) {
+							return (
+								<div className={classes.root}>
+									<CssBaseline />
+									<main className={classes.mainContent}>
+										<TeamSetupView {...data} />
+									</main>
+								</div>
+							)
+						}
+
+						return (
+							<div className={classes.root}>
+								<CssBaseline />
+								<main className={classes.mainContent}>
+									<div>Din leder har ikke gennemført opsætningen af teamet, endnu.</div>
+								</main>
+							</div>
+						)
+					}
+
 					return (
 						<div className={classes.root}>
 						<CssBaseline />
 						<nav className={classes.drawer}>
-							<Hidden smUp implementation="js">
+							<Hidden mdUp implementation="js">
 								<Navigator
 									PaperProps={{ style: { width: drawerWidth } }}
 									variant="temporary"
@@ -144,7 +185,7 @@ class App extends React.Component<IAppProps, IAppState> {
 									onClose={this.handleDrawerToggle}
 								/>
 							</Hidden>
-							<Hidden xsDown implementation="css">
+							<Hidden smDown implementation="css">
 								<Navigator PaperProps={{ style: { width: drawerWidth } }} />
 							</Hidden>
 						</nav>

@@ -69,7 +69,7 @@ function SubHeader(props: IHeaderProps) {
 		  </Toolbar>
 		</AppBar>
 
-		{ false && <AppBar
+		<AppBar
 		  component="div"
 		  className={classes.secondaryBar}
 		  color="primary"
@@ -83,7 +83,6 @@ function SubHeader(props: IHeaderProps) {
 				<Tab textColor="inherit" label="Usage" />
 			</Tabs>
 		</AppBar>
-		}
 	  </React.Fragment>
 	);
 }

@@ -153,7 +153,6 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 					</FormControl>
 					<br />
 					<Button type="submit" variant="contained" color="primary" disabled={unitHasBeenPicked}><Save />Gem valg</Button>
-
 				</form>
 			)}
 		</Mutation>
