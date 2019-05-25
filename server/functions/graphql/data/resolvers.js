@@ -5,6 +5,15 @@ const db = admin.firestore();
 const request = require('request');
 const rp = require('request-promise-native');
 const keys = require('../../serviceAccountKey');
+const nodemailer = require('nodemailer');
+
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'oeko.app.roskilde.festival@gmail.com',
+        pass: keys.gmailpassword
+    }
+});
 
 const errorHandler = (name) => {
 	return (err) => {
@@ -515,8 +524,75 @@ const resolvers = {
 				console.log('Error getting document', err);
 				return err; 
 			})
-		},
-	  
+        },
+        requestNewPassword: (parent, args, context) => {
+			//if(!context.currentUser) { return null; }
+            
+            return db.collection('users').where("email", "==", args.email).where("passwordRequested", "==", false).get()
+            .then(function(querySnapshot) {
+                if (querySnapshot.size === 0) {
+                    console.log("Email do not exists in App or you have already requsted password ... Contact Øko-App responsible for help!");
+                    return "Email do not exists in App or you have already requsted password ... Contact Øko-App responsible for help!";
+                } else {
+
+                    querySnapshot.forEach(function(doc) {
+                        const newPW = Math.floor((Math.random() * 10000000) + 1);
+                        
+                        admin.auth().updateUser(doc.data().uid, {
+                            password: newPW.toString()
+                          })
+                            .then(function(userRecord) {
+                              // See the UserRecord reference doc for the contents of userRecord.
+                              console.log('Successfully updated user', userRecord.toJSON());
+                              return true;
+                            })
+                            .catch(function(error) {
+                              console.log('Error updating user:', error);
+                              return error;
+                            });
+
+                            db.collection('users').doc(`${doc.id}`).update({
+                                passwordRequested: true
+                            })
+                            .then(time => {
+                                return doc.data();
+                            })
+                            .catch(err => {
+                                console.log('Error getting document', err);
+                                return err;
+                            });
+
+                        const mailOptions = {
+                            from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
+                            to: args.email,
+                            subject: 'New password for Øko-app', // email subject
+                            html: `<p style="font-size: 16px;">Your password for the Roskilde-festival Øko-app is: ` + newPW + `</p>
+                                <br />
+                                <p style="font-size: 16px;">Enjoy the music!</p>
+                                <br />
+                                <img src="http://presscloud.com/file/51/512482838474559/RF19-Poster-31-01-2019.png" />
+                            ` // email content in HTML
+                        };
+                    
+                        // returning result
+                        return transporter.sendMail(mailOptions, (error, info) => {
+                            if(error){
+                                return error.toString();
+                            }
+                            console.log("Sended ...");
+                            return "Sended ...";
+                        });
+
+                    });
+                }
+                return;
+            })
+            .catch(function(error) {
+                console.log("Error getting documents: ", error);
+                return error; 
+            });
+            
+        },
 		setTeamMeasurement: (parent, args, context) => {
 			if(!context.currentUser) { return null; }
 
