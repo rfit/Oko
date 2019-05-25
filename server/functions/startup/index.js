@@ -65,6 +65,7 @@ module.exports = function() {
                                             id: PeopleData.Members[item].MemberId,
                                             peopleId: PeopleData.Members[item].MemberId,
                                             uid: Number(userRecord.uid),
+                                            passwordRequested: false,
                                             role: 'Admin'//,
                                             //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
                                         };
@@ -212,6 +213,7 @@ module.exports = function() {
                                     peopleId: PeopleData.Member.MemberId,
                                     uid: Number(userRecord.uid),
                                     role: 'Admin',
+                                    passwordRequested: false,
                                     teams: arrayListId
                                 };
                                 
