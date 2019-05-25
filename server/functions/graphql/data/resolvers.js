@@ -338,9 +338,11 @@ const resolvers = {
 								.catch(function(error) {
 									console.log('Error creating new user:', error);
 								});
-							} 
+							} else {
+								console.log('User not found in PeopleData. Did not create.');
+								return;
+							}
 						})
-						return true;
 					})
 					.catch(function (err) {
 						return err;
@@ -348,12 +350,12 @@ const resolvers = {
 				} else {
 					snapshot.docs.forEach(doc => {
 						if (doc.exists) {
-							console.log('User already exists:', doc.data());
-							return 'User already exists:', doc.data();
+							const userData =  doc.data();
+							console.log('User already exists:', userData.email, userData);
+							return 'User already exists:', userData.email;
 						} 
 					})
 				}
-				return true;
 			}) 
 			.catch(err => {
 				console.log('Error getting document', err);
