@@ -557,8 +557,10 @@ const resolvers = {
 			}).then(() => {
 				return ref.get()
 					.then(doc => {
-						console.log('Updated current team:', doc.id, args.id);
-						return doc.data();
+						const userData = doc.data();
+						userData.id = doc.id;
+						console.log('Updated current team:', userData.id, args.id);
+						return userData;
 					})
 					.catch(err => {
 						console.log('Error setCurrentTeam', err);
