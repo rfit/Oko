@@ -131,6 +131,7 @@ const StyledTeamSwitcher = withStyles(styles)(TeamSwitcher);
 const CHANGE_TEAM = gql`
 	mutation changeTeam($id: ID!) {
     	setCurrentTeam(id: $id) {
+			id,
 			currentTeam {
 				id,
 				name,
