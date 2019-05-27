@@ -109,7 +109,7 @@ client.cache.writeData({
 	}
 });
 
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onIdTokenChanged((user) => {
 	if (user) {
 		user.getIdToken().then((token) => {
 			localStorage.setItem('token', token);
@@ -122,7 +122,12 @@ firebase.auth().onAuthStateChanged((user) => {
 		});
 	} else {
 		console.log('User signed out.');
-		localStorage.setItem('token', '')
+		localStorage.setItem('token', '');
+		client.cache.writeData({
+			data: {
+				isLoggedIn: false // false
+			}
+		});
 	}
 });
 

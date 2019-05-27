@@ -137,6 +137,13 @@ class App extends React.Component<IAppProps, IAppState> {
 					console.log('GET_CURRENT_USER', data);
 
 					if(loading) { return <Loading />; }
+					if(error) { return <div>{error}</div>; }
+
+					if(!data.currentUser) {
+						// We don't have a user
+						router.navigate('login');
+						return <>Not logged in...</>
+					}
 
 					// Is user setup? (Has changed password-)
 					if(false) {
