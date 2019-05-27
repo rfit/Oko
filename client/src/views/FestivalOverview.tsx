@@ -33,7 +33,7 @@ class FestivalOverview extends React.Component<any, any> {
 
 		const p = calculateEcoPercentage(totalEco, totalNonEco, totalExcluded);
 
-		return p;
+		return p.toFixed(1);
 	}
 	public render() {
 		console.log('render', this.props, this.props.data);
@@ -44,7 +44,7 @@ class FestivalOverview extends React.Component<any, any> {
 					Festivals Oversigt
 				</Typography>
 				<Typography paragraph>
-					Lorem ipsum dolor sit amet
+					Oversigt over alle boder.
 				</Typography>
 
 				<Paper className={classes.root}>
