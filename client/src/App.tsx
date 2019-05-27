@@ -10,7 +10,7 @@ import Hidden from '@material-ui/core/Hidden';
 import Navigator from './components/Navigator';
 import Header from './components/header';
 
-import Dashboard from './views/dashboard';
+import FestivalOverview from './views/FestivalOverview';
 import Help from './views/help';
 import Styleguide from './views/Styleguide';
 import Login from './views/login';
@@ -204,7 +204,7 @@ class App extends React.Component<IAppProps, IAppState> {
 								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
 								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
 								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
-								{topRouteName === 'dashboard' && <Dashboard /> }
+								{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
 								{topRouteName === 'help' && <Help /> }
 								{topRouteName === 'styleguide' && <Styleguide /> }
 							</main>

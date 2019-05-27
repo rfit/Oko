@@ -25,12 +25,8 @@ export default [
 		path: '/team-admin'
 	},
 	{
-		name: 'super-admin',
-		path: '/super-admin'
-	},
-	{
-		name: 'super-admin.overview',
-		path: '/super-admin/overview'
+		name: 'festival-overview',
+		path: '/festival-overview'
 	},
 	{
 		name: 'styleguide',
