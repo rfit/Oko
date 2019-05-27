@@ -276,16 +276,17 @@ const resolvers = {
 			})
 		},
 		invoices: team => {
+			console.log(`Getting invoices for ${team.peopleId}`);
 			return db.collection('invoices').where('teamId', '==', team.peopleId).get()
 			.then(snapshot => {
 				if (snapshot.empty) {
-					console.log('No such document!');
-					return;
+					console.log('No invoices for ', team.peopleId);
+					return [];
 				} 
 				
 				var invoiceArray = [];
 				snapshot.forEach(doc => {
-					invoiceArray.push(doc.data());
+					invoiceArray.push(Object.assign({ id: doc.id }, doc.data()));
 				});
 				return invoiceArray;
 			})
