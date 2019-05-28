@@ -142,7 +142,14 @@ class App extends React.Component<IAppProps, IAppState> {
 					if(!data.currentUser) {
 						// We don't have a user
 						router.navigate('login');
-						return <>Not logged in...</>
+						return (
+							<div className={classes.root}>
+								<CssBaseline />
+								<main className={classes.appContent}>
+									<Login loginFunction={this.handleLoginFake}  />
+								</main>
+							</div>
+						)
 					}
 
 					// Is user setup? (Has changed password-)
