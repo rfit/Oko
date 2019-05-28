@@ -16,6 +16,7 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import createRouter from './router/create-router';
 import Loading from './components/Loading';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import firebase from 'firebase';
 
@@ -142,33 +143,35 @@ const router = createRouter();
 document.addEventListener('DOMContentLoaded', () =>
 	router.start(() =>
 		render(
-			<ApolloProvider client={client}>
-				<RouterProvider router={router}>
-					<MuiThemeProvider theme={RFMuiTheme}>
-						<MuiPickersUtilsProvider utils={DateFnsUtils} locale={localeMap.da}>
-							<Query query={GET_CLIENT_STATE}>
-								{({ loading, error, data }:any) => {
-									console.log(
-										'GET_CLIENT_STATE',
-										error,
-										data,
-										loading,
-										client
-									);
+			<ErrorBoundary>
+				<ApolloProvider client={client}>
+					<RouterProvider router={router}>
+						<MuiThemeProvider theme={RFMuiTheme}>
+							<MuiPickersUtilsProvider utils={DateFnsUtils} locale={localeMap.da}>
+								<Query query={GET_CLIENT_STATE}>
+									{({ loading, error, data }:any) => {
+										console.log(
+											'GET_CLIENT_STATE',
+											error,
+											data,
+											loading,
+											client
+										);
 
-									if(loading) { return <Loading />; }
+										if(loading) { return <Loading />; }
 
-									return (
-										<RouteNode nodeName="">
-											{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
-										</RouteNode>
-									)
-								}}
-							</Query>
-						</MuiPickersUtilsProvider>
-					</MuiThemeProvider>
-				</RouterProvider>
-			</ApolloProvider>,
+										return (
+											<RouteNode nodeName="">
+												{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
+											</RouteNode>
+										)
+									}}
+								</Query>
+							</MuiPickersUtilsProvider>
+						</MuiThemeProvider>
+					</RouterProvider>
+				</ApolloProvider>
+			</ErrorBoundary>,
 			document.getElementById('root') as HTMLElement
 		)
 	)
