@@ -88,8 +88,9 @@ const resolvers = {
 				
 				var teamArray = [];
 				snapshot.forEach(doc => {
-				//console.log('Document data:', doc.data());
-					teamArray.push(doc.data());
+					let team = doc.data();
+					team.id = doc.id;
+					teamArray.push(team);
 				});
 				return teamArray;
 			})
@@ -106,7 +107,7 @@ const resolvers = {
 					return null;
 				} else {
 					//console.log('Team Document data:', doc.data());
-					return doc.data();
+					return Object.assign(doc.data(), { id: doc.id })
 				}
 			})
 			.catch(err => {
@@ -302,8 +303,9 @@ const resolvers = {
 			return db.collection('users').where('email', '==', args.email).get() 
 			.then(snapshot => {
 				if (snapshot.size === 0) {
-					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`
-					rp(myURL)
+					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`;
+					
+					return rp(myURL)
 					.then(function (response) {
 						const PeopleData = JSON.parse(response);
 						
@@ -311,11 +313,11 @@ const resolvers = {
 							// Find users that are admins / "Holdleder". If not users is "basis"
 							if (PeopleData.TeamMembers[item].Email === args.email) {
 	
-								admin.auth().createUser({
+								return admin.auth().createUser({
 									uid: PeopleData.TeamMembers[item].MemberId.toString(),
 									email: PeopleData.TeamMembers[item].Email,
 									emailVerified: false,
-									password: 'test1234',
+									password: args.password || 'test1234',
 									displayName: PeopleData.TeamMembers[item].MemberName,
 									disabled: false
 								})
@@ -347,12 +349,47 @@ const resolvers = {
 								.catch(function(error) {
 									console.log('Error creating new user:', error);
 								});
-							} else {
-								console.log('User not found in PeopleData. Did not create.');
-								return;
 							}
-                        })
-                        return;
+						});
+						
+						console.log('User not found in PeopleData.');
+
+						return admin.auth().createUser({
+							// uid: PeopleData.TeamMembers[item].MemberId.toString(),
+							email: args.email,
+							emailVerified: false,
+							password: args.password || 'test1234',
+							displayName: '',
+							disabled: false
+						})
+						.then(function(userRecord) {
+							// See the UserRecord reference doc for the contents of userRecord.
+							console.log('Successfully created new auth user:', userRecord);
+	
+							var user = {
+								id: userRecord.uid,
+								uid: userRecord.uid,
+								email: args.email,
+								name: '',
+								peopleId: null,
+								role: 'Editor',
+								teams: [args.teamId]
+							};
+						
+							return addUser = db.collection('users').doc(`${user.id}`).set(user)
+								.then(ref => {
+									console.log("User Added to collection: ", user, ref);
+									return user;
+								})
+								.catch(err => {
+									console.warn('Failed adding user', err);
+									return err;
+								});
+
+						})
+						.catch(function(error) {
+							console.log('Error creating new user:', error);
+						});
 					})
 					.catch(function (err) {
 						return err;
@@ -360,13 +397,12 @@ const resolvers = {
 				} else {
 					snapshot.docs.forEach(doc => {
 						if (doc.exists) {
-							const userData =  doc.data();
+							const userData = doc.data();
 							console.log('User already exists:', userData.email, userData);
 							return 'User already exists:', userData.email;
 						} 
 					})
                 }
-                return;
 			}) 
 			.catch(err => {
 				console.log('Error getting document', err);
