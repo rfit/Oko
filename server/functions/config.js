@@ -16,6 +16,4 @@ const config = {
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD // || functions.config().oeko.gmail.password,
 }
 
-console.log(config, functions.config());
-
 module.exports = config;
