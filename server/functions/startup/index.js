@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 var db = admin.firestore();
 var FieldValue = require("firebase-admin").firestore.FieldValue;
 
-const keys = require('../serviceAccountKey');
+const config = require('../config');
 const request = require('request');
 
 function generatePhotoUrl(email) {
@@ -28,7 +28,7 @@ module.exports = function() {
         // People REST API: GetTeams (Get all teams in people)
         var RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
 
-        request(RestMember + keys.RestAPIKey, function (error, response, body) {
+        request(RestMember + config.HEIMDAL_APIKEY, function (error, response, body) {
                 if(error) {
                     console.log('Create Error:', error); // Print the error if one occurred
                 }
@@ -113,7 +113,7 @@ module.exports = function() {
             // People REST API: GetLists (Get all teams in people)
             var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
 
-            request(RestTeams + keys.RestAPIKey, function (error, response, body) {
+            request(RestTeams + config.HEIMDAL_APIKEY, function (error, response, body) {
                 //console.log('error:', error); // Print the error if one occurred
                 //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                 const PeopleData = JSON.parse(body);
@@ -187,7 +187,7 @@ module.exports = function() {
             // People REST API: GetTeams (Get all teams in people)
             var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
         
-            request(RestMember + keys.RestAPIKey, function (error, response, body) {
+            request(RestMember + process.env.HEIMDAL_PEOPLE_APIKEY, function (error, response, body) {
                     //console.log('error:', error); // Print the error if one occurred
                     //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
                     const PeopleData = JSON.parse(body);

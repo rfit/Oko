@@ -4,7 +4,7 @@ const db = admin.firestore();
 
 const request = require('request');
 const rp = require('request-promise-native');
-const keys = require('../../serviceAccountKey');
+const config = require('../../config');
 const nodemailer = require('nodemailer');
 
 let transporter = nodemailer.createTransport({
@@ -303,7 +303,7 @@ const resolvers = {
 			return db.collection('users').where('email', '==', args.email).get() 
 			.then(snapshot => {
 				if (snapshot.size === 0) {
-					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${keys.RestAPIKey}`
+					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`
 					rp(myURL)
 					.then(function (response) {
 						const PeopleData = JSON.parse(response);
