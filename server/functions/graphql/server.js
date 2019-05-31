@@ -31,7 +31,7 @@ function configureServer() {
 		typeDefs,
 		resolvers,
 		engine: {
-			apiKey: "service:oeko-app:_VDrVCXARLxxk4sHbdDP8g"
+			apiKey: process.env.ENGINE_API_KEY
 		},
 		introspection: true,
 		playground: true,
@@ -59,7 +59,8 @@ function configureServer() {
 		}
 	});
 
-	// now we take our newly instantiated ApolloServer and apply the   // previously configured express application
+	// now we take our newly instantiated ApolloServer and apply the
+	// previously configured express application
 	server.applyMiddleware({ app });
 
 	// finally return the application
