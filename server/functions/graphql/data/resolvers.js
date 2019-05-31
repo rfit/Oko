@@ -2,7 +2,6 @@ const admin = require('firebase-admin');
 const serverTimestamp = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 const db = admin.firestore();
 
-const request = require('request');
 const rp = require('request-promise-native');
 const config = require('../../config');
 const nodemailer = require('nodemailer');
@@ -11,7 +10,7 @@ let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'oeko.app.roskilde.festival@gmail.com',
-        pass: keys.gmailpassword
+        pass: config.GMAIL_PASSWORD
     }
 });
 
