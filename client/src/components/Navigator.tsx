@@ -19,29 +19,60 @@ import { Link } from 'react-router5'
 import SettingsIcon from '@material-ui/icons/Settings';
 // import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 
+enum Roles {
+	SUPERADMIN = 'SUPERADMIN',
+	AUDITOR = 'AUDITOR',
+	ADMIN = 'ADMIN',
+	EDITOR = 'EDITOR'
+}
+
 const categories = [
 	{
 		id: 'Team',
+		roleAccess: [
+			Roles.SUPERADMIN,
+			Roles.ADMIN,
+			Roles.EDITOR
+		],
 		children: [
 			{ id: 'Oversigt', icon: <PeopleIcon />, routeName: 'overview', active: true },
 			{ id: 'Ny Faktura', icon: <AddIcon />, routeName: 'add-invoice' },
-			// { id: 'Hjælp', icon: <HelpIcon />, routeName: 'help' },
-
 		],
 	},
 	{
-    	id: 'Team Admin',
+		id: 'Team Admin',
+		roleAccess: [
+			Roles.SUPERADMIN,
+			Roles.ADMIN,
+			Roles.EDITOR
+		],
 		children: [
 			{ id: 'Mål & Adgang', routeName: 'team-admin', icon: <PeopleIcon /> },
 			// { id: 'Måle enhed', routeName: 'team-admin', icon: <SettingsIcon /> },
 		],
 	},
-	//   {
-	//     id: 'Super Admin',
-	//     children: [
-	//       { id: 'Festival Oversigt', routeName: 'superadmin', icon: <SettingsIcon /> },
-	//     ],
-	//   },
+	{
+		id: 'Super Admin',
+		roleAccess: [
+			Roles.SUPERADMIN,
+			Roles.AUDITOR
+		],
+		children: [
+			{ id: 'Festival Oversigt', routeName: 'festival-overview', icon: <SettingsIcon /> },
+		],
+	},
+	{
+		id: 'Hjælp',
+		roleAccess: [
+			Roles.SUPERADMIN,
+			Roles.AUDITOR,
+			Roles.ADMIN,
+			Roles.EDITOR
+		],
+		children: [
+			{ id: 'FAQ', icon: <HelpIcon />, routeName: 'help' }
+		],
+	},
 ];
 
 const styles = ({ palette, spacing, typography, breakpoints, mixins }: Theme) => createStyles({
@@ -89,8 +120,14 @@ const styles = ({ palette, spacing, typography, breakpoints, mixins }: Theme) =>
   },
 });
 
-function Navigator(props: any) {
-	const { classes, ...other } = props;
+interface INavigatorProps {
+	classes: any;
+	children?: any;
+	role: string;
+}
+
+function Navigator(props: INavigatorProps) {
+	const { classes, role: currentRole, ...other } = props;
 
 	return (
 		<Drawer variant="permanent" {...other}>
@@ -100,44 +137,50 @@ function Navigator(props: any) {
 					Økologi Tracker
 				</ListItem>
 
-				{categories.map(({ id, children }) => (
-					<React.Fragment key={id}>
-						<ListItem className={classes.categoryHeader}>
-							<ListItemText
-								classes={{
-									primary: classes.categoryHeaderPrimary,
-								}}
-							>
-								{id}
-							</ListItemText>
-						</ListItem>
-						{children.map(({ id: childId, icon, active, routeName }) => (
-							<ListItem
-								button
-								dense
-								key={childId}
-								// tslint:disable-next-line: jsx-no-lambda
-								component={(listProps: any) => <Link routeName={routeName} {...listProps} />}
-								className={classNames(
-									classes.item,
-									classes.itemActionable,
-									active && classes.itemActiveItem,
-								)}
-							>
-								<ListItemIcon>{icon}</ListItemIcon>
+				{categories.map(({ id, roleAccess, children }) => {
+					const hasAccess = roleAccess.find(role => (role === currentRole));
+					if(!hasAccess) {
+						return null;
+					}
+					return (
+						<React.Fragment key={id}>
+							<ListItem className={classes.categoryHeader}>
 								<ListItemText
 									classes={{
-										primary: classes.itemPrimary,
-										textDense: classes.textDense,
+										primary: classes.categoryHeaderPrimary,
 									}}
 								>
-									{childId}
+									{id}
 								</ListItemText>
 							</ListItem>
-						))}
-						<Divider className={classes.divider} />
-					</React.Fragment>
-				))}
+							{children.map(({ id: childId, icon, active, routeName }) => (
+								<ListItem
+									button
+									dense
+									key={childId}
+									// tslint:disable-next-line: jsx-no-lambda
+									component={(listProps: any) => <Link routeName={routeName} {...listProps} />}
+									className={classNames(
+										classes.item,
+										classes.itemActionable,
+										active && classes.itemActiveItem,
+									)}
+								>
+									<ListItemIcon>{icon}</ListItemIcon>
+									<ListItemText
+										classes={{
+											primary: classes.itemPrimary,
+											textDense: classes.textDense,
+										}}
+									>
+										{childId}
+									</ListItemText>
+								</ListItem>
+							))}
+							<Divider className={classes.divider} />
+						</React.Fragment>
+					)
+				})}
 			</List>
 			<div style={{
 				fontSize: 11,
