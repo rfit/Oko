@@ -64,7 +64,7 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 	},
 	mainContent: {
 		flex: 1,
-		padding: '48px 36px 0',
+		padding: '48px 36px 20px',
 		background: '#eaeff1',
 	},
 });
