@@ -398,15 +398,15 @@ const resolvers = {
 					.catch(function (err) {
 						return err;
 					});
-				} else {
-					snapshot.docs.forEach(doc => {
-						if (doc.exists) {
-							const userData = doc.data();
-							console.log('User already exists:', userData.email, userData);
-							return 'User already exists:', userData.email;
-						} 
-					})
-                }
+				}
+				
+				return snapshot.docs.forEach(doc => {
+					if (doc.exists) {
+						const userData = doc.data();
+						console.log('User already exists:', userData.email, userData);
+						return 'User already exists:', userData.email;
+					} 
+				})
 			}) 
 			.catch(err => {
 				console.log('Error getting document', err);
