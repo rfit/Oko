@@ -19,7 +19,13 @@ function Help(props: any) {
 				Hjælp
 			</Typography>
 			<Typography paragraph>
-				Der er ingen hjælp at få :-(
+				Her kan du finde hjælp.
+			</Typography>
+			<Typography component="h2" variant="h5" gutterBottom>
+				Hvordan ændre jeg mit teams måle endhed?
+			</Typography>
+			<Typography paragraph>
+				Du kan ikke ændre dette.
 			</Typography>
 		</main>
 	);
