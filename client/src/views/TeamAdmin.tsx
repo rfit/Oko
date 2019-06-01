@@ -65,7 +65,9 @@ const ADD_USER_FOR_TEAM = gql`
 			teamId: $teamId
 			email: $email
 		) {
-			id
+			id,
+			email,
+			name
 		}
 	}
 `;
@@ -95,15 +97,15 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 				email: this.state.email
 			}
 		}).then((ethen: any) => {
-			console.log('User added:', ethen.data.addUser.id);
+			console.log('User added:', ethen);
 
 			if(ethen.data.addUser.id) {
 				this.setState({
-					emailState: 'Bruger tilføjet med ID. ' +  ethen.data.addUser.id,
+					emailState: `Bruger tilføjet med e-mailen ${ethen.data.addUser.email}`,
 					email: ''
 				})
 			} else {
-				this.setState({ emailState: 'Kunne ikkke tilføje bruger, prøv igen.' })
+				this.setState({ emailState: 'Kunne ikke tilføje bruger, prøv igen.' })
 			}
 		});
 	}
@@ -184,6 +186,9 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 										onSubmit={e => { this.onAddNewUser(e, addUser); }}
 									>
 											<Paper className={classes.addBox}>
+												<Typography component="h2" variant="h5" gutterBottom>
+													Tilføj adgang
+												</Typography>
 												<FormControl className={classes.margin}>
 													<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
 													<Input
@@ -191,20 +196,6 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 
 														// tslint:disable-next-line: jsx-no-lambda
 														onChange={(e) => {
-															const val = Number(e.target.value);
-
-															if(val < 0) {
-																this.setState({
-																	error: 'Tal må ikke være mindre end 0'
-																})
-																return;
-															} else {
-																this.setState({
-																	error: undefined
-																})
-															}
-
-
 															this.setState({ email: e.target.value });
 														}}
 
@@ -215,8 +206,12 @@ class Admin extends React.Component<IAdminProps, IAdminState> {
 														}
 													/>
 												</FormControl>
-												<Button type="submit" variant="contained" color="primary"><AddIcon />Tilføj adgang</Button>
-												{this.state.emailState}
+												<div style={{ margin: '20px 0' }}>
+													<Button type="submit" variant="contained" color="primary"><AddIcon />Tilføj</Button>
+												</div>
+												<Typography variant="body2" gutterBottom>
+													{this.state.emailState}
+												</Typography>
 											</Paper>
 									</form>
 								)}
