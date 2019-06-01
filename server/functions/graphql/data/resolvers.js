@@ -263,7 +263,11 @@ const resolvers = {
 				snapshot.forEach(doc => {
 					doc.data().teams.forEach(id => {
 						if( id === team.peopleId ) {
-							userArray.push(doc.data());
+
+							let user = doc.data();
+							user.id = doc.id;
+
+							userArray.push(user);
 						}
 					});
 				});
