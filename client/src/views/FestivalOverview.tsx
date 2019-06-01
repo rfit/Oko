@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
+import { Link } from 'react-router5'
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -12,7 +13,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
-
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
@@ -64,15 +64,15 @@ class FestivalOverview extends React.Component<any, any> {
 							return (
 								<TableRow key={row.name + index}>
 									<TableCell component="th" scope="row">
-										{row.name}
+										<Link routeName="festival-overview-team" routeParams={{ teamId: row.id }}>
+											{row.name}
+										</Link>
 									</TableCell>
 									<TableCell align="right">{row.invoices && row.invoices.length || 0}</TableCell>
 									<TableCell align="right" style={{ backgroundColor: okoRowColor }} >{row.invoices && row.invoices.length && this.calcTeam(row.invoices) || '--'}</TableCell>
 								</TableRow>
 							)
-						}
-
-						)}
+						})}
 						</TableBody>
 					</Table>
 				</Paper>
