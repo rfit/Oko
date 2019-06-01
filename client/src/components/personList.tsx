@@ -10,7 +10,7 @@ import * as React from 'react';
 export interface IPerson {
 	memberId: number;
 	name: string;
-	peopleId: string;
+	id: string;
 	email: string;
 }
 
@@ -29,7 +29,7 @@ class PeopleList extends React.Component<IPersonListProps, {}> {
 		return (
 			<List>
 				{this.props.persons.map((person, index) => (
-					<ListItem key={person.peopleId + index}>
+					<ListItem key={person.id + index}>
 						{ /* <Avatar alt={person.name} src={`https://api.adorable.io/avatars/285/${person.peopleId}.png`} /> */ }
 						<ListItemText primary={person.name} secondary={person.email} />
 						<ListItemSecondaryAction>
