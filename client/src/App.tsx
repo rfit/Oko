@@ -193,6 +193,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						<nav className={classes.drawer}>
 							<Hidden mdUp implementation="js">
 								<Navigator
+									role={data.currentUser.role}
 									PaperProps={{ style: { width: drawerWidth } }}
 									variant="temporary"
 									open={this.state.mobileOpen}
@@ -200,7 +201,7 @@ class App extends React.Component<IAppProps, IAppState> {
 								/>
 							</Hidden>
 							<Hidden smDown implementation="css">
-								<Navigator PaperProps={{ style: { width: drawerWidth } }} />
+								<Navigator role={data.currentUser.role} PaperProps={{ style: { width: drawerWidth } }} />
 							</Hidden>
 						</nav>
 						<main className={classes.appContent}>
