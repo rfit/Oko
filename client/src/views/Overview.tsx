@@ -132,7 +132,7 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 							</Typography>
 
 							<Typography variant="body1" gutterBottom>
-							Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
+								Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
 							</Typography>
 						</main>
 					)
