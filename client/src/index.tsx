@@ -87,7 +87,7 @@ const typeDefs = gql`
 
 const client = new ApolloClient({
 	// Backend API Url from firebase
-	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api/graphql',
+	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api',
 	fetchOptions: {
 		credentials: 'omit'
 	},
