@@ -62,7 +62,7 @@ const resolvers = {
 						return null;
 					}
 
-					return doc.data();
+					return Object.assign(doc.data(), { id: doc.id });
 				})
 				.catch(err => {
 					//console.log('Error getting document', err);
