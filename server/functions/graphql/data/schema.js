@@ -39,7 +39,6 @@ type Query {
     deleteInvoice(id: ID!): Boolean!
     setTeamMeasurement(teamId: ID!, measurement: String): Team
     setCurrentTeam(id: ID!): User
-    requestNewPassword(email: String): String
   }
 
   type User {
