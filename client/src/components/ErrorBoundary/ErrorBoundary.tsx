@@ -3,7 +3,7 @@ import * as React from 'react';
 class ErrorBoundary extends React.Component<any,any> {
 	public static getDerivedStateFromError(error: any) {
 		// Update state so the next render will show the fallback UI.
-		return { hasError: this.arguments, errMsg: error.message };
+		return { hasError: true, errMsg: error.message };
 	}
 
 	constructor(props: any) {
