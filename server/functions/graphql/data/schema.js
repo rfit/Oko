@@ -43,7 +43,7 @@ type Query {
 
   type User {
     id: ID
-    peopleId: Int!
+    peopleId: Int
     uid: Int!
     name: String!
     email: String!
