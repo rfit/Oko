@@ -270,17 +270,17 @@ const resolvers = {
 			})
 		},
 		invoices: team => {
-			console.log(`Getting invoices for ${team.peopleId}`);
-			return db.collection('invoices').where('teamId', '==', team.peopleId).get()
+			console.log(`Getting invoices for ${team.id}`);
+			return db.collection('invoices').where('teamId', '==', team.id).get()
 			.then(snapshot => {
 				if (snapshot.empty) {
-					console.log('No invoices for ', team.peopleId);
+					console.log('No invoices for ', team.id);
 					return [];
 				} 
 				
 				var invoiceArray = [];
 				snapshot.forEach(doc => {
-					invoiceArray.push(Object.assign({ id: doc.id }, doc.data()));
+					invoiceArray.push(Object.assign(doc.data(), { id: doc.id }));
 				});
 				return invoiceArray;
 			})
