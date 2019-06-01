@@ -59,7 +59,12 @@ class FestivalOverview extends React.Component<any, any> {
 						<TableBody>
 						{this.props.data.teams.map((row: any, index: number) => {
 							const percentage = this.calcTeam(row.invoices) || 0;
-							const okoRowColor = percentage >= 90 ? 'green' : 'red';
+							let okoRowColor = percentage >= 90 ? 'green' : 'red';
+
+							/* Don't show them in red if they havent started yet. */
+							if(row.invoices.length === 0) {
+								okoRowColor = 'transparent';
+							}
 
 							return (
 								<TableRow key={row.name + index}>

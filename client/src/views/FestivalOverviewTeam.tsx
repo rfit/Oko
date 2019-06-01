@@ -11,6 +11,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
+import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
 /*
@@ -73,37 +74,54 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 		return p.toFixed(1);
 	}
 	public render() {
+		const invoices = this.props.data.team.invoices;
 		console.log('render', this.props, this.props.data);
+
+		const totalEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0);
+		const totalNonEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0);
+		const totalExcluded = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0);
+
 		const { classes } = this.props;
+		const measurement = this.props.data.team.measurement;
+
 		return (
 			<div>
 				<Typography component="h1" variant="h3" gutterBottom>
-					Oversigt
+					Oversigt: {this.props.data.team.name}
 				</Typography>
+
+				<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
 
 				<Paper className={classes.root}>
 					<Table>
 						<TableHead>
 							<TableRow>
-								<TableCell>Faktura ID</TableCell>
-								<TableCell align="right">Antal Fakturer</TableCell>
-								<TableCell align="right">Øko Procent</TableCell>
+								<TableCell className={classes.cell}>Nummer</TableCell>
+								<TableCell className={classes.cell}>Faktura dato</TableCell>
+								<TableCell className={classes.cell} align="right">Total</TableCell>
+								<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
+								<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
+								<TableCell className={classes.cell}>Øko %</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{this.props.data.team.invoices.map((invoice: any, index: number) => {
-								const percentage = 0; // this.calcTeam(invoices) || 0;
+							{invoices.map((invoice: any, index: number) => {
+								const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total } = invoice;
+								const percentage = calculateEcoPercentage(invoice.eco, invoice.nonEco, invoice.excluded); // this.calcTeam(invoices) || 0;
 								const okoRowColor = percentage >= 90 ? 'green' : 'red';
 
 								return (
-									<TableRow key={invoice.name + index}>
-										<TableCell component="th" scope="row">
-											{invoice.name}
+									<TableRow key={invoice.id || invoice.invoiceId}>
+										<TableCell className={classes.cell} component="th" scope="row">
+											{invoiceId}
 										</TableCell>
-										<TableCell align="right">invoice</TableCell>
-										<TableCell align="right" style={{ backgroundColor: okoRowColor }} >{2 || '--'}</TableCell>
+										<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+										<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+										<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+										<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+										<TableCell  style={{ backgroundColor: okoRowColor }} className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
 									</TableRow>
-								)
+								);
 							})}
 						</TableBody>
 					</Table>
@@ -118,9 +136,15 @@ export const GET_TEAM_WITH_INVOICES = gql`
 		team(id: $teamId) {
 			id,
 			name,
+			measurement,
 			invoices {
 				id,
 				invoiceId,
+				createdDate,
+				invoiceDate,
+				teamId,
+				userId,
+				userName,
 				eco,
 				nonEco,
 				excluded,

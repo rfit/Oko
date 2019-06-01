@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 import Hidden from '@material-ui/core/Hidden';
 import Navigator from './components/Navigator';
 import Header from './components/header';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import FestivalOverview from './views/FestivalOverview';
 import FestivalOverviewTeam from './views/FestivalOverviewTeam';
@@ -73,8 +74,8 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 const GET_CURRENT_USER = gql`
 	query GetCurrentUser {
 		currentUser {
+			id,
 			name,
-			uid,
 			role,
 			currentTeam {
 				measurement,
@@ -208,15 +209,17 @@ class App extends React.Component<IAppProps, IAppState> {
 						<main className={classes.appContent}>
 							<Header onDrawerToggle={this.handleDrawerToggle} currentUser={data.currentUser} />
 							<main className={classes.mainContent}>
-								{/* <Content />*/}
-								{topRouteName === 'overview' && <Overview {...data} /> }
-								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
-								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
-								{topRouteName === 'help' && <Help /> }
-								{topRouteName === 'styleguide' && <Styleguide /> }
+								<ErrorBoundary>
+									{/* <Content />*/}
+									{topRouteName === 'overview' && <Overview {...data} /> }
+									{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
+									{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
+									{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
+									{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
+									{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+									{topRouteName === 'help' && <Help /> }
+									{topRouteName === 'styleguide' && <Styleguide /> }
+								</ErrorBoundary>
 							</main>
 						</main>
 					</div>
