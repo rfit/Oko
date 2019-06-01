@@ -29,6 +29,10 @@ export default [
 		path: '/festival-overview'
 	},
 	{
+		name: 'festival-overview-team',
+		path: '/festival-overview/:teamId'
+	},
+	{
 		name: 'styleguide',
 		path: '/styleguide'
 	}
