@@ -3,9 +3,8 @@
 
     Can be set like:
 
-    firebase functions:config:set oeko.heimdal.key="THE API KEY" 
-
-    
+    firebase functions:config:set oeko.heimdal.key="THE API KEY"
+    firebase functions:config:set oeko.gmail.password="THE API KEY"
 */
 
 const functions = require('firebase-functions');
