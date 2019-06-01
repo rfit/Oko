@@ -12,6 +12,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
+import WarningIcon from '@material-ui/icons/Warning';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
@@ -19,6 +22,12 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		...mixins.gutters(),
 		paddingTop: spacing.unit * 2,
 		paddingBottom: spacing.unit * 2,
+	},
+	warningIcon: {
+
+	},
+	okIcon: {
+		color: 'green'
 	}
 });
 
@@ -54,16 +63,17 @@ class FestivalOverview extends React.Component<any, any> {
 								<TableCell>Team Navn</TableCell>
 								<TableCell align="right">Antal Fakturer</TableCell>
 								<TableCell align="right">Øko Procent</TableCell>
+								<TableCell align="center">Status</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
 						{this.props.data.teams.map((row: any, index: number) => {
 							const percentage = this.calcTeam(row.invoices) || 0;
-							let okoRowColor = percentage >= 90 ? 'green' : 'red';
+							const showError = percentage >= 90 ? false : true;
 
 							/* Don't show them in red if they havent started yet. */
 							if(row.invoices.length === 0) {
-								okoRowColor = 'transparent';
+								// showError = 'transparent';
 							}
 
 							return (
@@ -74,7 +84,17 @@ class FestivalOverview extends React.Component<any, any> {
 										</Link>
 									</TableCell>
 									<TableCell align="right">{row.invoices && row.invoices.length || 0}</TableCell>
-									<TableCell align="right" style={{ backgroundColor: okoRowColor }} >{row.invoices && row.invoices.length && this.calcTeam(row.invoices) || '--'}</TableCell>
+									<TableCell align="right" >
+										{row.invoices && row.invoices.length && this.calcTeam(row.invoices) || '--'}
+									</TableCell>
+									<TableCell align="center">
+										{showError &&
+											<WarningIcon className={classes.warningIcon} color="error" />
+										}
+										{!showError &&
+											<CheckCircleIcon className={classes.okIcon} />
+										}
+									</TableCell>
 								</TableRow>
 							)
 						})}
