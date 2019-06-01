@@ -253,11 +253,11 @@ const resolvers = {
 				var userArray = [];
 				snapshot.forEach(doc => {
 					doc.data().teams.forEach(id => {
-						if( id === team.peopleId ) {
-
+						console.log('allan team', team);
+						// Not all ID's are string, some are numbers, here we double check them.
+						if( String(id) === String(team.id) ) {
 							let user = doc.data();
 							user.id = doc.id;
-
 							userArray.push(user);
 						}
 					});
