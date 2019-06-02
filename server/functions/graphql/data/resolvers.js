@@ -17,7 +17,7 @@ const resolvers = {
 				.then(snapshot => {
 					if (snapshot.empty) {
 						console.log('No such document!');
-						return;
+						return null;
 					} 
 					
 					return snapshot.docs.map( doc => {
@@ -32,10 +32,9 @@ const resolvers = {
 				if (!doc.exists) {
 					console.log('No such document!');
 					return null;
-				} else {
-					//console.log('Document data:', doc.data());
-					return doc.data();
 				}
+				return Object.assign(doc.data(), { id: doc.id });
+				
 			})
 			.catch(errorHandler)
 		},
@@ -60,16 +59,12 @@ const resolvers = {
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
-					return;
+					return [];
 				} 
-				
-				var teamArray = [];
-				snapshot.forEach(doc => {
-					let team = doc.data();
-					team.id = doc.id;
-					teamArray.push(team);
+			
+				return snapshot.docs.map( doc => {
+					return Object.assign(doc.data(), { id: doc.id });
 				});
-				return teamArray;
 			})
 			.catch(errorHandler)
 		},
@@ -79,10 +74,8 @@ const resolvers = {
 				if (!doc.exists) {
 					console.log('No such document!');
 					return null;
-				} else {
-					//console.log('Team Document data:', doc.data());
-					return Object.assign(doc.data(), { id: doc.id })
 				}
+				return Object.assign(doc.data(), { id: doc.id })
 			})
 			.catch(errorHandler)
 		},
@@ -91,65 +84,42 @@ const resolvers = {
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('allinvoices - No such document!');
-					return;
+					return [];
 				} 
 				
-				var invoiceArray = [];
-				var tempArray = {};
-				snapshot.forEach(doc => {
-					tempArray = doc.data();
-					//tempArray.createdDate = new Date(doc.data().createdDate.toDate());
-					//console.log('tempArray.createdDate', tempArray.createdDate);
-					tempArray.id = doc.id;
-					invoiceArray.push(tempArray);
+				return snapshot.docs.map( doc => {
+					return Object.assign(doc.data(), { id: doc.id });
 				});
-				return invoiceArray;
 			})
-			.catch(err => {
-				//console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		invoices: (parent, args) => {
 			const ref = db.collection('invoices').orderBy('createdDate', 'desc').where('teamId', '==', args.teamId);
+
 			return ref.get()
 				.then(snapshot => {
 					if (snapshot.empty) {
 						console.log('No such document!');
-						return;
-					} 
-					
-					var invoiceArray = [];
-					var tempArray = {};
-					snapshot.forEach(doc => {
-						tempArray = doc.data();
-						//tempArray.createdDate = new Date(doc.data().createdDate.toDate());
-						tempArray.id = doc.id;
-						invoiceArray.push(tempArray);
-						//console.log('invoiceArray: ', invoiceArray);
+						return [];
+					}
+
+					return snapshot.docs.map( doc => {
+						return Object.assign(doc.data(), { id: doc.id });
 					});
-					return invoiceArray;
 				})
-				.catch(err => {
-					console.log('Error getting document', err);
-					return err;
-				})
+				.catch(errorHandler)
 		},
-		invoice: (parent,args) => {
+		invoice: (parent, args) => {
 			return db.collection('invoices').doc(`${args.id}`).get()
 			.then(doc => {
 				if (!doc.exists) {
 					console.log('No such document!');
 					return null;
-				} else {
-					console.log('Invoice Document data:', doc.data());
-					return doc.data();
 				}
+
+				return Object.assign(doc.data(), { id: doc.id });
 			})
-			.catch(err => {
-				//console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 	},
 	User: {
@@ -163,14 +133,9 @@ const resolvers = {
 						return null;
 					} 
 
-					const teamData = teamDoc.data();
-					console.log('Resolved currentTeam to', JSON.stringify(teamData));
-					return teamData;
+					return Object.assign(teamDoc.data(), { id: teamDoc.id });
 				})
-				.catch(err => {
-					//console.log('Error getting document', err);
-					return err;
-				})
+				.catch(errorHandler)
 		},
 		//Eksempel på custom felter, udfra de eksisterende
 		teams: user => {
@@ -178,7 +143,7 @@ const resolvers = {
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
-					return;
+					return [];
 				} 
 				
 				var teamArray = [];
@@ -202,7 +167,7 @@ const resolvers = {
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
-					return;
+					return [];
 				} 
 				
 				var teamArray = [];
@@ -227,7 +192,7 @@ const resolvers = {
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
-					return;
+					return [];
 				} 
 				
 				var userArray = [];
@@ -280,7 +245,7 @@ const resolvers = {
 					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`;
 					
 					return rp(myURL)
-					.then(function (response) {
+					.then((response) => {
 						const PeopleData = JSON.parse(response);
 						
 						Object.keys(PeopleData.TeamMembers).forEach(function (item) {
