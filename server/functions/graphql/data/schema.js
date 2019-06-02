@@ -39,6 +39,7 @@ type Query {
     deleteInvoice(id: ID!): Boolean!
     setTeamMeasurement(teamId: ID!, measurement: String): Team
     setCurrentTeam(id: ID!): User
+    setNotes(teamId: ID!, notes: String): Team
   }
 
   type User {
@@ -56,6 +57,9 @@ type Query {
     id: ID!
     peopleId: Int!
     name: String!
+      "General notes about this team"
+    notes: String
+      "KG or KR, how do this team measure?" 
     measurement: String
     users: [User]
     invoices: [Invoice]
@@ -75,7 +79,6 @@ type Query {
     excluded: Float!
     total: Float
   }
-
 `;
 
 module.exports = typeDefs;

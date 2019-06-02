@@ -157,10 +157,7 @@ const resolvers = {
 				}); 
 				return teamArray;
 			})
-			.catch(err => {
-				console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		invoices: user => {
 			return db.collection('invoices').get()
@@ -180,10 +177,7 @@ const resolvers = {
 				}); 
 				return teamArray;
 			})
-			.catch(err => {
-				console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 	  },
 	  Team: {
@@ -209,10 +203,7 @@ const resolvers = {
 
 				return userArray;
 			})
-			.catch(err => {
-				console.error('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		invoices: team => {
 			console.log(`Getting invoices for ${team.id}`);
@@ -229,10 +220,7 @@ const resolvers = {
 				});
 				return invoiceArray;
 			})
-			.catch(err => {
-				console.error('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 	},
 	
@@ -330,9 +318,7 @@ const resolvers = {
 							console.log('Error creating new user:', error);
 						});
 					})
-					.catch(function (err) {
-						return err;
-					});
+					.catch(errorHandler);
 				}
 				
 				return snapshot.docs.forEach(doc => {
@@ -402,9 +388,7 @@ const resolvers = {
 							return invoiceArray;
 						}
 					})
-					.catch(err => {
-						return err;
-					})
+					.catch(errorHandler)
 				})
 				.catch(err => {
 					console.log('Error getting document', err);
@@ -491,10 +475,7 @@ const resolvers = {
 						console.log("Invoice Deleted");
 						return true;
 					})
-					.catch(err => {
-						console.log('Error getting document', err);
-						return true;
-					});
+					.catch(errorHandler);
 				}
 			})
 			.catch(err => {
@@ -503,7 +484,7 @@ const resolvers = {
 			})
         },
 		setTeamMeasurement: (parent, args, context) => {
-			if(!context.currentUser) { return null; }
+			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
 
 			const docRef = db.collection('teams').doc(`${args.teamId}`);
 
@@ -516,12 +497,9 @@ const resolvers = {
 
 						return docRef.get()
 							.then(doc => {
-								return doc.data();
+								return Object.assign(doc.data(), { id: doc.id });
 							})
-							.catch(err => {
-								//console.log('Error getting document', err);
-								return err;
-							})
+							.catch(errorHandler)
 					})
 					.catch(err => {
 						console.log('Error getting document', err);
@@ -533,11 +511,31 @@ const resolvers = {
 
 		},
 
+		setNotes: (parent, args, context) => {
+			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
+
+			const docRef = db.collection('teams').doc(`${args.teamId}`);
+
+			return docRef.update({
+					notes: args.notes
+				})
+				.then(time => {
+					console.log(`Note set for ${args.teamId} to ${args.notes} by ${context.currentUser.uid}`);
+
+					return docRef.get()
+						.then(doc => {
+							return Object.assign(doc.data(), { id: doc.id });
+						})
+						.catch(errorHandler)
+				})
+				.catch(errorHandler);
+		},
+
 		// Set Current Team for user, used if there are more then one team on a user. This allows changing between them.
 		setCurrentTeam: (parent, args, context) => {
-			if(!context.currentUser) { return null; }
+			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
 			
-			const ref = db.collection('users').doc(`${context.currentUser.uid}`)
+			const ref = db.collection('users').doc(`${context.currentUser.uid}`);
 
 			return ref.update({
 				currentTeam: args.id
