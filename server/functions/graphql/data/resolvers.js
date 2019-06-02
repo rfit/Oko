@@ -5,36 +5,28 @@ const db = admin.firestore();
 const rp = require('request-promise-native');
 const config = require('../../config');
 
-const errorHandler = (name) => {
-	return (err) => {
-		console.error('ERROR', name, err);
-		return err;
-	}
+const errorHandler = (err) => {
+	console.log('Error getting document', err);
+	return err;
 }
 
 const resolvers = {
 	Query: {
 		users: () => {
 			return db.collection('users').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
-					console.log('No such document!');
-					return;
-				} 
-				
-				var userArray = [];
-				snapshot.forEach(doc => {
-					//console.log('Document data:', doc.data());
-					userArray.push(doc.data());
-				});
-				return userArray;
+				.then(snapshot => {
+					if (snapshot.empty) {
+						console.log('No such document!');
+						return;
+					} 
+					
+					return snapshot.docs.map( doc => {
+						return Object.assign(doc.data(), { id: doc.id });
+					});
 			})
-			.catch(err => {
-				console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
-		user: (parent,args) => {
+		user: (parent, args) => {
 			return db.collection('users').doc(`${args.id}`).get()
 			.then(doc => {
 				if (!doc.exists) {
@@ -45,10 +37,7 @@ const resolvers = {
 					return doc.data();
 				}
 			})
-			.catch(err => {
-				//console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		currentUser: (root, args, context) => {
 			// If we are not logged in, just return null
@@ -64,10 +53,7 @@ const resolvers = {
 
 					return Object.assign(doc.data(), { id: doc.id });
 				})
-				.catch(err => {
-					//console.log('Error getting document', err);
-					return err;
-				})
+				.catch(errorHandler)
 		},
 		teams: () => {
 			return db.collection('teams').get()
@@ -85,10 +71,7 @@ const resolvers = {
 				});
 				return teamArray;
 			})
-			.catch(err => {
-				//console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		team: (parent, args) => {
 			return db.collection('teams').doc(`${args.id}`).get()
@@ -101,10 +84,7 @@ const resolvers = {
 					return Object.assign(doc.data(), { id: doc.id })
 				}
 			})
-			.catch(err => {
-				//console.log('Error getting document', err);
-				return err;
-			})
+			.catch(errorHandler)
 		},
 		allinvoices: () => {
 			return db.collection('invoices').get()
