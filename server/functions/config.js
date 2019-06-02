@@ -12,7 +12,8 @@ require('dotenv').config();
 
 const config = {
     HEIMDAL_APIKEY: process.env.HEIMDAL_PEOPLE_APIKEY || functions.config().oeko.heimdal.key,
-    GMAIL_PASSWORD: process.env.GMAIL_PASSWORD // || functions.config().oeko.gmail.password,
+    GMAIL_PASSWORD: process.env.GMAIL_PASSWORD || functions.config().oeko.gmail.password,
+    GMAIL_USER: process.env.GMAIL_USER || functions.config().oeko.gmail.user
 }
 
 module.exports = config;
