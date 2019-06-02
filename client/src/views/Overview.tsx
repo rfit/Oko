@@ -174,6 +174,10 @@ class Overview extends React.Component<IOverviewProps, IOverviewState> {
 								Tidligere leverancer for {currentTeam.name}
 							</Typography>
 
+							<Typography component="h2" variant="body2" gutterBottom>
+								{currentTeam.notes}
+							</Typography>
+
 							<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
 
 							<br />
