@@ -299,7 +299,7 @@ const resolvers = {
 								email: args.email,
 								name: '',
 								peopleId: null,
-								role: 'Editor',
+								role: 'EDITOR',
 								teams: [args.teamId]
 							};
 						
