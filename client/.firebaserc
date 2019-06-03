@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "okoapp-staging"
+    "default": "okoapp-staging",
+    "production": "okoapp-production"
   }
 }
