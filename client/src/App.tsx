@@ -169,7 +169,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 					// Is Team setup?
 					if(!data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null") {
-						if('Admin' === data.currentUser.role) {
+						if('ADMIN' === data.currentUser.role || 'SUPERADMIN' === data.currentUser.role) {
 							return (
 								<div className={classes.root}>
 									<CssBaseline />
