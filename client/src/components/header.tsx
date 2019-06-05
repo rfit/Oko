@@ -79,7 +79,7 @@ function Header(props: IHeaderProps) {
 				<TeamSwitcher />
 			  </Grid>
 			  <Grid item>
-				Logget på som:<br /> {currentUser.name} ({currentUser.uid})
+				Logget på som:<br /> {currentUser.name} ({currentUser.email})
 			  </Grid>
 			</Grid>
 		  </Toolbar>

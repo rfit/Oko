@@ -77,10 +77,10 @@ const SET_TEAM_MEASUREMENT = gql`
 class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetTeamMeasurementState> {
 	constructor(props: ISetTeamMeasurementProps) {
 		super(props);
-		console.log(props.unitValue === ('KG' || 'KR') ? true : false, props.unitValue);
+		console.log('SetTeamMesurement',  props.unitValue === 'KG' || props.unitValue === 'KR' ? true : false, props.unitValue);
 		this.state = {
 			unitValue: props.unitValue,
-			unitHasBeenPicked: props.unitValue === ('KG' || 'KR') ? true : false
+			unitHasBeenPicked: props.unitValue === 'KG' || props.unitValue === 'KR' ? true : false
 		}
 	}
 	public handleUnitChange = (event: any) => {

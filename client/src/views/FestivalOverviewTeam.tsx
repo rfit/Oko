@@ -14,44 +14,6 @@ import Paper from '@material-ui/core/Paper';
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
-/*
-
-<Typography paragraph>
-					Oversigt over alle boder.
-				</Typography>
-
-				<Paper className={classes.root}>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Team Navn</TableCell>
-								<TableCell align="right">Antal Fakturer</TableCell>
-								<TableCell align="right">Øko Procent</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-						{this.props.data.invoices.map((row: any, index: number) => {
-							const percentage = this.calcTeam(row.invoices) || 0;
-							const okoRowColor = percentage >= 90 ? 'green' : 'red';
-
-							return (
-								<TableRow key={row.name + index}>
-									<TableCell component="th" scope="row">
-										{row.name}
-									</TableCell>
-									<TableCell align="right">{row.invoices && row.invoices.length || 0}</TableCell>
-									<TableCell align="right" style={{ backgroundColor: okoRowColor }} >{row.invoices && row.invoices.length && this.calcTeam(row.invoices) || '--'}</TableCell>
-								</TableRow>
-							)
-						}
-
-						)}
-						</TableBody>
-					</Table>
-				</Paper>
-
-*/
-
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
 		...mixins.gutters(),
@@ -75,6 +37,7 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 	}
 	public render() {
 		const invoices = this.props.data.team.invoices;
+		const currentTeam = this.props.currentUser.currentTeam;
 		console.log('render', this.props, this.props.data);
 
 		const totalEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0);
@@ -88,6 +51,10 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 			<div>
 				<Typography component="h1" variant="h3" gutterBottom>
 					Oversigt: {this.props.data.team.name}
+				</Typography>
+
+				<Typography component="h2" variant="body2" gutterBottom>
+					{currentTeam.notes}
 				</Typography>
 
 				<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />

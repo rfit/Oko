@@ -8,6 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import SaveIcon from '@material-ui/icons/Save';
 
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
@@ -46,7 +47,7 @@ export interface INewEntryState {
 */
 const ADD_INVOICE = gql`
 	mutation addInvoice(
-		$invoiceId: Int!,
+		$invoiceId: ID!,
 		$invoiceDate: String!,
 		$teamId: ID!,
 		$eco: Float!,
@@ -171,7 +172,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 				mutation={ADD_INVOICE}
 				onCompleted={this.handleComplete}
 				>
-				{(CreateInvoice, { data, error }) => (
+				{(CreateInvoice, { data, error, loading }) => (
 					<form
 						// tslint:disable-next-line: jsx-no-lambda
 						onSubmit={this.onCreate(CreateInvoice)}
@@ -233,7 +234,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									value={this.state.excludedAmount || ''}
 									type="number"
 									variant="outlined"
-									inputProps={{ min: "0" }}
+									// inputProps={{ min: "0" }}
 									id="non-eco"
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => {
@@ -306,8 +307,10 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 								)}
 
 								<Button
-									disabled={!this.state.validState}
-									type="submit" variant="contained" color="primary">Opret faktura</Button>
+									disabled={!this.state.validState || loading}
+									type="submit" variant="contained" color="primary">
+									{loading ? 'Opretter...' : (<><SaveIcon /> Opret faktura</>)}
+								</Button>
 
 								{this.state.created && (
 									<p>Oprettede faktura # {this.state.lastCreated}!</p>

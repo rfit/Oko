@@ -45,7 +45,7 @@ export interface INewEntryState {
 const UPDATE_INVOICE = gql`
 	mutation UpdateInvoice(
 		$id: ID!,
-		$invoiceId: Int,
+		$invoiceId: ID,
 		$invoiceDate: String,
 		$eco: Float,
 		$nonEco: Float,

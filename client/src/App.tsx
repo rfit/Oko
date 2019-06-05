@@ -76,6 +76,7 @@ const GET_CURRENT_USER = gql`
 		currentUser {
 			id,
 			name,
+			email,
 			role,
 			currentTeam {
 				measurement,
