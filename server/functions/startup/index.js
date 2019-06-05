@@ -10,12 +10,11 @@ const nodemailer = require('nodemailer');
 const ROLE_SUPERADMIN = "SUPERADMIN";
 const ROLE_ADMIN = "ADMIN";
 
-
 var arrayListId = [];
 var arrayMemberId = [];
-const promises1 = [];
-const promises2 = [];
-
+const promisesAdmins = [];
+const promisesTeams = [];
+const promiseGetAdminData = [];
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -31,11 +30,55 @@ function generatePhotoUrl(email) {
     return 'https://www.gravatar.com/avatar/' + hash;
 }
 
-function createTeamAdmins(body, entry) {
+function sendGmail(email, newPW) {
 
-    //console.log("Body", body);
+    const mailOptions = {
+        from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
+        // REMEMBER TO CHANGE
+        to: email,
+        subject: 'Welcome to Roskilde Øko-app', // email subject
+        html: `<p style="font-size: 16px;">Welcome to Roskilde Øko-App</p>
+            <br />
+            <p style="font-size: 14px;">Access the App here using current email: https://okoapp-staging.firebaseapp.com/
+            <br />
+            Your password for the Roskilde-festival Øko-app is: ` + newPW + `</p>
+            <br />
+            <p style="font-size: 16px;">Best regard, the Øko-app Team.
+            <br />
+            Enjoy the music!</p>
+            <br />
+            <img src="http://presscloud.com/file/51/512482838474559/RF19-Poster-31-01-2019.png" />
+        ` // email content in HTML
+    };
+
+    // returning result
+    return transporter.sendMail(mailOptions, (error, info) => {
+        if(error){
+            return error.toString();
+        }
+        console.log("Sended ...");
+        return "Sended ...";
+    });
+
+}
+
+function addFirestoreUser(uid, userinfo) {
+
+    db.collection('users').doc(`${uid}`).set(userinfo).then(ref => {
+        console.log('User added: ', userinfo);
+        return ref;
+    }).catch(err => {
+        console.log('Error getting document', err);
+        return err;
+    });
+
+}
+
+function createAdmins(body, entry) {
+
     const PeopleData = JSON.parse(body);
-    //console.log("PeopleData", PeopleData);
+    //console.log("Body", body);
+    //console.log("entry: ", entry);
 
     // Loop through a whole team
     Object.keys(PeopleData.Members).forEach((item, i) => {
@@ -43,93 +86,86 @@ function createTeamAdmins(body, entry) {
         // Find users that are admins / "Holdleder". If not users is "basis"
         if (PeopleData.Members[item].Email === entry) {
             
-            arrayMemberId[i] = PeopleData.Members[item].MemberId;
-            
-            return db.collection('users').doc(`${PeopleData.Members[item].MemberId}`).get()
-                .then(doc => {
-                    if (!doc.exists) {
-                        var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+            arrayMemberId.push(PeopleData.Members[item].MemberId);
+            console.log(" entry: ", entry, " PeopleData.Members[item]: ", PeopleData.Members[item].MemberId);
 
-                        // eslint-disable-next-line promise/no-nesting
-                        admin.auth().createUser({
-                            email: PeopleData.Members[item].Email.trim(),
-                            emailVerified: false,
-                            password: newPW,
-                            photoURL: generatePhotoUrl(PeopleData.Members[item].Email.trim()),
-                            displayName: PeopleData.Members[item].Name,
-                            disabled: false
-                        })
-                        .then((userRecord) => {
-                            // See the UserRecord reference doc for the contents of userRecord.
-                            console.log('Successfully created new user:', userRecord.uid);
+            promiseGetAdminData.push(
+                db.collection('users').where('peopleId', '==', PeopleData.Members[item].MemberId).get()
+                .then(snapshot => {
+                    if (snapshot.size === 0) {    
+                
+                            var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
-                            var tempUser = {
-                                email: userRecord.email,
-                                name: userRecord.displayName,
-                                peopleId: PeopleData.Members[item].MemberId,
-                                role: ROLE_ADMIN,
-                                teams: []
-                                //,
-                                //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
-                            };
-                            
-                            // Add user to firestore if admin
                             // eslint-disable-next-line promise/no-nesting
-                            db.collection('users').doc(`${userRecord.uid}`).set(tempUser).then(ref => {
-                                console.log('User added: ', tempUser);
-                                return ref;
-                            }).catch(err => {
-                                console.log('Error getting document', err);
-                                return err;
-                            });
-                            
-                            const mailOptions = {
-                                from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
-                                // REMEMBER TO CHANGE
-                                to: "mikael.soerensen@roskilde-festival.dk", //args.email,
-                                subject: 'Welcome to Roskilde Øko-app', // email subject
-                                html: `<p style="font-size: 16px;">Welcome to Roskilde Øko-App</p>
-                                    <br />
-                                    <p style="font-size: 14px;">Access the App here using current email: https://okoapp-staging.firebaseapp.com/
-                                    <br />
-                                    Your password for the Roskilde-festival Øko-app is: ` + newPW + `</p>
-                                    <br />
-                                    <p style="font-size: 16px;">Best regard, the Øko-app Team.
-                                    <br />
-                                    Enjoy the music!</p>
-                                    <br />
-                                    <img src="http://presscloud.com/file/51/512482838474559/RF19-Poster-31-01-2019.png" />
-                                ` // email content in HTML
-                            };
-                        
-                            // returning result
-                            return transporter.sendMail(mailOptions, (error, info) => {
-                                if(error){
-                                    return error.toString();
-                                }
-                                console.log("Sended ...");
-                                return "Sended ...";
-                            });
-                            
-                        })
-                        .catch((error) => {
-                            //console.log('Error creating new user:', error, PeopleData.Members[item]);
-                        });
+                            admin.auth().createUser({
+                                email: PeopleData.Members[item].Email.trim(),
+                                emailVerified: false,
+                                password: newPW,
+                                photoURL: generatePhotoUrl(PeopleData.Members[item].Email.trim()),
+                                displayName: PeopleData.Members[item].Name,
+                                disabled: false
+                            })
+                            .then((userRecord) => {
+                                // See the UserRecord reference doc for the contents of userRecord.
+                                console.log('Successfully created new user:', userRecord.uid);
 
-                } else {
-                    console.log('User already exists: ', doc.data().email);
-                    return doc.data();
-                }
-                return true;
-            })
-            .catch(err => {
-                console.log('Error getting document', err);
-                return err;
-                //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-            })
+                                var tempUser = {
+                                    email: userRecord.email,
+                                    name: userRecord.displayName,
+                                    peopleId: PeopleData.Members[item].MemberId,
+                                    role: ROLE_ADMIN,
+                                    teams: []
+                                    //,
+                                    //teams: [PeopleData.Members[item].TeamMemberships[0].TeamId]
+                                };
+                                
+                                // Add user to firestore if admin
+                                // eslint-disable-next-line promise/no-nesting
+                                
+                                var addUser = addFirestoreUser(userRecord.uid, tempUser);
+                                
+                                return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
+                                
+                            })
+                            .catch((error) => {
+                                //console.log('Error creating new user:', error, PeopleData.Members[item]);
+                            });
+
+                    } else {
+                        console.log('User already exists: ', PeopleData.Members[item].Email);
+                        return true;
+                    }
+                    return true;
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return err;
+                    //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                })
+            );
         }
-        return true; 
     });  
+    // eslint-disable-next-line promise/catch-or-return
+    Promise.all(promiseGetAdminData).then((values) => {
+        return true; 
+    }).catch((err)=> {
+        return err;
+    });
+    
+}
+
+function callback () { 
+        
+    arrayMemberId.forEach((entry) => {
+        // People REST API: GetLists (Get all teams in people)
+        var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
+        promisesTeams.push(request(RestTeams + config.HEIMDAL_APIKEY).then((body) => { 
+            return createTeams(body, entry);
+        })
+        .catch((err) => {
+            return err;
+        }));
+    });
 }
 
 function createTeams(body, entry) {
@@ -149,11 +185,12 @@ function createTeams(body, entry) {
                     peopleId: PeopleData.Lists[item].ListId
                 };
             
-                arrayListId[j] = PeopleData.Lists[item].ListId;
-
-                db.collection('users').doc(`${entry}`).update({
+                arrayListId.push(PeopleData.Lists[item].ListId);
+                
+                var updateUser = db.collection('users').where('peopleId', '==', entry).update({
                     teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)
                 }).then(ref => {
+                    console.log("Added ==>> PeopleData.Lists[item].ListId: ", PeopleData.Lists[item].ListId);
                     return ref;
                 }).catch(err => {
                     console.log('Error getting document', err);
@@ -174,7 +211,7 @@ function createTeams(body, entry) {
                         });
                         
                     } else {
-                        //console.log("Team already exists: ", doc.data().name);
+                        console.log("Team already exists: ", doc.data().name);
                         return doc.data();
                     }
                     return true;
@@ -189,6 +226,7 @@ function createTeams(body, entry) {
 }
 
 
+
 module.exports = function() {
     const data = require('../data/teams-2019');
     var requiredListOwnerEmail = data.requiredListOwnerEmail;
@@ -200,37 +238,23 @@ module.exports = function() {
     requiredListOwnerEmail.forEach((entry) => {
         // People REST API: GetTeams (Get all teams in people)
         var RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
-        promises1.push(request(RestMember + config.HEIMDAL_APIKEY).then((body) => {
-            return createTeamAdmins(body, entry);
+        promisesAdmins.push(request(RestMember + config.HEIMDAL_APIKEY).then((body) => {
+               return createAdmins(body, entry)
         })
         .catch((err) => {
             return err;
         }));
     });
 
-    Promise.all(promises1).then((values) => {
-        console.log("Done with users");
+    Promise.all(promisesAdmins).then((values) => {
+        console.log("Done with users. Array Len: ", arrayMemberId.length );
         return callback();
       }).catch((err)=> {
           return err;
       });
 
-    function callback () { 
-        console.log("arrayMemberId", arrayMemberId);
-        arrayMemberId.forEach((entry) => {
-            // People REST API: GetLists (Get all teams in people)
-            var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
-            promises2.push(request(RestTeams + config.HEIMDAL_APIKEY).then((body) => { 
-                return createTeams(body, entry);
-            })
-            .catch((err) => {
-                return err;
-            }));
-        });
-    }
-
-    Promise.all(promises1.concat(promises2)).then((values) => {
-        console.log("Done with teams");
+    Promise.all(promisesAdmins.concat(promisesTeams)).then((values) => {
+        console.log("Done with Admins and Teams");
         return callbackAdmin();
       }).catch((err)=> {
         return err;
@@ -243,7 +267,7 @@ module.exports = function() {
             // **** OBS **** Still on people-VOL!!
             var addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
             .then(snapshot => {
-				if (snapshot.size === 0) {    
+                if (snapshot.size === 0) {    
            
                         console.log('create.admin: ', `creating admin user with id ${entry}`);
                         // People REST API: GetTeams (Get all teams in people)
@@ -259,7 +283,7 @@ module.exports = function() {
                                 // eslint-disable-next-line promise/always-return
                                 if (PeopleData.Member.MemberId === entry) {
                                     var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
-
+    
                                     // eslint-disable-next-line promise/no-nesting
                                     admin.auth().createUser({
                                         email: PeopleData.Member.Email,
@@ -272,7 +296,7 @@ module.exports = function() {
                                         .then((userRecord) => {
                                             // See the UserRecord reference doc for the contents of userRecord.
                                             console.log('Successfully created new user:', userRecord.uid);
-
+    
                                             var tempUser = {
                                                 email: PeopleData.Member.Email,
                                                 name: PeopleData.Member.Name,
@@ -283,40 +307,10 @@ module.exports = function() {
                                             
                                             // Add user to firestore if admin
                                             // eslint-disable-next-line promise/no-nesting
-                                            var addUser = db.collection('users').doc(`${userRecord.uid}`).set(tempUser).then(ref => {
-                                                return ref;
-                                            }).catch(err => {
-                                                console.log('Error getting document', err);
-                                                return err;
-                                            });
                                             
-                                            const mailOptions = {
-                                                from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
-                                                // REMEMBER TO CHANGE
-                                                to: "mikael.soerensen@roskilde-festival.dk", //args.email,
-                                                subject: 'Welcome to Roskilde Øko-App', // email subject
-                                                html: `<p style="font-size: 16px;">Welcome to Roskilde Øko-App</p>
-                                                    <br />
-                                                    <p style="font-size: 14px;">Access the app here using current email: https://okoapp-staging.firebaseapp.com/
-                                                    <br />
-                                                    Your password for the Roskilde-festival Øko-app is: ` + newPW + `</p>
-                                                    <br />
-                                                    <p style="font-size: 16px;">Best regard, the Øko-app Team.
-                                                    <br />
-                                                    Enjoy the music!</p>
-                                                    <br />
-                                                    <img src="http://presscloud.com/file/51/512482838474559/RF19-Poster-31-01-2019.png" />
-                                                ` // email content in HTML
-                                            };
-                                        
-                                            // returning result
-                                            return transporter.sendMail(mailOptions, (error, info) => {
-                                                if(error){
-                                                    return error.toString();
-                                                }
-                                                console.log("Sended ...");
-                                                return "Sended ...";
-                                            });
+                                            var addUser = addFirestoreUser(userRecord.uid, tempUser);
+    
+                                            return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
                                         
                                         })
                                         .catch((error) => {
@@ -327,7 +321,7 @@ module.exports = function() {
                             .catch((err) => {
                                 return err;
                             });
-
+    
                         } else {
                             console.log('Super Admin User already exists with people-vol id: ', entry);
                             //return doc.data();
@@ -342,5 +336,6 @@ module.exports = function() {
                     })
         });
     }
+    
 };
 
