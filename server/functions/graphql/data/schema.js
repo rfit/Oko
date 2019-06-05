@@ -21,7 +21,7 @@ type Query {
     ): User
     removeUser(id: Int!): Boolean!
     addInvoice(
-      invoiceId: Int!,
+      invoiceId: ID!,
       invoiceDate: String!,
       teamId: ID!,
       eco: Float!,
@@ -30,7 +30,7 @@ type Query {
     ): Invoice
     updateInvoice(
       id: ID!,
-      invoiceId: Int,
+      invoiceId: ID,
       invoiceDate: String,
       eco: Float,
       nonEco: Float,
@@ -68,7 +68,7 @@ type Query {
   type Invoice {
       "Firebase invoice id"
     id: ID
-    invoiceId: Int!
+    invoiceId: ID!
     createdDate: String
     invoiceDate: String
     teamId: Int!
