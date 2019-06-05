@@ -171,7 +171,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 				mutation={ADD_INVOICE}
 				onCompleted={this.handleComplete}
 				>
-				{(CreateInvoice, { data }) => (
+				{(CreateInvoice, { data, error }) => (
 					<form
 						// tslint:disable-next-line: jsx-no-lambda
 						onSubmit={this.onCreate(CreateInvoice)}
@@ -311,6 +311,16 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 
 								{this.state.created && (
 									<p>Oprettede faktura # {this.state.lastCreated}!</p>
+								)}
+
+
+								{error && (
+									<div>
+										<h2>Der opstoed en fejl.</h2>
+										<pre>
+											{JSON.stringify(error, null, '\t') }
+										</pre>
+									</div>
 								)}
 							</div>
 						</Paper>
