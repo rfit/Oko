@@ -71,8 +71,8 @@ type Query {
     invoiceId: ID!
     createdDate: String
     invoiceDate: String
-    teamId: Int!
-    userId: Int!
+    teamId: ID!
+    userId: ID!
     userName: String
     eco: Float!
     nonEco: Float!
