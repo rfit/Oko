@@ -5,7 +5,7 @@ require('dotenv').config();
 
 admin.initializeApp({
     credential: admin.credential.applicationDefault(),
-    databaseURL: `https:/<DATABASE_NAME>.firebaseio.com`
+    databaseURL: 'https://<DATABASE_NAME>.firebaseio.com'
 });
 
 const settings = {timestampsInSnapshots: false};
