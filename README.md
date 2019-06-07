@@ -1,5 +1,10 @@
-# Øko App
-This is the code for the Roskilde Festival ØKO App.
+# Oko
+
+Welcome to the Oko App code. This project is used for Roskilde Festival. It's helping tracking the amount of organic food and brevages for merchants and the entire festival.
+
+The project its split in two, a client and a server. The server is an API and you can develop any new client to work with it, as it's not tied to the backend in anyway other that the data contract.
+
+The API is powered by GraphQL, and you can get some insights by looking at the schema.
 
 ## Server 
 Server code is located in `server/`, and is hosted on firebase.
