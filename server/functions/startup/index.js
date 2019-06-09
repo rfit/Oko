@@ -187,11 +187,14 @@ function createTeams(body, entry) {
             
                 arrayListId.push(PeopleData.Lists[item].ListId);
                 
-                var updateUser = db.collection('users').where('peopleId', '==', entry).update({
-                    teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)
-                }).then(ref => {
-                    console.log("Added ==>> PeopleData.Lists[item].ListId: ", PeopleData.Lists[item].ListId);
-                    return ref;
+                db.collection('users').where('peopleId', '==', entry).get()
+                // eslint-disable-next-line promise/always-return
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        //console.log(doc.id, " => ", doc.data());
+                        // Build doc ref from doc.id
+                        db.collection("users").doc(doc.id).update({teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)});
+                    });
                 }).catch(err => {
                     console.log('Error getting document', err);
                     return err;
