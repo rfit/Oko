@@ -18,22 +18,28 @@ import createRouter from './router/create-router';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 
-import firebase from 'firebase';
+import * as firebase from "firebase/app";
+import "firebase/performance";
 
 const localeMap = {
 	da: daLocale
 };
 
 // Initialize Firebase
-const config = {
+const firebaseConfig = {
 	apiKey: "AIzaSyCqo4feuGuO8Djm3d4ltS5gC9l48pPz_vw",
 	authDomain: "okoapp-staging.firebaseapp.com",
 	databaseURL: "https://okoapp-staging.firebaseio.com",
 	projectId: "okoapp-staging",
 	storageBucket: "okoapp-staging.appspot.com",
-	messagingSenderId: "91562819892"
-};
-firebase.initializeApp(config);
+	messagingSenderId: "91562819892",
+	appId: "1:91562819892:web:6e57f0480cdf275a"
+  };
+firebase.initializeApp(firebaseConfig);
+
+// Initialize Performance Monitoring and get a reference to the service
+firebase.performance();
+
 
 const RFMuiTheme = createMuiTheme({
 	palette: {
@@ -111,6 +117,7 @@ client.cache.writeData({
 });
 
 firebase.auth().onIdTokenChanged((user) => {
+	console.debug('running token check', user)
 	if (user) {
 		user.getIdToken().then((token) => {
 			localStorage.setItem('token', token);
