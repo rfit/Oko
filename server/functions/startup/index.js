@@ -335,8 +335,8 @@ module.exports = function() {
             });
         
             // eslint-disable-next-line promise/no-nesting
-            return Promise.all(promisesTeams).then((values) => {
-                console.log("Done with Admins and Teams");
+            Promise.all(promisesTeams).then((values) => {
+                console.log("Done with Admins and Teams.. Team len: ", arrayListId.length);
                 return callbackAdmin(requiredAdmins);
             }).catch((err)=> {
                 return err;
