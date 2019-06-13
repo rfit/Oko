@@ -15,6 +15,8 @@ var arrayMemberId = [];
 const promisesAdmins = [];
 const promisesTeams = [];
 const promiseGetAdminData = [];
+const promiseUpdateTeam = [];
+const promiseCheckTeam = [];
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -87,8 +89,7 @@ function createAdmins(body, entry) {
         if (PeopleData.Members[item].Email === entry) {
             
             arrayMemberId.push(PeopleData.Members[item].MemberId);
-            console.log(" entry: ", entry, " PeopleData.Members[item]: ", PeopleData.Members[item].MemberId);
-
+            
             promiseGetAdminData.push(
                 db.collection('users').where('peopleId', '==', PeopleData.Members[item].MemberId).get()
                 .then(snapshot => {
@@ -97,7 +98,7 @@ function createAdmins(body, entry) {
                             var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
                             // eslint-disable-next-line promise/no-nesting
-                            admin.auth().createUser({
+                            promiseGetAdminData.push(admin.auth().createUser({
                                 email: PeopleData.Members[item].Email.trim(),
                                 emailVerified: false,
                                 password: newPW,
@@ -122,14 +123,16 @@ function createAdmins(body, entry) {
                                 // Add user to firestore if admin
                                 // eslint-disable-next-line promise/no-nesting
                                 
-                                var addUser = addFirestoreUser(userRecord.uid, tempUser);
+                                promiseGetAdminData.push(addFirestoreUser(userRecord.uid, tempUser));
                                 
+                                // Change for go-live
+                                //return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
                                 return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
                                 
                             })
                             .catch((error) => {
                                 //console.log('Error creating new user:', error, PeopleData.Members[item]);
-                            });
+                            }));
 
                     } else {
                         console.log('User already exists: ', PeopleData.Members[item].Email);
@@ -146,26 +149,8 @@ function createAdmins(body, entry) {
         }
     });  
     // eslint-disable-next-line promise/catch-or-return
-    Promise.all(promiseGetAdminData).then((values) => {
-        return true; 
-    }).catch((err)=> {
-        return err;
-    });
+    return Promise.all(promiseGetAdminData);
     
-}
-
-function callback () { 
-        
-    arrayMemberId.forEach((entry) => {
-        // People REST API: GetLists (Get all teams in people)
-        var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
-        promisesTeams.push(request(RestTeams + config.HEIMDAL_APIKEY).then((body) => { 
-            return createTeams(body, entry);
-        })
-        .catch((err) => {
-            return err;
-        }));
-    });
 }
 
 function createTeams(body, entry) {
@@ -187,17 +172,20 @@ function createTeams(body, entry) {
             
                 arrayListId.push(PeopleData.Lists[item].ListId);
                 
-                var updateUser = db.collection('users').where('peopleId', '==', entry).update({
-                    teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)
-                }).then(ref => {
-                    console.log("Added ==>> PeopleData.Lists[item].ListId: ", PeopleData.Lists[item].ListId);
-                    return ref;
+                promiseUpdateTeam.push(db.collection('users').where('peopleId', '==', entry).get()
+                // eslint-disable-next-line promise/always-return
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        //console.log(doc.id, " => ", doc.data());
+                        // Build doc ref from doc.id
+                        db.collection("users").doc(doc.id).update({teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)});
+                    });
                 }).catch(err => {
                     console.log('Error getting document', err);
                     return err;
-                });
+                }));
 
-                return db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).get()
+                promiseCheckTeam.push(db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).get()
                 .then(doc => {
                     if (!doc.exists) {
                         // Add team to firestore if admin
@@ -220,11 +208,92 @@ function createTeams(body, entry) {
                     console.log('Error getting document', err);
                     return err;
                     //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                })   
+                }))   
             }
     });
+
+    return Promise.all(promiseUpdateTeam,promiseCheckTeam);
+
 }
 
+function callbackAdmin (requiredAdmins) { 
+    // Loop through all admins and create. 
+    requiredAdmins.forEach((entry) => {
+        
+        // **** OBS **** Still on people-VOL!!
+        var addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
+        .then(snapshot => {
+            if (snapshot.size === 0) {    
+       
+                    console.log('create.admin: ', `creating admin user with id ${entry}`);
+                    // People REST API: GetTeams (Get all teams in people)
+                    var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
+                
+                    // eslint-disable-next-line promise/no-nesting
+                    request(RestMember + process.env.HEIMDAL_PEOPLE_APIKEY).then( (body) => {
+                            //console.log('error:', error); // Print the error if one occurred
+                            //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                            const PeopleData = JSON.parse(body);
+                                
+                            // Find users that are admins / "Holdleder". If not users is "basis"
+                            // eslint-disable-next-line promise/always-return
+                            if (PeopleData.Member.MemberId === entry) {
+                                var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+
+                                // eslint-disable-next-line promise/no-nesting
+                                admin.auth().createUser({
+                                    email: PeopleData.Member.Email,
+                                    emailVerified: false,
+                                    password: newPW,
+                                    photoURL: generatePhotoUrl(PeopleData.Member.Email),
+                                    displayName: PeopleData.Member.Name,
+                                    disabled: false
+                                })
+                                    .then((userRecord) => {
+                                        // See the UserRecord reference doc for the contents of userRecord.
+                                        console.log('Successfully created new user:', userRecord.uid);
+
+                                        var tempUser = {
+                                            email: PeopleData.Member.Email,
+                                            name: PeopleData.Member.Name,
+                                            peopleId: PeopleData.Member.MemberId,
+                                            role: ROLE_SUPERADMIN,
+                                            teams: arrayListId
+                                        };
+                                        
+                                        // Add user to firestore if admin
+                                        // eslint-disable-next-line promise/no-nesting
+                                        
+                                        var addUser = addFirestoreUser(userRecord.uid, tempUser);
+
+                                        // Change for go-live
+                                        //return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
+                                        return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
+                                    
+                                    })
+                                    .catch((error) => {
+                                        //console.log('Error creating new user:', error);
+                                    });                        
+                            }
+                        })
+                        .catch((err) => {
+                            return err;
+                        });
+
+                    } else {
+                        console.log('Super Admin User already exists with people-vol id: ', entry);
+                        //return doc.data();
+                        return false;
+                    }
+                    return true;
+                })
+                .catch(err => {
+                    console.log('Error getting document', err);
+                    return err;
+                    //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+                })
+    });
+}
 
 
 module.exports = function() {
@@ -246,96 +315,38 @@ module.exports = function() {
         }));
     });
 
+    // eslint-disable-next-line promise/always-return
     Promise.all(promisesAdmins).then((values) => {
-        console.log("Done with users. Array Len: ", arrayMemberId.length );
-        return callback();
+        setTimeout(() => { 
+            console.log("waited for 15 sec..."); 
+        
+            console.log("Done with users. Array Len: ", arrayMemberId.length );
+            
+            arrayMemberId.forEach((entry) => {
+                // People REST API: GetLists (Get all teams in people)
+                var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
+                // eslint-disable-next-line promise/no-nesting
+                promisesTeams.push(request(RestTeams + config.HEIMDAL_APIKEY).then((body) => { 
+                    return createTeams(body, entry);
+                })
+                .catch((err) => {
+                    return err;
+                }));
+            });
+        
+            // eslint-disable-next-line promise/no-nesting
+            Promise.all(promisesTeams).then((values) => {
+                console.log("Done with Admins and Teams.. Team len: ", arrayListId.length);
+                return callbackAdmin(requiredAdmins);
+            }).catch((err)=> {
+                return err;
+            });
+
+        }, 15000);
+
       }).catch((err)=> {
           return err;
-      });
-
-    Promise.all(promisesAdmins.concat(promisesTeams)).then((values) => {
-        console.log("Done with Admins and Teams");
-        return callbackAdmin();
-      }).catch((err)=> {
-        return err;
-    });
-
-    function callbackAdmin () { 
-        // Loop through all admins and create. 
-        requiredAdmins.forEach((entry) => {
-            
-            // **** OBS **** Still on people-VOL!!
-            var addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
-            .then(snapshot => {
-                if (snapshot.size === 0) {    
-           
-                        console.log('create.admin: ', `creating admin user with id ${entry}`);
-                        // People REST API: GetTeams (Get all teams in people)
-                        var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
-                    
-                        // eslint-disable-next-line promise/no-nesting
-                        request(RestMember + process.env.HEIMDAL_PEOPLE_APIKEY).then( (body) => {
-                                //console.log('error:', error); // Print the error if one occurred
-                                //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-                                const PeopleData = JSON.parse(body);
-                                    
-                                // Find users that are admins / "Holdleder". If not users is "basis"
-                                // eslint-disable-next-line promise/always-return
-                                if (PeopleData.Member.MemberId === entry) {
-                                    var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
-    
-                                    // eslint-disable-next-line promise/no-nesting
-                                    admin.auth().createUser({
-                                        email: PeopleData.Member.Email,
-                                        emailVerified: false,
-                                        password: newPW,
-                                        photoURL: generatePhotoUrl(PeopleData.Member.Email),
-                                        displayName: PeopleData.Member.Name,
-                                        disabled: false
-                                    })
-                                        .then((userRecord) => {
-                                            // See the UserRecord reference doc for the contents of userRecord.
-                                            console.log('Successfully created new user:', userRecord.uid);
-    
-                                            var tempUser = {
-                                                email: PeopleData.Member.Email,
-                                                name: PeopleData.Member.Name,
-                                                peopleId: PeopleData.Member.MemberId,
-                                                role: ROLE_SUPERADMIN,
-                                                teams: arrayListId
-                                            };
-                                            
-                                            // Add user to firestore if admin
-                                            // eslint-disable-next-line promise/no-nesting
-                                            
-                                            var addUser = addFirestoreUser(userRecord.uid, tempUser);
-    
-                                            return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
-                                        
-                                        })
-                                        .catch((error) => {
-                                            //console.log('Error creating new user:', error);
-                                        });                        
-                                }
-                            })
-                            .catch((err) => {
-                                return err;
-                            });
-    
-                        } else {
-                            console.log('Super Admin User already exists with people-vol id: ', entry);
-                            //return doc.data();
-                            return false;
-                        }
-                        return true;
-                    })
-                    .catch(err => {
-                        console.log('Error getting document', err);
-                        return err;
-                        //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                    })
-        });
-    }
+      }); 
     
 };
 
