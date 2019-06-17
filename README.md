@@ -1,4 +1,5 @@
 # Oko
+[![CircleCI](https://circleci.com/gh/rfit/Oko.svg?style=svg)](https://circleci.com/gh/rfit/Oko) [![codecov](https://codecov.io/gh/rfit/Oko/branch/master/graph/badge.svg)](https://codecov.io/gh/rfit/Oko)
 
 Welcome to Oko! This project is used for Roskilde Festival. It's helping tracking the amount of organic food and brevages for merchants and the entire festival.
 
