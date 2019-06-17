@@ -23,6 +23,7 @@ type Query {
     addInvoice(
       invoiceId: ID!,
       invoiceDate: String!,
+      supplier: String!,
       teamId: ID!,
       eco: Float!,
       nonEco: Float!,
@@ -32,6 +33,7 @@ type Query {
       id: ID!,
       invoiceId: ID,
       invoiceDate: String,
+      supplier: String,
       eco: Float,
       nonEco: Float,
       excluded: Float
@@ -71,6 +73,7 @@ type Query {
     invoiceId: ID!
     createdDate: String
     invoiceDate: String
+    supplier: String
     teamId: ID!
     userId: ID!
     userName: String
