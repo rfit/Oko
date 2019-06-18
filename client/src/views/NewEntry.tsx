@@ -33,6 +33,7 @@ export interface INewEntryState {
 	ecoAmount?: any;
 	nonEcoAmount: number;
 	validState: boolean;
+	supplier?: string;
 	error?: string;
 }
 /*
@@ -49,6 +50,7 @@ const ADD_INVOICE = gql`
 	mutation addInvoice(
 		$invoiceId: ID!,
 		$invoiceDate: String!,
+		$supplier: String!,
 		$teamId: ID!,
 		$eco: Float!,
 		$nonEco: Float!,
@@ -57,7 +59,8 @@ const ADD_INVOICE = gql`
 		addInvoice(
 			invoiceId: $invoiceId,
 			invoiceDate: $invoiceDate,
-			teamId: $teamId
+			teamId: $teamId,
+			supplier: $supplier,
 			eco: $eco,
 			nonEco: $nonEco,
 			excluded: $excluded
@@ -147,7 +150,8 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 			CreateInvoice({
 				variables: {
 					invoiceDate: this.state.invoiceDate,
-					invoiceId: parseInt(this.state.invoiceId + '', 10),
+					invoiceId: this.state.invoiceId,
+					supplier: this.state.supplier,
 					teamId: currentTeam.id,
 					eco: ecoAmount,
 					nonEco: nonEcoAmount,
@@ -194,9 +198,19 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									// tslint:disable-next-line: jsx-no-lambda
 									onChange={(e) => this.setState({ invoiceId: e.target.value})}
 									variant="outlined"
-									type="number"
-									id="invoice-number"
+									type="text"
+									id="invoice-id"
 									label="Faktura/bilag nummer"
+									margin="normal"
+								/><br />
+								<TextField
+									value={this.state.supplier || ''}
+									// tslint:disable-next-line: jsx-no-lambda
+									onChange={(e) => this.setState({ supplier: e.target.value})}
+									variant="outlined"
+									type="text"
+									id="supplier-name"
+									label="Leverandør"
 									margin="normal"
 								/><br />
 								<TextField

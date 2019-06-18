@@ -8,6 +8,7 @@ export const GET_ALL_INVOICES = gql`
 			invoiceId,
 			createdDate,
 			invoiceDate,
+			supplier,
 			teamId,
 			userId,
 			userName,
