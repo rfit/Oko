@@ -34,11 +34,21 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 class FestivalOverview extends React.Component<any, any> {
 	public calcTeam = (invoices: any) => {
 		if (!invoices) { return 0; }
-		console.log(invoices);
 
 		const totalEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
 		const totalNonEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
 		const totalExcluded = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
+
+		const p = calculateEcoPercentage(totalEco, totalNonEco, totalExcluded);
+
+		return p.toFixed(1);
+	}
+	public calulateFestivalTotal = () => {
+		const allInvoices = [].concat(...this.props.data.teams.map((team: any) => team.invoices));
+
+		const totalEco = allInvoices && allInvoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
+		const totalNonEco = allInvoices && allInvoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+		const totalExcluded = allInvoices && allInvoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
 
 		const p = calculateEcoPercentage(totalEco, totalNonEco, totalExcluded);
 
@@ -54,6 +64,10 @@ class FestivalOverview extends React.Component<any, any> {
 				</Typography>
 				<Typography paragraph>
 					Oversigt over alle boder.
+				</Typography>
+
+				<Typography paragraph>
+					Samlet øko procent for hele festivallen: <strong>{this.calulateFestivalTotal()}%</strong>
 				</Typography>
 
 				<Paper className={classes.root}>
