@@ -65,6 +65,7 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 							<TableRow>
 								<TableCell className={classes.cell}>Nummer</TableCell>
 								<TableCell className={classes.cell}>Faktura dato</TableCell>
+								<TableCell className={classes.cell}>Leverandør</TableCell>
 								<TableCell className={classes.cell} align="right">Total</TableCell>
 								<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
 								<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
@@ -73,7 +74,7 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 						</TableHead>
 						<TableBody>
 							{invoices.map((invoice: any, index: number) => {
-								const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total } = invoice;
+								const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
 								const percentage = calculateEcoPercentage(invoice.eco, invoice.nonEco, invoice.excluded); // this.calcTeam(invoices) || 0;
 								const okoRowColor = percentage >= 90 ? 'green' : 'red';
 
@@ -83,6 +84,7 @@ class FestivalOverviewTeam extends React.Component<any, any> {
 											{invoiceId}
 										</TableCell>
 										<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+										<TableCell className={classes.cell}>{supplier}</TableCell>
 										<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
 										<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
 										<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
@@ -109,6 +111,7 @@ export const GET_TEAM_WITH_INVOICES = gql`
 				invoiceId,
 				createdDate,
 				invoiceDate,
+				supplier,
 				teamId,
 				userId,
 				userName,
