@@ -68,6 +68,7 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableRow>
 					<TableCell className={classes.cell}>Nummer</TableCell>
 					<TableCell className={classes.cell}>Faktura dato</TableCell>
+					<TableCell className={classes.cell}>Leverandør</TableCell>
 					<TableCell className={classes.cell} align="right">Total</TableCell>
 					<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
 					<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
@@ -76,7 +77,7 @@ const SimpleInvoiceTable = (props: any) => {
 			</TableHead>
 			<TableBody>
 				{invoices && invoices.map((invoice: any) => {
-					const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total } = invoice;
+					const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
 					return (
 						<TableRow key={invoice.id || invoice.invoiceId}>
 							<TableCell className={classes.cell} component="th" scope="row">
@@ -85,6 +86,7 @@ const SimpleInvoiceTable = (props: any) => {
 								</Link>
 							</TableCell>
 							<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+							<TableCell className={classes.cell}>{supplier}</TableCell>
 							<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
 							<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>

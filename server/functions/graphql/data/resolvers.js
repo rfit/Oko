@@ -365,6 +365,7 @@ const resolvers = {
 				invoiceId: args.invoiceId, 
 				createdDate: serverTimestamp,
 				invoiceDate: args.invoiceDate,
+				supplier: args.supplier,
 				teamId: args.teamId,
 				userId: context.currentUser.uid,
 				eco: args.eco,
@@ -414,11 +415,14 @@ const resolvers = {
 						userId: context.currentUser.uid,
 						eco: doc.data().eco,
 						nonEco: doc.data().nonEco,
-						excluded: doc.data().excluded
+						excluded: doc.data().excluded,
+						supplier: doc.data().supplier
+
 					};
 
 					if( args.invoiceId ) { invoice.invoiceId = args.invoiceId; }
 					if( args.invoiceDate ) { invoice.invoiceDate = args.invoiceDate; }
+					if( args.supplier ) { invoice.supplier = args.supplier; }
 					// firebase.firestore.Timestamp.fromDate(new Date(args.invoiceDate)),
 					if( args.eco ) {
 						invoice.eco = args.eco;

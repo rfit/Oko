@@ -10,6 +10,8 @@
 const functions = require('firebase-functions');
 require('dotenv').config();
 
+console.log(functions.config());
+
 const config = {
     HEIMDAL_APIKEY: process.env.HEIMDAL_PEOPLE_APIKEY || functions.config().oeko.heimdal.key,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD || functions.config().oeko.gmail.password,
