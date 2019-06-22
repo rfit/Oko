@@ -93,6 +93,7 @@ const typeDefs = gql`
 
 const client = new ApolloClient({
 	// Backend API Url from firebase
+	// uri: 'http://localhost:5000/okoapp-staging/europe-west1/api',
 	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api',
 	fetchOptions: {
 		credentials: 'omit'
