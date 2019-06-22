@@ -37,6 +37,7 @@ const categories = [
 		children: [
 			{ id: 'Oversigt', icon: <PeopleIcon />, routeName: 'overview', active: true },
 			{ id: 'Ny Faktura', icon: <AddIcon />, routeName: 'add-invoice' },
+			{ id: 'Ny Kreditnota', icon: <AddIcon />, routeName: 'add-creditnote' },
 		],
 	},
 	{
