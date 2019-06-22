@@ -17,6 +17,8 @@ import registerServiceWorker from './registerServiceWorker';
 import createRouter from './router/create-router';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
+import getEndpoint from './utils/getEndpoint';
+
 
 import * as firebase from "firebase/app";
 import "firebase/performance";
@@ -93,7 +95,7 @@ const typeDefs = gql`
 
 const client = new ApolloClient({
 	// Backend API Url from firebase
-	uri: 'https://europe-west1-okoapp-staging.cloudfunctions.net/api',
+	uri: getEndpoint(location.hostname),
 	fetchOptions: {
 		credentials: 'omit'
 	},
