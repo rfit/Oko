@@ -1,6 +1,8 @@
 const admin = require('firebase-admin');
 const serverTimestamp = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 const db = admin.firestore();
+const { AuthenticationError } = require("apollo-server-express");
+
 
 const rp = require('request-promise-native');
 const config = require('../../config');
@@ -40,7 +42,7 @@ const resolvers = {
 		},
 		currentUser: (root, args, context) => {
 			// If we are not logged in, just return null
-			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
+			if(!context.currentUser) { throw new AuthenticationError('must authenticate'); }
 	
 			// console.log('currentUser', context, context.currentUser);
 			return db.collection('users').doc(`${context.currentUser.uid}`).get()
