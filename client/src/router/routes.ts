@@ -12,6 +12,10 @@ export default [
 		name: 'edit-invoice',
 		path: '/edit-invoice/:invoiceId'
 	},
+	{
+		name: 'add-creditnote',
+		path: '/add-creditnote'
+	},
     {
 		name: 'help',
 		path: '/help'

@@ -17,6 +17,7 @@ import Help from './views/help';
 import Styleguide from './views/Styleguide';
 import Login from './views/login';
 import NewEntry from './views/NewEntry';
+import NewCreditnote from './views/NewCreditnote';
 import EditInvoice from './views/EditInvoice';
 import Overview from './views/Overview';
 import TeamAdmin from './views/TeamAdmin';
@@ -145,7 +146,6 @@ class App extends React.Component<IAppProps, IAppState> {
 
 					if(!data.currentUser) {
 						// We don't have a user
-						router.navigate('login');
 						return (
 							<div className={classes.root}>
 								<CssBaseline />
@@ -170,7 +170,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 					// Is Team setup?
 					if(!data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null") {
-						if('ADMIN' === data.currentUser.role || 'SUPERADMIN' === data.currentUser.role) {
+						if('ADMIN' === data.currentUser.role) {
 							return (
 								<div className={classes.root}>
 									<CssBaseline />
@@ -180,16 +180,34 @@ class App extends React.Component<IAppProps, IAppState> {
 								</div>
 							)
 						}
-
-						return (
-							<div className={classes.root}>
-								<CssBaseline />
-								<main className={classes.mainContent}>
-									<div>Din leder har ikke gennemført opsætningen af teamet, endnu.</div>
-								</main>
-							</div>
-						)
 					}
+
+
+
+					const mainContent = !data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null" ?
+
+					(
+						<div className={classes.root}>
+							<CssBaseline />
+							<main className={classes.mainContent}>
+								<div>Din leder har ikke gennemført opsætningen af teamet, endnu.</div>
+							</main>
+						</div>
+					) :
+
+					(
+						<>
+							{topRouteName === 'overview' && <Overview {...data} /> }
+								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
+								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
+								{topRouteName === 'add-creditnote' && <NewCreditnote {...data} route={route} router={router} /> }
+								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
+								{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
+								{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+								{topRouteName === 'help' && <Help /> }
+								{topRouteName === 'styleguide' && <Styleguide /> }
+						</>
+					)
 
 					return (
 						<div className={classes.root}>
@@ -212,15 +230,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							<Header onDrawerToggle={this.handleDrawerToggle} currentUser={data.currentUser} />
 							<main className={classes.mainContent}>
 								<ErrorBoundary>
-									{/* <Content />*/}
-									{topRouteName === 'overview' && <Overview {...data} /> }
-									{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-									{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
-									{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
-									{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
-									{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
-									{topRouteName === 'help' && <Help /> }
-									{topRouteName === 'styleguide' && <Styleguide /> }
+									{mainContent}
 								</ErrorBoundary>
 							</main>
 						</main>
