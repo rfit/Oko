@@ -15,6 +15,8 @@ import ErrorView from './components/ErrorView';
 import FestivalOverview from './views/FestivalOverview';
 import FestivalOverviewTeam from './views/FestivalOverviewTeam';
 import Help from './views/help';
+import HelpGenral from './views/help/General';
+import HelpSupport from './views/help/Support';
 import Styleguide from './views/Styleguide';
 import Login from './views/login';
 import NewEntry from './views/NewEntry';
@@ -244,6 +246,8 @@ class App extends React.Component<IAppProps, IAppState> {
 									{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
 									{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
 									{topRouteName === 'help' && <Help /> }
+									{topRouteName === 'help-general' && <HelpGenral /> }
+									{topRouteName === 'help-support' && <HelpSupport /> }
 									{topRouteName === 'styleguide' && <Styleguide /> }
 								</ErrorBoundary>
 							</main>
