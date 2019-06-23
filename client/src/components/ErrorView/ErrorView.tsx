@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-const ErrorView = (props: any) => {
+interface IErrorViewProps {
+	error: IError;
+}
+interface IError {
+	message: string;
+}
+
+const ErrorView = (props: IErrorViewProps) => {
 	return (
 		<div>
 			<h1>Ups. Der opstod en fejl.</h1>
