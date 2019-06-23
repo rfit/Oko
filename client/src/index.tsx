@@ -18,7 +18,7 @@ import createRouter from './router/create-router';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import getEndpoint from './utils/getEndpoint';
-
+import getFirebaseConfig from './utils/getFirebaseConfig';
 
 import * as firebase from "firebase/app";
 import "firebase/performance";
@@ -28,20 +28,10 @@ const localeMap = {
 };
 
 // Initialize Firebase
-const firebaseConfig = {
-	apiKey: "AIzaSyCqo4feuGuO8Djm3d4ltS5gC9l48pPz_vw",
-	authDomain: "okoapp-staging.firebaseapp.com",
-	databaseURL: "https://okoapp-staging.firebaseio.com",
-	projectId: "okoapp-staging",
-	storageBucket: "okoapp-staging.appspot.com",
-	messagingSenderId: "91562819892",
-	appId: "1:91562819892:web:6e57f0480cdf275a"
-  };
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(getFirebaseConfig(location.hostname));
 
 // Initialize Performance Monitoring and get a reference to the service
 firebase.performance();
-
 
 const RFMuiTheme = createMuiTheme({
 	palette: {
@@ -93,14 +83,19 @@ const typeDefs = gql`
 	}
 `;
 
+
 const client = new ApolloClient({
 	// Backend API Url from firebase
 	uri: getEndpoint(location.hostname),
 	fetchOptions: {
 		credentials: 'omit'
 	},
-	headers: {
-		authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : "",
+	request: async (operation) => {
+		operation.setContext({
+		  headers: {
+			authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ""
+		  }
+		});
 	},
 	typeDefs,
 	resolvers: {
@@ -112,78 +107,82 @@ const client = new ApolloClient({
 	}
 });
 
-client.cache.writeData({
-	data: {
-		isLoggedIn: !!localStorage.getItem('token'), // false,
-	}
-});
+const authPromise = new Promise((resolve, reject) => {
+	firebase.auth().onIdTokenChanged((user) => {
+		console.debug('running token check', user)
+		if (user) {
+			user.getIdToken().then((token) => {
+				console.log('Setting new token');
 
-firebase.auth().onIdTokenChanged((user) => {
-	console.debug('running token check', user)
-	if (user) {
-		user.getIdToken().then((token) => {
-			localStorage.setItem('token', token);
-		});
+				localStorage.setItem('token', token);
 
-		client.cache.writeData({
-			data: {
-				isLoggedIn: true // false
-			}
-		});
-	} else {
-		console.log('User signed out.');
-		localStorage.setItem('token', '');
-		client.cache.writeData({
-			data: {
-				isLoggedIn: false // false
-			}
-		});
-	}
+				client.cache.writeData({
+					data: {
+						isLoggedIn: true
+					}
+				});
+
+				resolve(token);
+			});
+		} else {
+			console.log('User signed out.');
+			localStorage.setItem('token', '');
+			client.cache.writeData({
+				data: {
+					isLoggedIn: false
+				}
+			});
+
+			resolve(false);
+		}
+	});
 });
 
 const GET_CLIENT_STATE = gql`
 	query IsUserLoggedIn {
-		isLoggedIn @client
+		isLoggedIn @client(always: true)
 	}
 `;
 
 const router = createRouter();
 
 document.addEventListener('DOMContentLoaded', () =>
-	router.start(() =>
-		render(
-			<ErrorBoundary>
-				<ApolloProvider client={client}>
-					<RouterProvider router={router}>
-						<MuiThemeProvider theme={RFMuiTheme}>
-							<MuiPickersUtilsProvider utils={DateFnsUtils} locale={localeMap.da}>
-								<Query query={GET_CLIENT_STATE}>
-									{({ loading, error, data }:any) => {
-										console.log(
-											'GET_CLIENT_STATE',
-											error,
-											data,
-											loading,
-											client
-										);
+	authPromise.then(() => {
+		router.start(() =>
+			render(
+				<ErrorBoundary>
+					<ApolloProvider client={client}>
+						<RouterProvider router={router}>
+							<MuiThemeProvider theme={RFMuiTheme}>
+								<MuiPickersUtilsProvider utils={DateFnsUtils} locale={localeMap.da}>
+									<Query query={GET_CLIENT_STATE}>
+										{({ loading, error, data }:any) => {
+											console.log(
+												'GET_CLIENT_STATE',
+												error,
+												data,
+												loading,
+												client
+											);
 
-										if(loading) { return <Loading />; }
+											if(loading) { return <Loading />; }
 
-										return (
-											<RouteNode nodeName="">
-												{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
-											</RouteNode>
-										)
-									}}
-								</Query>
-							</MuiPickersUtilsProvider>
-						</MuiThemeProvider>
-					</RouterProvider>
-				</ApolloProvider>
-			</ErrorBoundary>,
-			document.getElementById('root') as HTMLElement
+											return (
+												<RouteNode nodeName="">
+													{({ route }) => <App route={route} router={router} clientState={data} client={client} />}
+												</RouteNode>
+											)
+										}}
+									</Query>
+								</MuiPickersUtilsProvider>
+							</MuiThemeProvider>
+						</RouterProvider>
+					</ApolloProvider>
+				</ErrorBoundary>,
+				document.getElementById('root') as HTMLElement
+			)
 		)
-	)
+	})
 )
 
 registerServiceWorker();
