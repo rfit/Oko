@@ -10,6 +10,7 @@ import Hidden from '@material-ui/core/Hidden';
 import Navigator from './components/Navigator';
 import Header from './components/header';
 import ErrorBoundary from './components/ErrorBoundary';
+import ErrorView from './components/ErrorView';
 
 import FestivalOverview from './views/FestivalOverview';
 import FestivalOverviewTeam from './views/FestivalOverviewTeam';
@@ -24,6 +25,8 @@ import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
 import Loading from './components/Loading';
 import TeamSetupView from './views/TeamStartup';
+
+import WarningIcon from '@material-ui/icons/Warning';
 
 interface IAppState {
 	open: boolean;
@@ -142,9 +145,27 @@ class App extends React.Component<IAppProps, IAppState> {
 					console.log('GET_CURRENT_USER', data);
 
 					if(loading) { return <Loading />; }
-					if(error) { return <div>{error}</div>; }
+					if(error) {
+						const AuthError = error.graphQLErrors.find((err) => err && err.extensions && err.extensions.code === "UNAUTHENTICATED" ? true : false);
+						if(AuthError) {
+							return (
+								<div className={classes.root}>
+									<CssBaseline />
+									<main className={classes.appContent}>
+										<Login loginFunction={this.handleLoginFake}  />
+									</main>
+								</div>
+							)
+						}
+
+						if(typeof(error) === "object") {
+							return <ErrorView error={{message: JSON.stringify(error)}} />
+						}
+						return <div>{error}</div>;
+					}
 
 					if(!data.currentUser) {
+						console.log('Current user is not set, we should login.');
 						// We don't have a user
 						return (
 							<div className={classes.root}>
@@ -182,33 +203,6 @@ class App extends React.Component<IAppProps, IAppState> {
 						}
 					}
 
-
-
-					const mainContent = !data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null" ?
-
-					(
-						<div className={classes.root}>
-							<CssBaseline />
-							<main className={classes.mainContent}>
-								<div>Din leder har ikke gennemført opsætningen af teamet, endnu.</div>
-							</main>
-						</div>
-					) :
-
-					(
-						<>
-							{topRouteName === 'overview' && <Overview {...data} /> }
-								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
-								{topRouteName === 'add-creditnote' && <NewCreditnote {...data} route={route} router={router} /> }
-								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
-								{topRouteName === 'help' && <Help /> }
-								{topRouteName === 'styleguide' && <Styleguide /> }
-						</>
-					)
-
 					return (
 						<div className={classes.root}>
 						<CssBaseline />
@@ -230,7 +224,27 @@ class App extends React.Component<IAppProps, IAppState> {
 							<Header onDrawerToggle={this.handleDrawerToggle} currentUser={data.currentUser} />
 							<main className={classes.mainContent}>
 								<ErrorBoundary>
-									{mainContent}
+									{ !data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null" && (
+										<div style={{
+											backgroundColor: '#ffa000',
+											boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+											padding: 8,
+											marginBottom: 25
+										}}>
+											<WarningIcon style={{ margin: '0 8px 0 0' }} />
+											<span>Din leder har ikke gennemført opsætningen af teamet, endnu. Ikke alle funktioner er aktiveret.</span>
+										</div>
+									)}
+
+									{topRouteName === 'overview' && <Overview {...data} /> }
+									{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
+									{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
+									{topRouteName === 'add-creditnote' && <NewCreditnote {...data} route={route} router={router} /> }
+									{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
+									{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
+									{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+									{topRouteName === 'help' && <Help /> }
+									{topRouteName === 'styleguide' && <Styleguide /> }
 								</ErrorBoundary>
 							</main>
 						</main>
