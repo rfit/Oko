@@ -8,7 +8,8 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
+import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
+import PhoneIcon from '@material-ui/icons/Phone';
 import PeopleIcon from '@material-ui/icons/People';
 import AddIcon from '@material-ui/icons/Add';
 import HelpIcon from '@material-ui/icons/Help';
@@ -71,7 +72,9 @@ const categories = [
 			Roles.EDITOR
 		],
 		children: [
-			{ id: 'FAQ', icon: <HelpIcon />, routeName: 'help' }
+			{ id: 'Generelt', icon: <HelpIcon />, routeName: 'help-general' },
+			{ id: 'Support', icon: <PhoneIcon />, routeName: 'help-support' },
+			{ id: 'FAQ', icon: <QuestionAnswerIcon />, routeName: 'help' }
 		],
 	},
 ];
@@ -190,7 +193,7 @@ function Navigator(props: INavigatorProps) {
 				padding: 10,
 				color: '#2f4058'
 			}}>
-				v0.9.1
+				v1.0.0
 			</div>
     	</Drawer>
 	);
