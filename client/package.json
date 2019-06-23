@@ -1,6 +1,6 @@
 {
-  "name": "ecotrack",
-  "homepage": "https://okoapp-staging.firebaseapp.com",
+  "name": "oko",
+  "homepage": "https://github.com/rfit/Oko",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
