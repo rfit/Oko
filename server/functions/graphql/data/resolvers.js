@@ -152,7 +152,7 @@ const resolvers = {
 				snapshot.forEach(doc => {
 					user.teams.forEach(team => {
 						if( doc.data().peopleId === team ) {
-							teamArray.push(doc.data());
+							teamArray.push(Object.assign(doc.data(), { id: doc.id }));
 						}
 					})
 
