@@ -38,14 +38,16 @@ function sendGmail(email, newPW) {
         from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
         // REMEMBER TO CHANGE
         to: email,
-        subject: 'Welcome to Roskilde Øko-app', // email subject
-        html: `<p style="font-size: 16px;">Welcome to Roskilde Øko-App</p>
+        subject: 'Welcome to Roskilde Festival Øko-App (Organic-App)', // email subject
+        html: `<p style="font-size: 16px;">Welcome to Roskilde Festival Øko-App (Organic-App)</p>
             <br />
-            <p style="font-size: 14px;">Access the App here using current email: https://okoapp-staging.firebaseapp.com/
+            <p style="font-size: 14px;">Access the Web-App here using your current email: https://oko.roskilde-festival.dk/
             <br />
-            Your password for the Roskilde-festival Øko-app is: ` + newPW + `</p>
+            Your password for the Roskilde Festival Øko-App is: ` + newPW + `</p>
             <br />
-            <p style="font-size: 16px;">Best regard, the Øko-app Team.
+            <p style="font-size: 14px;">Guide for the app can be found in People shared files.</p>
+            <br />
+            <p style="font-size: 16px;">Best regards, the Øko-App Team.
             <br />
             Enjoy the music!</p>
             <br />
@@ -54,6 +56,7 @@ function sendGmail(email, newPW) {
     };
 
     // returning result
+    /*
     return transporter.sendMail(mailOptions, (error, info) => {
         if(error){
             return error.toString();
@@ -61,7 +64,7 @@ function sendGmail(email, newPW) {
         console.log("Sended ...");
         return "Sended ...";
     });
-
+*/
 }
 
 function addFirestoreUser(uid, userinfo) {
@@ -126,8 +129,8 @@ function createAdmins(body, entry) {
                                 promiseGetAdminData.push(addFirestoreUser(userRecord.uid, tempUser));
                                 
                                 // Change for go-live
-                                //return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
-                                return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
+                                return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
+                                //return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
                                 
                             })
                             .catch((error) => {
@@ -267,8 +270,8 @@ function callbackAdmin (requiredAdmins) {
                                         var addUser = addFirestoreUser(userRecord.uid, tempUser);
 
                                         // Change for go-live
-                                        //return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
-                                        return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
+                                        return sendGmail(PeopleData.Member.Email.trim(), newPW);
+                                        //return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
                                     
                                     })
                                     .catch((error) => {
@@ -293,15 +296,81 @@ function callbackAdmin (requiredAdmins) {
                     //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
                 })
     });
+
 }
 
+function callbackAdminExternal (requiredAdminsExternal) { 
+
+    // Loop through all admins and create. 
+    requiredAdminsExternal.forEach((entry) => {
+    
+
+        var addSuperAdmin = db.collection('users').where('email', '==', entry).get()
+        .then(snapshot => {
+            if (snapshot.size === 0) {    
+       
+                console.log('create.admin: ', `creating admin user with email: ${entry}`);
+                var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+
+                // eslint-disable-next-line promise/no-nesting
+                admin.auth().createUser({
+                    email: entry,
+                    emailVerified: false,
+                    password: newPW,
+                    photoURL: generatePhotoUrl(entry),
+                    displayName: entry,
+                    disabled: false
+                })
+                    .then((userRecord) => {
+                        // See the UserRecord reference doc for the contents of userRecord.
+                        console.log('Successfully created new user:', userRecord.uid);
+
+                        var tempUser = {
+                            email: entry,
+                            name: entry,
+                            peopleId: '',
+                            role: ROLE_SUPERADMIN,
+                            teams: arrayListId
+                        };
+                        
+                        // Add user to firestore if admin
+                        // eslint-disable-next-line promise/no-nesting
+                        
+                        var addUser = addFirestoreUser(userRecord.uid, tempUser);
+
+                        // Change for go-live
+                        return sendGmail(PeopleData.Member.Email.trim(), newPW);
+                        //return sendGmail('mikael.soerensen@roskilde-festival.dk', newPW);
+                    
+                    })
+                    .catch((error) => {
+                        //console.log('Error creating new user:', error);
+                    });  
+
+            } else {
+                console.log('Super Admin User already exists with email id: ', entry);
+                //return doc.data();
+                return false;
+            }
+            return true;
+        })
+        .catch(err => {
+            console.log('Error getting document', err);
+            return err;
+            //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+        })
+
+
+    });
+}
 
 module.exports = function() {
     const data = require('../data/teams-2019');
     var requiredListOwnerEmail = data.requiredListOwnerEmail;
     var requiredAdmins = data.requiredAdmins;
+    var requiredAdminsExternal = data.requiredAdminsExternal;
 
-    console.log(`Starting import of ${requiredListOwnerEmail.length} owners, and ${requiredAdmins.length} admins.`);
+    console.log(`Starting import of ${requiredListOwnerEmail.length} owners, ${requiredAdmins.length} admins internal and ${requiredAdminsExternal.length} admins external.`);
 
     // Loop through all admins and create. 
     requiredListOwnerEmail.forEach((entry) => {
@@ -336,11 +405,20 @@ module.exports = function() {
         
             // eslint-disable-next-line promise/no-nesting
             Promise.all(promisesTeams).then((values) => {
-                console.log("Done with Admins and Teams.. Team len: ", arrayListId.length);
+                console.log("Done with Admins and Teams.. Team len: ", arrayListId.length, " Starting Admin Internal ...");
                 return callbackAdmin(requiredAdmins);
             }).catch((err)=> {
                 return err;
             });
+
+            // eslint-disable-next-line promise/no-nesting
+            Promise.all(promisesTeams).then((values) => {
+                console.log("Done with Admins and Teams.. Team len: ", arrayListId.length, " Starting Admin External ...");
+                return callbackAdminExternal(requiredAdminsExternal);
+            }).catch((err)=> {
+                return err;
+            });
+
 
         }, 15000);
 
