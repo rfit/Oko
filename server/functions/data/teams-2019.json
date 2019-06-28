@@ -25,7 +25,7 @@
         "nm@vega.dk",
         "pc@peterlarsenkaffe.dk",
         "kim.roskilde@gmail.com",
-        "phamhong_hanh@hotmail.com ",
+        "phamhong_hanh@hotmail.com",
         "joan@thorlin.dk",
         "Lasseandersen@groed.com",
         "draemdarebelivedo@hotmail.com",
@@ -113,6 +113,9 @@
         203757,
         932,
         121821
+    ],
+    "requiredAdminsExternal": [
+        "giba@fvst.dk"
     ],
     "__commentAdmins": {
         "Stine Eisen": 111100,

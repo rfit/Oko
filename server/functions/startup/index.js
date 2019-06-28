@@ -56,7 +56,6 @@ function sendGmail(email, newPW) {
     };
 
     // returning result
-    /*
     return transporter.sendMail(mailOptions, (error, info) => {
         if(error){
             return error.toString();
@@ -64,7 +63,7 @@ function sendGmail(email, newPW) {
         console.log("Sended ...");
         return "Sended ...";
     });
-*/
+
 }
 
 function addFirestoreUser(uid, userinfo) {
