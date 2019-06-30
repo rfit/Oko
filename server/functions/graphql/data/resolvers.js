@@ -363,6 +363,10 @@ const resolvers = {
 		addInvoice: (parent, args, context) => {
 			if(!context.currentUser) { return null; }
 
+			if ( args.excluded === null ) {
+				args.excluded = 0;
+			}
+
 			const invoice = {
 				invoiceId: args.invoiceId, 
 				createdDate: serverTimestamp,
@@ -378,6 +382,7 @@ const resolvers = {
 
 			return addInvoice = db.collection('invoices').add(invoice)
 				.then(ref => {
+					// eslint-disable-next-line promise/no-nesting
 					return db.collection('invoices').doc(`${ref.id}`).get()
 					.then(doc => {
 						if (!doc.exists) {
