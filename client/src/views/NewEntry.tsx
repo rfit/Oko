@@ -287,7 +287,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 										name="excluded"
 										type="number"
 										variant="outlined"
-										// inputProps={{ min: "0" }}
+										inputProps={{ min: "0" }}
 										id="non-eco"
 										// tslint:disable-next-line: jsx-no-lambda
 										label={`Ikke omfattet andel`}
