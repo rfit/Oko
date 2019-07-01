@@ -161,9 +161,23 @@ class App extends React.Component<IAppProps, IAppState> {
 						}
 
 						if(typeof(error) === "object") {
-							return <ErrorView error={{message: JSON.stringify(error)}} />
+							return  (
+								<div className={classes.root}>
+									<CssBaseline />
+									<main className={classes.appContent}>
+										<ErrorView error={{message: JSON.stringify(error)}} />
+									</main>
+								</div>
+							)
 						}
-						return <div>{error}</div>;
+						return (
+							<div className={classes.root}>
+								<CssBaseline />
+								<main className={classes.appContent}>
+									<ErrorView error={{message: error}} />
+								</main>
+							</div>
+						);
 					}
 
 					if(!data.currentUser) {
