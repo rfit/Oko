@@ -141,7 +141,7 @@ const resolvers = {
 		},
 		//Eksempel på custom felter, udfra de eksisterende
 		teams: user => {
-			return db.collection('teams').get()
+			return db.collection('teams').orderBy('name', 'asc').get()
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
