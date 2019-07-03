@@ -57,7 +57,7 @@ const resolvers = {
 				.catch(errorHandler)
 		},
 		teams: () => {
-			return db.collection('teams').get()
+			return db.collection('teams').orderBy('name', 'asc').get()
 			.then(snapshot => {
 				if (snapshot.empty) {
 					console.log('No such document!');
