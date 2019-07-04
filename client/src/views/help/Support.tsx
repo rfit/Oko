@@ -33,14 +33,13 @@ function Help(props: any) {
 			</Typography>
 			<Typography paragraph>
 				Det er muligt at oprette fejl og ønsker på: <a href="https://github.com/rfit/Oko/issues">GitHub Issues</a>.
-
-				Brug kun telefon hvis det er meget akut. Der bliver tjekket mails løbende.<br /><br />
+				Send gerne spørgsmål og fejl til alle 3 e-mails.
 				<ul>
 					<li>
-						Allan Kimmer Jensen, 31 58 50 80, <a href="mailto:allan.jensen@roskilde-festival.dk">allan.jensen@roskilde-festival.dk</a>
+						Mikael Sørensen, <a href="mailto:Mikael.Soerensen@roskilde-festival.dk;stine.eisen@roskilde-festival.dk;Mikael.Soerensen@roskilde-festival.dk">Mikael.Soerensen@roskilde-festival.dk</a>
 					</li>
 					<li>
-						Mikael Sørensen, <a href="mailto:Mikael.Soerensen@roskilde-festival.dk">Mikael.Soerensen@roskilde-festival.dk</a>
+						Allan Kimmer Jensen, <a href="mailto:allan.jensen@roskilde-festival.dk;Mikael.Soerensen@roskilde-festival.dk;stine.eisen@roskilde-festival.dk">allan.jensen@roskilde-festival.dk</a>
 					</li>
 				</ul>
 			</Typography>
