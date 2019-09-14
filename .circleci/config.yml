@@ -67,4 +67,6 @@ workflows:
   build-test-deploy:
     jobs:
       - build-and-test
-      - push-images
+      - push-images:
+          requires:
+            - build-and-test
