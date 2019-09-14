@@ -56,8 +56,9 @@ jobs:
     docker:
       - image: tstrohmeier/awscli:3.7.2
 
-    run:
-      working_directory: ~/repo/client
-      command: |
-        docker build -t oko-client .
+    steps:
+      - run:
+        working_directory: ~/repo/client
+        command: |
+          docker build -t oko-client .
 
