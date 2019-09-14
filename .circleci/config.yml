@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  build:
+  build-and-test:
     docker:
       # specify the version you desire here
       - image: circleci/node:7.10
@@ -23,7 +23,7 @@ jobs:
       - restore_cache:
           working_directory:  ~/repo/client
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-{{ checksum "client/package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
@@ -35,7 +35,7 @@ jobs:
           working_directory:  ~/repo/client
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-dependencies-{{ checksum "client/package.json" }}
 
       # run tests!
       - run:
@@ -62,3 +62,9 @@ jobs:
         command: |
           docker build -t oko-client .
 
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build-and-test
+      - push-images
