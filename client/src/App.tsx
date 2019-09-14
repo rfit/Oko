@@ -104,6 +104,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		open: false,
 		mobileOpen: false,
 	};
+
 	public handleDrawerOpen = () => {
 		this.setState({ open: true });
 	};
