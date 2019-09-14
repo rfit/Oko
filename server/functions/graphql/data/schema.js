@@ -1,8 +1,7 @@
 const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
-
-type Query {
+  type Query {
     user(id: ID!): User
     currentUser: User
     users: [User]
@@ -14,28 +13,24 @@ type Query {
   }
 
   type Mutation {
-    addUser(
-      email: String!,
-      teamId: ID!,
-      password: String
-    ): User
+    addUser(email: String!, teamId: ID!, password: String): User
     removeUser(id: Int!): Boolean!
     addInvoice(
-      invoiceId: ID!,
-      invoiceDate: String!,
-      supplier: String!,
-      teamId: ID!,
-      eco: Float!,
-      nonEco: Float!,
+      invoiceId: ID!
+      invoiceDate: String!
+      supplier: String!
+      teamId: ID!
+      eco: Float!
+      nonEco: Float!
       excluded: Float!
     ): Invoice
     updateInvoice(
-      id: ID!,
-      invoiceId: ID,
-      invoiceDate: String,
-      supplier: String,
-      eco: Float,
-      nonEco: Float,
+      id: ID!
+      invoiceId: ID
+      invoiceDate: String
+      supplier: String
+      eco: Float
+      nonEco: Float
       excluded: Float
     ): Invoice
     deleteInvoice(id: ID!): Boolean!
@@ -59,16 +54,16 @@ type Query {
     id: ID!
     peopleId: Int!
     name: String!
-      "General notes about this team"
+    "General notes about this team"
     notes: String
-      "KG or KR, how do this team measure?" 
+    "KG or KR, how do this team measure?"
     measurement: String
     users: [User]
     invoices: [Invoice]
   }
 
   type Invoice {
-      "Firebase invoice id"
+    "Firebase invoice id"
     id: ID
     invoiceId: ID!
     createdDate: String

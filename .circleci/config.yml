@@ -41,3 +41,23 @@ jobs:
       - run:
           working_directory:  ~/repo/client
           command: yarn test --coverage
+
+      # Build client
+      - run:
+          working_directory: ~/repo/client
+          command: yarn build
+
+      - persist_to_workspace:
+          root: ~/repo/client
+          paths:
+            - build/*
+
+  push-images:
+    docker:
+      - image: tstrohmeier/awscli:3.7.2
+
+    run:
+      working_directory: ~/repo/client
+      command: |
+        docker build -t oko-client .
+
