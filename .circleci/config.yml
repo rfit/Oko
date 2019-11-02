@@ -54,6 +54,9 @@ jobs:
             - server
 
   push-images:
+    environment:
+      CLIENT_REPO: 242728147184.dkr.ecr.eu-central-1.amazonaws.com/oko-app/client
+
     docker:
       - image: tstrohmeier/awscli:3.7.2
 
@@ -76,8 +79,10 @@ jobs:
           name: Build client docker image
           working_directory: /tmp/workspace/client
           command: |
-            ls
-            docker build -t oko-client .
+            docker build -t oko-app/client .
+            $(aws ecr get-login --no-include-email --region eu-central-1)
+            docker tag oko-app/client:latest $CLIENT_REPO:latest
+            docker push $CLIENT_REPO:latest
 
 workflows:
   version: 2
