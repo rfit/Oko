@@ -57,6 +57,7 @@ jobs:
       - image: tstrohmeier/awscli:3.7.2
 
     steps:
+      - checkout
       - setup_remote_docker
 
       - run:
