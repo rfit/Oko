@@ -57,7 +57,7 @@ jobs:
     environment:
       CLIENT_REPO: 242728147184.dkr.ecr.eu-central-1.amazonaws.com/oko-app/client
       VERSION: 1.0
-      BUILD_ID: $VERSION-$CIRCLE_BUILD_NUM
+      BUILD_ID: ${VERSION}-${CIRCLE_BUILD_NUM}
 
     docker:
       - image: tstrohmeier/awscli:3.7.2
