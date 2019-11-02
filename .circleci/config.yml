@@ -57,6 +57,9 @@ jobs:
       - image: tstrohmeier/awscli:3.7.2
 
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+
       - run:
           working_directory: ~/repo/client
           command: |
