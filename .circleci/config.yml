@@ -48,16 +48,16 @@ jobs:
           command: yarn build
 
       - persist_to_workspace:
-          root: ~/repo/client
+          root: ~/repo
           paths:
-            - build/*
+            - client
+            - server
 
   push-images:
     docker:
       - image: tstrohmeier/awscli:3.7.2
 
     steps:
-      - checkout
       - setup_remote_docker
 
       - run:
@@ -69,9 +69,12 @@ jobs:
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
 
+      - attach_workspace:
+          at: /tmp/workspace
+
       - run:
           name: Build client docker image
-          working_directory: ~/repo/client
+          working_directory: ~/tmp/workspace/client
           command: |
             ls
             docker build -t oko-client .
