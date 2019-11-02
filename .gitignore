@@ -1,3 +1,4 @@
-
+.idea/
 client/.firebase/
-serviceAccountKey.json
+server/functions/serviceAccountKey.json
+server/functions/serviceAccountKey2.json

@@ -1,7 +1,7 @@
 # Oko
 [![CircleCI](https://circleci.com/gh/rfit/Oko.svg?style=svg)](https://circleci.com/gh/rfit/Oko) [![codecov](https://codecov.io/gh/rfit/Oko/branch/master/graph/badge.svg)](https://codecov.io/gh/rfit/Oko)
 
-Welcome to Oko! This project is used for Roskilde Festival. It's helping tracking the amount of organic food and brevages for merchants and the entire festival.
+Welcome to Oko! This project is used for Roskilde Festival. It's helping tracking the amount of organic food and beverages for merchants and the entire festival.
 
 It replaces the [Organic Accounting Sheet](https://www.oekologisk-spisemaerke.dk/media/1104/organic-accounting-sheet.xls). A excel sheet, with an app that work on most devices - it also makes it possible to keep an overview of all the merchants on the festival, so we can reach out to ones below the threshold. 
 
