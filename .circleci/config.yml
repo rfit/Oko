@@ -59,8 +59,7 @@ jobs:
     steps:
       - run:
         working_directory: ~/repo/client
-        command: |
-          docker build -t oko-client .
+        command: docker build -t oko-client .
 
 workflows:
   version: 2
