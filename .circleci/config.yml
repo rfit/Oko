@@ -74,7 +74,7 @@ jobs:
 
       - run:
           name: Build client docker image
-          working_directory: ~/tmp/workspace/client
+          working_directory: /tmp/workspace/client
           command: |
             ls
             docker build -t oko-client .
