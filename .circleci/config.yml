@@ -82,7 +82,7 @@ jobs:
           command: |
             docker build -t oko-app/client .
             $(aws ecr get-login --no-include-email --region eu-central-1)
-            echo 'export BUILD_ID=$VERSION-$CIRCLE_BUILD_NUM' >> $BASH_ENV
+            export BUILD_ID=$VERSION-$CIRCLE_BUILD_NUM
             docker tag oko-app/client:latest $CLIENT_REPO:$BUILD_ID
             docker tag oko-app/client:latest $CLIENT_REPO:latest
             docker push $CLIENT_REPO:$BUILD_ID
