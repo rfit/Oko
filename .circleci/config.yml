@@ -73,6 +73,7 @@ jobs:
           name: Build client docker image
           working_directory: ~/repo/client
           command: |
+            ls
             docker build -t oko-client .
 
 workflows:
