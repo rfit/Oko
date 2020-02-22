@@ -2,10 +2,10 @@ const admin = require('firebase-admin');
 const serverTimestamp = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 const db = admin.firestore();
 const { AuthenticationError } = require("apollo-server-express");
-
-
 const rp = require('request-promise-native');
 const config = require('../../config');
+
+const { User, Team, Invoice } = require('./schema')
 
 const errorHandler = (err) => {
 	console.log('Error getting document', err);

@@ -1,82 +1,40 @@
-const { gql } = require("apollo-server-express");
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const typeDefs = gql`
-  type Query {
-    user(id: ID!): User
-    currentUser: User
-    users: [User]
-    team(id: ID!): Team
-    teams: [Team]
-    invoice(id: ID!): Invoice
-    invoices(teamId: ID!): [Invoice]
-    allinvoices: [Invoice]
-  }
-
-  type Mutation {
-    addUser(email: String!, teamId: ID!, password: String): User
-    removeUser(id: Int!): Boolean!
-    addInvoice(
-      invoiceId: ID!
-      invoiceDate: String!
-      supplier: String!
-      teamId: ID!
-      eco: Float!
-      nonEco: Float!
-      excluded: Float!
-    ): Invoice
-    updateInvoice(
-      id: ID!
-      invoiceId: ID
-      invoiceDate: String
-      supplier: String
-      eco: Float
-      nonEco: Float
-      excluded: Float
-    ): Invoice
-    deleteInvoice(id: ID!): Boolean!
-    setTeamMeasurement(teamId: ID!, measurement: String): Team
-    setCurrentTeam(id: ID!): User
-    setNotes(teamId: ID!, notes: String): Team
-  }
-
-  type User {
-    id: ID!
-    peopleId: Int
-    name: String
-    email: String!
-    role: String!
-    currentTeam: Team
-    teams: [Team]
+const User = mongoose.model('user', new Schema({
+    peopleId: Number,
+    name: String,
+    email: { type: String, required: true },
+    role: { type: String, required: true },
+    currentTeam: Team,
+    teams: [Team],
     invoices: [Invoice]
-  }
+}))
 
-  type Team {
-    id: ID!
-    peopleId: Int!
-    name: String!
-    "General notes about this team"
-    notes: String
-    "KG or KR, how do this team measure?"
-    measurement: String
-    users: [User]
+const Team = mongoose.model('team', new Schema({
+    peopleId: { type: Number, required: true },
+    name: { type: String, required: true },
+    notes: String,
+    measurement: String,
+    users: [User],
     invoices: [Invoice]
-  }
+}))
 
-  type Invoice {
-    "Firebase invoice id"
-    id: ID
-    invoiceId: ID!
-    createdDate: String
-    invoiceDate: String
-    supplier: String
-    teamId: ID!
-    userId: ID!
-    userName: String
-    eco: Float!
-    nonEco: Float!
-    excluded: Float!
-    total: Float
-  }
-`;
+const Invoice = mongoose.model('invoice', new Schema({
+    invoiceId: { type: Number, required: true },
+    createdDate: String,
+    invoiceDate: String,
+    supplier: String,
+    teamId: { type: Team, required: true },
+    userId: { type: User, required: true },
+    userName: String,
+    eco: { type: Number, required: true },
+    nonEco: { type: Number, required: true },
+    total: Number
+}))
 
-module.exports = typeDefs;
+module.exports = {
+    User,
+    Team,
+    Invoice
+}

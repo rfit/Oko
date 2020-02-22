@@ -2,6 +2,10 @@
 const express = require("express");
 const admin = require('firebase-admin');
 const { ApolloServer } = require("apollo-server-express");
+
+const mongoose = require('mongoose')
+mongoose.Promise = global.Promise
+
 // cors allows our server to accept requests from different origins
 const cors = require("cors");
 
@@ -23,7 +27,11 @@ function configureServer() {
 	//use the cors middleware
 	app.use(cors());
 
-	const typeDefs = require('./data/schema');
+	const connectionUrl = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:27017/oko`
+	mongoose.connect(connectionUrl, { useNewUrlParser: true })
+	mongoose.connection.once('open', () => console.log(`Connected to mongo at ${connectionUrl}`))
+
+	const typeDefs = require('./data/typedefs');
 	const resolvers = require('./data/resolvers');
 		
 	const server = new ApolloServer({

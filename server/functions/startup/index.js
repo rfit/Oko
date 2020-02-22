@@ -67,7 +67,6 @@ function sendGmail(email, newPW) {
 }
 
 function addFirestoreUser(uid, userinfo) {
-
     db.collection('users').doc(`${uid}`).set(userinfo).then(ref => {
         console.log('User added: ', userinfo);
         return ref;
@@ -75,7 +74,6 @@ function addFirestoreUser(uid, userinfo) {
         console.log('Error getting document', err);
         return err;
     });
-
 }
 
 function createAdmins(body, entry) {
