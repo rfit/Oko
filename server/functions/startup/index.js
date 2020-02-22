@@ -17,6 +17,8 @@ const promiseGetAdminData = [];
 const promiseUpdateTeam = [];
 const promiseCheckTeam = [];
 
+const { User, Team, Invoice } = require('../graphql/data/schema');
+
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -32,7 +34,6 @@ function generatePhotoUrl(email) {
 }
 
 function sendGmail(email, newPW) {
-
     const mailOptions = {
         from: 'Roskilde Øko App <oeko.app.roskilde.festival@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
         // REMEMBER TO CHANGE
@@ -59,19 +60,17 @@ function sendGmail(email, newPW) {
         if(error){
             return error.toString();
         }
-        console.log("Sended ...");
-        return "Sended ...";
+        console.log("Sent ...");
+        return "Sent ...";
     });
 
 }
 
-function addFirestoreUser(uid, userinfo) {
-    db.collection('users').doc(`${uid}`).set(userinfo).then(ref => {
+function addMongoUser(uid, userinfo) {
+    User.create({ _id: uid, ...userinfo }).then(() => {
         console.log('User added: ', userinfo);
-        return ref;
     }).catch(err => {
         console.log('Error getting document', err);
-        return err;
     });
 }
 
@@ -90,9 +89,9 @@ function createAdmins(body, entry) {
             arrayMemberId.push(PeopleData.Members[item].MemberId);
             
             promiseGetAdminData.push(
-                db.collection('users').where('peopleId', '==', PeopleData.Members[item].MemberId).get()
-                .then(snapshot => {
-                    if (snapshot.size === 0) {    
+                User.find({ peopleId:  PeopleData.Members[item].MemberId})
+                .then(users => {
+                    if (users.length === 0) {
                 
                             let newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
@@ -122,7 +121,7 @@ function createAdmins(body, entry) {
                                 // Add user to firestore if admin
                                 // eslint-disable-next-line promise/no-nesting
                                 
-                                promiseGetAdminData.push(addFirestoreUser(userRecord.uid, tempUser));
+                                promiseGetAdminData.push(addMongoUser(userRecord.uid, tempUser));
                                 
                                 // Change for go-live
                                 return sendGmail(PeopleData.Members[item].Email.trim(), newPW);
@@ -171,35 +170,33 @@ function createTeams(body, entry) {
             
                 arrayListId.push(PeopleData.Lists[item].ListId);
                 
-                promiseUpdateTeam.push(db.collection('users').where('peopleId', '==', entry).get()
+                promiseUpdateTeam.push(User.find({ peopleId: entry })
                 // eslint-disable-next-line promise/always-return
                 .then((querySnapshot) => {
                     querySnapshot.forEach((doc) => {
                         //console.log(doc.id, " => ", doc.data());
                         // Build doc ref from doc.id
-                        db.collection("users").doc(doc.id).update({teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)});
+                        User.findOneAndUpdate({ _id: doc.id }, {teams: FieldValue.arrayUnion(PeopleData.Lists[item].ListId)});
                     });
                 }).catch(err => {
                     console.log('Error getting document', err);
                     return err;
                 }));
 
-                promiseCheckTeam.push(db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).get()
+                promiseCheckTeam.push(User.findById(PeopleData.Lists[item].ListId)
                 .then(doc => {
-                    if (!doc.exists) {
+                    if (!doc) {
                         // Add team to firestore if admin
                         // eslint-disable-next-line promise/no-nesting
-                        let addTeam = db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).set(tempTeam).then(ref => {
+                        User.create({ _id: PeopleData.Lists[item].ListId, ...tempTeam }).then(() => {
                             console.log('Team do not exists: ', tempTeam);
-                            return ref;
                         }).catch(err => {
                             console.log('Error getting document', err);
-                            return err;
                         });
                         
                     } else {
-                        console.log("Team already exists: ", doc.data().name);
-                        return doc.data();
+                        console.log("Team already exists: ", doc.name);
+                        return doc;
                     }
                     return true;
                 })
@@ -207,11 +204,11 @@ function createTeams(body, entry) {
                     console.log('Error getting document', err);
                     return err;
                     //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                }))   
+                }));   
             }
     });
 
-    return Promise.all(promiseUpdateTeam,promiseCheckTeam);
+    return Promise.all([promiseUpdateTeam, promiseCheckTeam]);
 
 }
 
@@ -220,9 +217,8 @@ function callbackAdmin (requiredAdmins) {
     requiredAdmins.forEach((entry) => {
         
         // **** OBS **** Still on people-VOL!!
-        let addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
-        .then(snapshot => {
-            if (snapshot.size === 0) {    
+        User.find({ peopleId: entry }).then(users => {
+            if (users.length === 0) {
        
                     console.log('create.admin: ', `creating admin user with id ${entry}`);
                     // People REST API: GetTeams (Get all teams in people)
@@ -263,7 +259,7 @@ function callbackAdmin (requiredAdmins) {
                                         // Add user to firestore if admin
                                         // eslint-disable-next-line promise/no-nesting
                                         
-                                        let addUser = addFirestoreUser(userRecord.uid, tempUser);
+                                        let addUser = addMongoUser(userRecord.uid, tempUser);
 
                                         // Change for go-live
                                         return sendGmail(PeopleData.Member.Email.trim(), newPW);
@@ -290,7 +286,7 @@ function callbackAdmin (requiredAdmins) {
                     console.log('Error getting document', err);
                     return err;
                     //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-                })
+                });
     });
 
 }
@@ -301,9 +297,8 @@ function callbackAdminExternal (requiredAdminsExternal) {
     requiredAdminsExternal.forEach((entry) => {
     
 
-        let addSuperAdmin = db.collection('users').where('email', '==', entry).get()
-        .then(snapshot => {
-            if (snapshot.size === 0) {    
+        User.find({ email: entry }).then(users => {
+            if (users.length === 0) {
        
                 console.log('create.admin: ', `creating admin user with email: ${entry}`);
                 let newPW = Math.floor((Math.random() * 10000000) + 1).toString();
@@ -332,7 +327,7 @@ function callbackAdminExternal (requiredAdminsExternal) {
                         // Add user to firestore if admin
                         // eslint-disable-next-line promise/no-nesting
                         
-                        let addUser = addFirestoreUser(userRecord.uid, tempUser);
+                        let addUser = addMongoUser(userRecord.uid, tempUser);
 
                         // Change for go-live
                         return sendGmail(PeopleData.Member.Email.trim(), newPW);
@@ -354,7 +349,7 @@ function callbackAdminExternal (requiredAdminsExternal) {
             console.log('Error getting document', err);
             return err;
             //throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-        })
+        });
 
 
     });
@@ -373,7 +368,7 @@ module.exports = function() {
         // People REST API: GetTeams (Get all teams in people)
         let RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
         promisesAdmins.push(request(RestMember + config.HEIMDAL_APIKEY).then((body) => {
-               return createAdmins(body, entry)
+               return createAdmins(body, entry);
         })
         .catch((err) => {
             return err;
