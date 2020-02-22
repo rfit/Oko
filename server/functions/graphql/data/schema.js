@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const ObjectId = Schema.Types.ObjectId
+
 const User = mongoose.model('user', new Schema({
     peopleId: Number,
     name: String,
     email: { type: String, required: true },
     role: { type: String, required: true },
-    currentTeam: Team,
-    teams: [Team],
-    invoices: [Invoice]
+    currentTeam: { type: ObjectId, ref: 'team' },
+    teams: [{ type: ObjectId, ref: 'team' }],
+    invoices: [{ type: ObjectId, ref: 'invoice' }]
 }))
 
 const Team = mongoose.model('team', new Schema({
@@ -16,8 +18,8 @@ const Team = mongoose.model('team', new Schema({
     name: { type: String, required: true },
     notes: String,
     measurement: String,
-    users: [User],
-    invoices: [Invoice]
+    users: [{ type: ObjectId, ref: 'user' }],
+    invoices: [{ type: ObjectId, ref: 'invoice' }]
 }))
 
 const Invoice = mongoose.model('invoice', new Schema({
@@ -25,8 +27,8 @@ const Invoice = mongoose.model('invoice', new Schema({
     createdDate: String,
     invoiceDate: String,
     supplier: String,
-    teamId: { type: Team, required: true },
-    userId: { type: User, required: true },
+    teamId: { type: ObjectId, ref: 'team', required: true },
+    userId: { type: ObjectId, ref: 'user', required: true },
     userName: String,
     eco: { type: Number, required: true },
     nonEco: { type: Number, required: true },
