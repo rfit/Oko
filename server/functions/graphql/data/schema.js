@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const ObjectId = Schema.Types.ObjectId
+const ObjectId = Schema.Types.ObjectId;
 
 const User = mongoose.model('user', new Schema({
+    _id: Number,
     peopleId: Number,
     name: String,
     email: { type: String, required: true },
@@ -11,7 +12,7 @@ const User = mongoose.model('user', new Schema({
     currentTeam: { type: ObjectId, ref: 'team' },
     teams: [{ type: ObjectId, ref: 'team' }],
     invoices: [{ type: ObjectId, ref: 'invoice' }]
-}))
+}));
 
 const Team = mongoose.model('team', new Schema({
     peopleId: { type: Number, required: true },
@@ -20,7 +21,7 @@ const Team = mongoose.model('team', new Schema({
     measurement: String,
     users: [{ type: ObjectId, ref: 'user' }],
     invoices: [{ type: ObjectId, ref: 'invoice' }]
-}))
+}));
 
 const Invoice = mongoose.model('invoice', new Schema({
     invoiceId: { type: Number, required: true },
@@ -33,10 +34,10 @@ const Invoice = mongoose.model('invoice', new Schema({
     eco: { type: Number, required: true },
     nonEco: { type: Number, required: true },
     total: Number
-}))
+}));
 
 module.exports = {
     User,
     Team,
     Invoice
-}
+};

@@ -1,244 +1,227 @@
 const admin = require('firebase-admin');
 const serverTimestamp = require("firebase-admin").firestore.FieldValue.serverTimestamp();
-const db = admin.firestore();
 const { AuthenticationError } = require("apollo-server-express");
 const rp = require('request-promise-native');
 const config = require('../../config');
 
-const { User, Team, Invoice } = require('./schema')
+const { User, Team, Invoice } = require('./schema');
 
 const errorHandler = (err) => {
 	console.log('Error getting document', err);
 	return err;
-}
+};
 
 const resolvers = {
 	Query: {
 		users: () => {
-			return db.collection('users').get()
-				.then(snapshot => {
-					if (snapshot.empty) {
+			return User.find({})
+				.then(users => {
+					if (users.length === 0) {
 						console.log('No such document!');
 						return null;
 					} 
 					
-					return snapshot.docs.map( doc => {
-						return Object.assign(doc.data(), { id: doc.id });
-					});
+					return users;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		user: (parent, args) => {
-			return db.collection('users').doc(`${args.id}`).get()
-			.then(doc => {
-				if (!doc.exists) {
-					console.log('No such document!');
+			return User.findById(args.id)
+			.then(user => {
+				if (!user) {
+					console.log('No such user!');
 					return null;
 				}
-				return Object.assign(doc.data(), { id: doc.id });
+				return user;
 				
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		currentUser: (root, args, context) => {
 			// If we are not logged in, just return null
 			if(!context.currentUser) { throw new AuthenticationError('must authenticate'); }
 	
 			// console.log('currentUser', context, context.currentUser);
-			return db.collection('users').doc(`${context.currentUser.uid}`).get()
-				.then(doc => {
-					if (!doc.exists) {
-						console.log('No such document!');
+			return User.findById(context.currentUser.uid)
+				.then(user => {
+					if (!user) {
+						console.log('No such user!');
 						return null;
 					}
 
-					return Object.assign(doc.data(), { id: doc.id });
+					return user;
 				})
-				.catch(errorHandler)
+				.catch(errorHandler);
 		},
 		teams: () => {
-			return db.collection('teams').orderBy('name', 'asc').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return Team.find({}).sort('name asc')
+			.then(users => {
+				if (users.length === 0) {
 					console.log('No such document!');
 					return [];
 				} 
 			
-				return snapshot.docs.map( doc => {
-					return Object.assign(doc.data(), { id: doc.id });
-				});
+				return users;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		team: (parent, args) => {
-			return db.collection('teams').doc(`${args.id}`).get()
-			.then(doc => {
-				if (!doc.exists) {
+			return Team.findById(args.id)
+			.then(team => {
+				if (!team) {
 					console.log('No such document!');
 					return null;
 				}
-				return Object.assign(doc.data(), { id: doc.id })
+				return team;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		allinvoices: () => {
-			return db.collection('invoices').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return Invoice.find({})
+			.then(invoices => {
+				if (invoices.length === 0) {
 					console.log('allinvoices - No such document!');
 					return [];
 				} 
 				
-				return snapshot.docs.map( doc => {
-					return Object.assign(doc.data(), { id: doc.id });
-				});
+				return invoices;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		invoices: (parent, args) => {
-			const ref = db.collection('invoices').orderBy('createdDate', 'desc').where('teamId', '==', args.teamId);
-
-			return ref.get()
-				.then(snapshot => {
-					if (snapshot.empty) {
+			return Invoice.find({ teamId: args.teamId }).sort('createdDate desc')
+				.then(invoices => {
+					if (invoices.length === 0) {
 						console.log('No such document!');
 						return [];
 					}
 
-					return snapshot.docs.map( doc => {
-						return Object.assign(doc.data(), { id: doc.id });
-					});
+					return invoices;
 				})
-				.catch(errorHandler)
+				.catch(errorHandler);
 		},
 		invoice: (parent, args) => {
-			return db.collection('invoices').doc(`${args.id}`).get()
-			.then(doc => {
-				if (!doc.exists) {
-					console.log('No such document!');
+			return Invoice.findById(args.id)
+			.then(invoice => {
+				if (!invoice) {
+					console.log('No such invoice!');
 					return null;
 				}
 
-				return Object.assign(doc.data(), { id: doc.id });
+				return invoice;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 	},
 	User: {
 		currentTeam: user => {
-			const teamId = user.currentTeam || user.teams[0]
+			const teamId = user.currentTeam || user.teams[0];
 
-			return db.collection('teams').doc(`${teamId}`).get()
+			return Team.findById(teamId)
 				.then(teamDoc => {
-					if (!teamDoc.exists) {
+					if (!teamDoc) {
 						console.log(`No such document: teams/${teamId}`);
 						return null;
 					} 
 
-					return Object.assign(teamDoc.data(), { id: teamDoc.id });
+					return teamDoc;
 				})
-				.catch(errorHandler)
+				.catch(errorHandler);
 		},
 		//Eksempel på custom felter, udfra de eksisterende
 		teams: user => {
-			return db.collection('teams').orderBy('name', 'asc').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return Team.find({}).sort('name asc')
+			.then(teams => {
+				if (teams.length === 0) {
 					console.log('No such document!');
 					return [];
 				} 
 				
-				var teamArray = [];
-				snapshot.forEach(doc => {
-					user.teams.forEach(team => {
-						if( doc.data().peopleId === team ) {
-							teamArray.push(Object.assign(doc.data(), { id: doc.id }));
+				let teamArray = [];
+				teams.forEach(team => {
+					user.teams.forEach(existingTeam => {
+						if( team.peopleId === existingTeam ) {
+							teamArray.push(team);
 						}
-					})
+					});
 
 				}); 
 				return teamArray;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		invoices: user => {
-			return db.collection('invoices').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return Invoice.find({})
+			.then(invoices => {
+				if (invoices.length === 0) {
 					console.log('No such document!');
 					return [];
 				} 
 				
-				var teamArray = [];
-				snapshot.forEach(doc => {
+				let teamArray = [];
+				invoices.forEach(invoice => {
 					user.teams.forEach(team => {
-						if( doc.data().teamId === team ) {
-							teamArray.push(doc.data());
+						if( invoice.teamId === team ) {
+							teamArray.push(invoice);
 						}
-					})
+					});
 				}); 
 				return teamArray;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 	  },
 	  Team: {
 		users: team => {
-			return db.collection('users').get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return User.find({})
+			.then(users => {
+				if (users.length === 0) {
 					console.log('No such document!');
 					return [];
 				} 
 				
-				var userArray = [];
-				snapshot.forEach(doc => {
-					doc.data().teams.forEach(id => {
+				let userArray = [];
+				users.forEach(user => {
+					user.teams.forEach(id => {
 						// Not all ID's are string, some are numbers, here we double check them.
 						if( String(id) === String(team.id) ) {
-							let user = doc.data();
-							user.id = doc.id;
-							userArray.push(user);
+							userArray.push({ id: user.id });
 						}
 					});
 				});
 
 				return userArray;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 		invoices: team => {
 			console.log(`Getting invoices for ${team.id}`);
-			return db.collection('invoices').where('teamId', '==', team.id).get()
-			.then(snapshot => {
-				if (snapshot.empty) {
+			return Invoice.find({ teamId: team.id })
+			.then(invoices => {
+				if (invoices.length === 0) {
 					console.log('No invoices for ', team.id);
 					return [];
 				} 
 				
-				var invoiceArray = [];
-				snapshot.forEach(doc => {
-					invoiceArray.push(Object.assign(doc.data(), { id: doc.id }));
-				});
-				return invoiceArray;
+				return invoices;
 			})
-			.catch(errorHandler)
+			.catch(errorHandler);
 		},
 	},
 	
 	Mutation: {
 		addUser: (parent, args) => {
 			//console.log('args.email: ', args.email);
-			return db.collection('users').where('email', '==', args.email).get() 
-			.then(snapshot => {
-				if (snapshot.size === 0) {
-					var myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`;
+			return User.find({ email: args.email })
+			.then(docs => {
+				if (docs.length === 0) {
+					let myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`;
 					
 					return rp(myURL)
 					.then((response) => {
 						const PeopleData = JSON.parse(response);
 						
-						Object.keys(PeopleData.TeamMembers).forEach(function (item) {
+						Object.keys(PeopleData.TeamMembers).forEach((item) => {
 							// Find users that are admins / "Holdleder". If not users is "basis"
 							if (PeopleData.TeamMembers[item].Email === args.email) {
 	
@@ -250,12 +233,12 @@ const resolvers = {
 									displayName: PeopleData.TeamMembers[item].MemberName,
 									disabled: false
 								})
-								.then(function(userRecord) {
+								.then((userRecord) => {
 									// See the UserRecord reference doc for the contents of userRecord.
 									console.log('Successfully created new auth user:', userRecord);
 			
-									var user = {
-										id: PeopleData.TeamMembers[item].MemberId,
+									let user = {
+										_id: PeopleData.TeamMembers[item].MemberId,
 										uid: PeopleData.TeamMembers[item].MemberId,
 										email: PeopleData.TeamMembers[item].Email,
 										name: PeopleData.TeamMembers[item].MemberName,
@@ -263,8 +246,8 @@ const resolvers = {
 										role: 'Editor',
 										teams: [args.teamId]
 									};
-								
-									return addUser = db.collection('users').doc(`${user.id}`).set(user)
+
+									return User.create(user)
 										.then(ref => {
 											console.log("User Added to collection: ", user);
 											return user;
@@ -275,7 +258,7 @@ const resolvers = {
 										});
 
 								})
-								.catch(function(error) {
+								.catch((error) => {
 									console.log('Error creating new user:', error);
 								});
 							}
@@ -291,12 +274,12 @@ const resolvers = {
 							displayName: '',
 							disabled: false
 						})
-						.then(function(userRecord) {
+						.then((userRecord) => {
 							// See the UserRecord reference doc for the contents of userRecord.
 							console.log('Successfully created new auth user:', userRecord);
 	
-							var user = {
-								id: userRecord.uid,
+							let user = {
+								_id: userRecord.uid,
 								uid: userRecord.uid,
 								email: args.email,
 								name: '',
@@ -305,7 +288,7 @@ const resolvers = {
 								teams: [args.teamId]
 							};
 						
-							return addUser = db.collection('users').doc(`${user.id}`).set(user)
+							return User.create(user)
 								.then(ref => {
 									console.log("User Added to collection: ", user, ref);
 									return user;
@@ -316,35 +299,32 @@ const resolvers = {
 								});
 
 						})
-						.catch(function(error) {
+						.catch((error) => {
 							console.log('Error creating new user:', error);
 						});
 					})
 					.catch(errorHandler);
 				}
 				
-				return snapshot.docs.forEach(doc => {
-					if (doc.exists) {
-						const userData = doc.data();
-						console.log('User already exists:', userData.email, userData);
-						return 'User already exists:', userData.email;
-					} 
-				})
+				return docs.forEach(doc => {
+					console.log('User already exists:', doc.email, doc);
+					return 'User already exists:' + doc.email;
+				});
 			}) 
 			.catch(err => {
 				console.log('Error getting document', err);
 				return err;
-			})
+			});
 		},
 		removeUser: (parent, args) => {
-			return db.collection('users').doc(`${args.id}`).get()
+			return User.findById(args.id)
 			.then(doc => {
-				if (!doc.exists) {
+				if (!doc) {
 					console.log("User Not Found");
 					return false;
 				}
 
-				return addUser = db.collection('users').doc(`${args.id}`).delete()
+				return User.findById(args.id).remove()
 					.then(timestamp => {
 						console.log("User Deleted");
 						return true;
@@ -358,7 +338,7 @@ const resolvers = {
 				console.log('Error getting document', err);
 				return err;
 				//throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
-			})
+			});
 		},
 		addInvoice: (parent, args, context) => {
 			if(!context.currentUser) { return null; }
@@ -380,23 +360,20 @@ const resolvers = {
 				total: args.eco + args.nonEco + args.excluded
 			};
 
-			return addInvoice = db.collection('invoices').add(invoice)
+			return Invoice.create(invoice)
 				.then(ref => {
 					// eslint-disable-next-line promise/no-nesting
-					return db.collection('invoices').doc(`${ref.id}`).get()
+					return Invoice.findById(ref.id)
 					.then(doc => {
-						if (!doc.exists) {
+						if (!doc) {
 							console.log('No such document!');
 							return null;
 						} else {
-							var invoiceArray = [];
-							invoiceArray = doc.data();
-							invoiceArray.id = ref.id;
-							console.log('Invoice Document data:', invoiceArray);
-							return invoiceArray;
+							console.log('Invoice Document data:', doc);
+							return doc;
 						}
 					})
-					.catch(errorHandler)
+					.catch(errorHandler);
 				})
 				.catch(err => {
 					console.log('Error getting document', err);
@@ -406,25 +383,24 @@ const resolvers = {
 		updateInvoice: (parent, args, context) => {
 			if(!context.currentUser) { return null; }
 
-			const invoiceRef = db.collection('invoices').doc(`${args.id}`);
-			return invoiceRef.get()
+			return Invoice.findById(args.id)
 				.then(doc => {
-					if (!doc.exists) {
+					if (!doc) {
 						console.log("Invoice Not Found");
 						return false;
 					}
 
 					const invoice = {
+						_id: args.id,
 						createdDate: serverTimestamp,
-						invoiceId: doc.data().invoiceId,
-						invoiceDate: doc.data().invoiceDate,
-						teamId: doc.data().teamId,
+						invoiceId: doc.invoiceId,
+						invoiceDate: doc.invoiceDate,
+						teamId: doc.teamId,
 						userId: context.currentUser.uid,
-						eco: doc.data().eco,
-						nonEco: doc.data().nonEco,
-						excluded: doc.data().excluded,
-						supplier: doc.data().supplier
-
+						eco: doc.eco,
+						nonEco: doc.nonEco,
+						excluded: doc.excluded,
+						supplier: doc.supplier
 					};
 
 					if( args.invoiceId ) { invoice.invoiceId = args.invoiceId; }
@@ -444,23 +420,20 @@ const resolvers = {
 
 					console.log(`Updating invoice: ${JSON.stringify(invoice)}`);
 
-					return invoiceRef.update(invoice)
-						.then(time => {
-							return invoiceRef.get()
+					return Invoice.update(invoice)
+						.then(() => {
+							return Invoice.findById(args.id)
 								.then(updatedoc => {
-									if (!updatedoc.exists) {
+									if (!updatedoc) {
 										console.log('No such document!');
 										return null;
-									} 
-									var invoiceArray = [];
-									invoiceArray = updatedoc.data();
-									invoiceArray.id = args.id;
-									console.log('Invoice Document data:', invoiceArray);
-									return updatedoc.data();
+									}
+									console.log('Invoice Document data:', updatedoc);
+									return updatedoc;
 								})
 								.catch(err => {
 									return err;
-								})
+								});
 				})
 				.catch(err => {
 					console.log('Error getting document', err);
@@ -470,19 +443,19 @@ const resolvers = {
 			.catch(err => {
 				console.log('Error getting document', err);
 				return err; 
-			})
+			});
 		},
 		deleteInvoice: (parent, args, context) => {
 			if(!context.currentUser) { return null; }
 
-			return db.collection('invoices').doc(`${args.id}`).get()
+			return Invoice.findById(args.id)
 			.then(doc => {
-				if (!doc.exists) {
+				if (!doc) {
 					console.log("Invoice Not Found");
 					return false;
 				} else {
-					return addUser = db.collection('invoices').doc(`${args.id}`).delete()
-					.then(ref => {
+					return Invoice.findOneAndDelete(args.id)
+					.then(() => {
 						console.log("Invoice Deleted");
 						return true;
 					})
@@ -492,25 +465,20 @@ const resolvers = {
 			.catch(err => {
 				console.log('Error getting document', err);
 				return err; 
-			})
+			});
         },
 		setTeamMeasurement: (parent, args, context) => {
 			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
 
-			const docRef = db.collection('teams').doc(`${args.teamId}`);
-
 			if (args.measurement === 'KG' || args.measurement === 'KR') {
-				return docRef.update({
+				return Team.findOneAndUpdate({ _id: args.id }, {
 						measurement: args.measurement
 					})
 					.then(time => {
 						console.log(`Measurement Changed for ${args.teamId} to ${args.measurement} by ${context.currentUser.uid}`);
 
-						return docRef.get()
-							.then(doc => {
-								return Object.assign(doc.data(), { id: doc.id });
-							})
-							.catch(errorHandler)
+						return Team.findById(args.id)
+							.catch(errorHandler);
 					})
 					.catch(err => {
 						console.log('Error getting document', err);
@@ -525,19 +493,14 @@ const resolvers = {
 		setNotes: (parent, args, context) => {
 			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
 
-			const docRef = db.collection('teams').doc(`${args.teamId}`);
-
-			return docRef.update({
+			return Team.findOneAndUpdate({ _id: args.teamId }, {
 					notes: args.notes
 				})
 				.then(time => {
 					console.log(`Note set for ${args.teamId} to ${args.notes} by ${context.currentUser.uid}`);
 
-					return docRef.get()
-						.then(doc => {
-							return Object.assign(doc.data(), { id: doc.id });
-						})
-						.catch(errorHandler)
+					return Team.findById(args.id)
+						.catch(errorHandler);
 				})
 				.catch(errorHandler);
 		},
@@ -546,23 +509,19 @@ const resolvers = {
 		setCurrentTeam: (parent, args, context) => {
 			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
 			
-			const ref = db.collection('users').doc(`${context.currentUser.uid}`);
-
-			return ref.update({
+			return User.findOneAndUpdate({ _id: context.currentUser.uid },{
 				currentTeam: args.id
 			}).then(() => {
-				return ref.get()
+				return User.findById(context.currentUser.uid).get()
 					.then(doc => {
-						const userData = doc.data();
-						userData.id = doc.id;
-						console.log('Updated current team:', userData.id, args.id);
-						return userData;
+						console.log('Updated current team:', doc, args.id);
+						return doc;
 					})
 					.catch(err => {
 						console.log('Error setCurrentTeam', err);
 						return err;
-					})
-			})
+					});
+			});
  
 		},
 	},

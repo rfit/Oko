@@ -4,17 +4,12 @@ const config = require('./config');
 require('dotenv').config();
 
 admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-    databaseURL: 'https://<DATABASE_NAME>.firebaseio.com'
+    credential: admin.credential.applicationDefault()
 });
-
-const settings = {timestampsInSnapshots: false};
-admin.firestore().settings(settings);
 
 const functions = require("firebase-functions");
 const configureServer = require("./graphql/server");
 const getPeopleData = require("./startup/index");
-
 
 //initialize the server
 const server = configureServer();

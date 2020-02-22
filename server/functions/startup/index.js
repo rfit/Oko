@@ -1,7 +1,6 @@
 // Firebase Setup
 const admin = require('firebase-admin');
-var db = admin.firestore();
-var FieldValue = require("firebase-admin").firestore.FieldValue;
+let FieldValue = require("firebase-admin").firestore.FieldValue;
 
 const config = require('../config');
 const request = require('request-promise-native');
@@ -10,8 +9,8 @@ const nodemailer = require('nodemailer');
 const ROLE_SUPERADMIN = "SUPERADMIN";
 const ROLE_ADMIN = "ADMIN";
 
-var arrayListId = [];
-var arrayMemberId = [];
+let arrayListId = [];
+let arrayMemberId = [];
 const promisesAdmins = [];
 const promisesTeams = [];
 const promiseGetAdminData = [];
@@ -27,7 +26,7 @@ let transporter = nodemailer.createTransport({
 });
 
 function generatePhotoUrl(email) {
-    var crypto = require('crypto');
+    let crypto = require('crypto');
     const hash = crypto.createHash('md5').update(email).digest("hex");
     return 'https://www.gravatar.com/avatar/' + hash;
 }
@@ -95,7 +94,7 @@ function createAdmins(body, entry) {
                 .then(snapshot => {
                     if (snapshot.size === 0) {    
                 
-                            var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+                            let newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
                             // eslint-disable-next-line promise/no-nesting
                             promiseGetAdminData.push(admin.auth().createUser({
@@ -110,7 +109,7 @@ function createAdmins(body, entry) {
                                 // See the UserRecord reference doc for the contents of userRecord.
                                 console.log('Successfully created new user:', userRecord.uid);
 
-                                var tempUser = {
+                                let tempUser = {
                                     email: userRecord.email,
                                     name: userRecord.displayName,
                                     peopleId: PeopleData.Members[item].MemberId,
@@ -164,7 +163,7 @@ function createTeams(body, entry) {
             if (PeopleData.Lists[item].MemberId === entry) {
                 //console.log('body:', PeopleData.Lists[item]);
 
-                var tempTeam = {
+                let tempTeam = {
                     measurement: 'null',
                     name: PeopleData.Lists[item].Name,
                     peopleId: PeopleData.Lists[item].ListId
@@ -190,7 +189,7 @@ function createTeams(body, entry) {
                     if (!doc.exists) {
                         // Add team to firestore if admin
                         // eslint-disable-next-line promise/no-nesting
-                        var addTeam = db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).set(tempTeam).then(ref => {
+                        let addTeam = db.collection('teams').doc(`${PeopleData.Lists[item].ListId}`).set(tempTeam).then(ref => {
                             console.log('Team do not exists: ', tempTeam);
                             return ref;
                         }).catch(err => {
@@ -221,13 +220,13 @@ function callbackAdmin (requiredAdmins) {
     requiredAdmins.forEach((entry) => {
         
         // **** OBS **** Still on people-VOL!!
-        var addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
+        let addSuperAdmin = db.collection('users').where('peopleId', '==', entry).get()
         .then(snapshot => {
             if (snapshot.size === 0) {    
        
                     console.log('create.admin: ', `creating admin user with id ${entry}`);
                     // People REST API: GetTeams (Get all teams in people)
-                    var RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
+                    let RestMember = 'https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetMemberDataById/?Id=' + entry + '&ApiKey=';
                 
                     // eslint-disable-next-line promise/no-nesting
                     request(RestMember + process.env.HEIMDAL_PEOPLE_APIKEY).then( (body) => {
@@ -238,7 +237,7 @@ function callbackAdmin (requiredAdmins) {
                             // Find users that are admins / "Holdleder". If not users is "basis"
                             // eslint-disable-next-line promise/always-return
                             if (PeopleData.Member.MemberId === entry) {
-                                var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+                                let newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
                                 // eslint-disable-next-line promise/no-nesting
                                 admin.auth().createUser({
@@ -253,7 +252,7 @@ function callbackAdmin (requiredAdmins) {
                                         // See the UserRecord reference doc for the contents of userRecord.
                                         console.log('Successfully created new user:', userRecord.uid);
 
-                                        var tempUser = {
+                                        let tempUser = {
                                             email: PeopleData.Member.Email,
                                             name: PeopleData.Member.Name,
                                             peopleId: PeopleData.Member.MemberId,
@@ -264,7 +263,7 @@ function callbackAdmin (requiredAdmins) {
                                         // Add user to firestore if admin
                                         // eslint-disable-next-line promise/no-nesting
                                         
-                                        var addUser = addFirestoreUser(userRecord.uid, tempUser);
+                                        let addUser = addFirestoreUser(userRecord.uid, tempUser);
 
                                         // Change for go-live
                                         return sendGmail(PeopleData.Member.Email.trim(), newPW);
@@ -302,12 +301,12 @@ function callbackAdminExternal (requiredAdminsExternal) {
     requiredAdminsExternal.forEach((entry) => {
     
 
-        var addSuperAdmin = db.collection('users').where('email', '==', entry).get()
+        let addSuperAdmin = db.collection('users').where('email', '==', entry).get()
         .then(snapshot => {
             if (snapshot.size === 0) {    
        
                 console.log('create.admin: ', `creating admin user with email: ${entry}`);
-                var newPW = Math.floor((Math.random() * 10000000) + 1).toString();
+                let newPW = Math.floor((Math.random() * 10000000) + 1).toString();
 
                 // eslint-disable-next-line promise/no-nesting
                 admin.auth().createUser({
@@ -322,7 +321,7 @@ function callbackAdminExternal (requiredAdminsExternal) {
                         // See the UserRecord reference doc for the contents of userRecord.
                         console.log('Successfully created new user:', userRecord.uid);
 
-                        var tempUser = {
+                        let tempUser = {
                             email: entry,
                             name: entry,
                             peopleId: '',
@@ -333,7 +332,7 @@ function callbackAdminExternal (requiredAdminsExternal) {
                         // Add user to firestore if admin
                         // eslint-disable-next-line promise/no-nesting
                         
-                        var addUser = addFirestoreUser(userRecord.uid, tempUser);
+                        let addUser = addFirestoreUser(userRecord.uid, tempUser);
 
                         // Change for go-live
                         return sendGmail(PeopleData.Member.Email.trim(), newPW);
@@ -363,16 +362,16 @@ function callbackAdminExternal (requiredAdminsExternal) {
 
 module.exports = function() {
     const data = require('../data/teams-2019');
-    var requiredListOwnerEmail = data.requiredListOwnerEmail;
-    var requiredAdmins = data.requiredAdmins;
-    var requiredAdminsExternal = data.requiredAdminsExternal;
+    let requiredListOwnerEmail = data.requiredListOwnerEmail;
+    let requiredAdmins = data.requiredAdmins;
+    let requiredAdminsExternal = data.requiredAdminsExternal;
 
     console.log(`Starting import of ${requiredListOwnerEmail.length} owners, ${requiredAdmins.length} admins internal and ${requiredAdminsExternal.length} admins external.`);
 
     // Loop through all admins and create. 
     requiredListOwnerEmail.forEach((entry) => {
         // People REST API: GetTeams (Get all teams in people)
-        var RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
+        let RestMember = 'https://people-pro.roskilde-festival.dk/Api/MemberApi/1/GetMembersByTerm/?term=' + entry + '&ApiKey=';
         promisesAdmins.push(request(RestMember + config.HEIMDAL_APIKEY).then((body) => {
                return createAdmins(body, entry)
         })
@@ -390,7 +389,7 @@ module.exports = function() {
             
             arrayMemberId.forEach((entry) => {
                 // People REST API: GetLists (Get all teams in people)
-                var RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
+                let RestTeams = 'https://people-pro.roskilde-festival.dk/Api/Guest/List/1/GetLists/?memberid='+ entry +'&ApiKey=';
                 // eslint-disable-next-line promise/no-nesting
                 promisesTeams.push(request(RestTeams + config.HEIMDAL_APIKEY).then((body) => { 
                     return createTeams(body, entry);
