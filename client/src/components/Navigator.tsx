@@ -120,7 +120,7 @@ const styles = ({ palette, spacing, typography, breakpoints, mixins }: Theme) =>
   },
   textDense: {},
   divider: {
-    marginTop: spacing.unit * 2,
+    // marginTop: spacing.unit * 2,
   },
 });
 
@@ -173,8 +173,8 @@ function Navigator(props: INavigatorProps) {
 									<ListItemIcon>{icon}</ListItemIcon>
 									<ListItemText
 										classes={{
-											primary: classes.itemPrimary,
-											textDense: classes.textDense,
+											primary: classes.itemPrimary
+											// textDense: classes.textDense,
 										}}
 									>
 										{childId}

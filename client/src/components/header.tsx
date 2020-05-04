@@ -26,7 +26,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		zIndex: 0,
 	},
 	menuButton: {
-		marginLeft: -spacing.unit,
+		// marginLeft: -spacing.unit,
 	},
 	iconButtonAvatar: {
 		padding: 4,

@@ -142,7 +142,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		}
 
 		return (
-			<Query query={GET_CURRENT_USER}>
+			<Query<any, any> query={GET_CURRENT_USER}>
 				{({ loading, error, data }) => {
 
 					console.log('GET_CURRENT_USER', data);

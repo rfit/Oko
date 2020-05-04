@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
+import { useQuery } from '@apollo/react-hooks';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -17,8 +18,8 @@ import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
 		...mixins.gutters(),
-		paddingTop: spacing.unit * 2,
-		paddingBottom: spacing.unit * 2,
+		// paddingTop: spacing.unit * 2,
+		// paddingBottom: spacing.unit * 2,
 	}
 });
 
@@ -128,26 +129,21 @@ export const GET_TEAM_WITH_INVOICES = gql`
 class FestivalOverviewTeamContainer extends React.Component<any, any> {
 	public render() {
 		const { route } = this.props;
-
 		console.log('DATA FROM container', route.params.teamId, this.props);
 
-		return (
-			<Query
-				variables={{
-					teamId: route.params.teamId
-				}}
-				query={GET_TEAM_WITH_INVOICES}
-			>
-				{({ loading, error, data }) => {
-					if (error) { return error }
-					if (loading) { return 'Henter data...'; }
+		const { loading, data, error } = useQuery<any, any>(
+			GET_TEAM_WITH_INVOICES,
+			{ variables: {
+				teamId: route.params.teamId
+			}}
+		);
 
-					return (
-						<FestivalOverviewTeam data={data} {...this.props} />
-					);
-				}}
-			</Query>
-		)
+		if (error) { return error }
+		if (loading) { return 'Henter data...'; }
+
+		return (
+			<FestivalOverviewTeam data={data} {...this.props} />
+		);
 	}
 }
 

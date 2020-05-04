@@ -48,7 +48,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		flexWrap: 'wrap',
 	},
 	formControl: {
-		margin: spacing.unit,
+		 // margin: spacing.unit,
 		minWidth: 120,
 		maxWidth: 300,
 	},
@@ -57,10 +57,10 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		flexWrap: 'wrap',
 	},
 	chip: {
-		margin: spacing.unit / 4,
+		// margin: spacing.unit / 4,
 	},
 	noLabel: {
-		marginTop: spacing.unit * 3,
+		// marginTop: spacing.unit * 3,
 	},
 });
 
@@ -141,11 +141,20 @@ const CHANGE_TEAM = gql`
   	}
 `;
 
+
+/*
+
+
+const AllPeopleComponent = <Query<Data, Variables> query={ALL_PEOPLE_QUERY}>
+  {({ loading, error, data }) => { ... }}
+</Query>
+
+*/
 const ConnectedTeamSwitcher = () => {
 	return (
 		<Mutation mutation={CHANGE_TEAM}>
-			{(changeTeam) => (
-				<Query
+			{(changeTeam: any) => (
+				<Query<any, any>
 					query={gql`
 						{
 							currentUser {

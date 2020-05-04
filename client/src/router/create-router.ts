@@ -1,4 +1,4 @@
-import { Router } from 'router5/types';
+import { Router } from 'router5';
 
 import createRouter from 'router5';
 import loggerPlugin from 'router5-plugin-logger';

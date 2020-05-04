@@ -40,8 +40,8 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 	addBox: {
 		...mixins.gutters(),
-		paddingTop: spacing.unit * 2,
-		paddingBottom: spacing.unit * 2,
+		// paddingTop: spacing.unit * 2,
+		// paddingBottom: spacing.unit * 2,
 	}
 });
 
@@ -115,7 +115,7 @@ class SetTeamMeasurement extends React.Component<ISetTeamMeasurementProps, ISetT
 
 		return (
 			<Mutation mutation={SET_TEAM_MEASUREMENT}>
-			{(setTeamMeasurement) => (
+			{(setTeamMeasurement: any) => (
 				<form
 					// tslint:disable-next-line: jsx-no-lambda
 					onSubmit={e => { this.onSave(e, setTeamMeasurement); }}
