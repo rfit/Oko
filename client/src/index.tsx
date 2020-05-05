@@ -5,7 +5,8 @@ import { RouterProvider, RouteNode } from 'react-router5';
 import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
-import { ApolloProvider, Query } from 'react-apollo';
+import {  Query } from 'react-apollo';
+import { ApolloProvider } from '@apollo/react-hooks';
 import DateFnsUtils from '@date-io/date-fns';
 import daLocale from "date-fns/locale/en-US";
 
