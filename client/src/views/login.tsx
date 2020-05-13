@@ -11,19 +11,19 @@ const styles: any = (theme: any) => ({
 	wrap: {
 		display: 'flex',
 		alignItems: 'center',
-		  justifyContent: 'center',
-		  height: '100%'
+		justifyContent: 'center',
+		height: '100%'
 	},
 	layout: {
-	  width: 'auto',
-	  display: 'block', // Fix IE 11 issue.
-	  marginLeft: theme.spacing(3),
-	  marginRight: theme.spacing(3),
-	  [theme.breakpoints.up(400 + theme.spacing(3) * 2)]: {
-		width: 400,
-		marginLeft: 'auto',
-		marginRight: 'auto',
-	  },
+		width: 'auto',
+		display: 'block', // Fix IE 11 issue.
+		marginLeft: theme.spacing(3),
+		marginRight: theme.spacing(3),
+		[theme.breakpoints.up(400 + theme.spacing(3) * 2)]: {
+			width: 400,
+			marginLeft: 'auto',
+			marginRight: 'auto',
+		},
 	},
 	paper: {
 		display: 'flex',
@@ -77,7 +77,7 @@ function Login(props: ILoginProps) {
 						color="primary"
 						className={classes.submit}
 					>
-						Login via Heimdal
+						Fake login
 					</Button>
 
 				</Paper>
