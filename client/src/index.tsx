@@ -25,11 +25,11 @@ const localeMap = {
 };
 
 const RFMuiTheme = createMuiTheme({
-	palette: {
-		primary: {
-			main: '#ee7203' // RF Orange
-		}
-	},
+	// palette: {
+	// 	primary: {
+	// 		// main: '#ee7203' // RF Orange
+	// 	}
+	// },
 	typography: {
 		// useNextVariants: true
 	},
@@ -83,9 +83,9 @@ const client = new ApolloClient({
 	},
 	request: async (operation: any) => {
 		operation.setContext({
-		  headers: {
-			authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ""
-		  }
+			headers: {
+				authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ""
+			}
 		});
 	},
 	typeDefs,

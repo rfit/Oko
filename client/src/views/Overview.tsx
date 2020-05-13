@@ -1,55 +1,66 @@
-import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import * as React from 'react';
 import { Query } from "react-apollo";
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Link } from 'react-router5'
 
-import Button from '@material-ui/core/Button';
 // import Fab from '@material-ui/core/Fab';
-import Paper from '@material-ui/core/Paper';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Typography from '@material-ui/core/Typography';
+import {
+	Card,
+	CardActions,
+	Paper,
+	CardHeader,
+	CardContent,
+	Button,
+	Divider,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	Typography,
+	TableRow,
+	Tooltip,
+	TableSortLabel,
+	Grid
+} from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
-import { GET_ALL_INVOICES } from '../queries';
-
+import NotesCard from '../components/Notes';
 import SubHeader from '../components/SubHeader';
 import Loading from '../components/Loading';
 
-const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
-	addBox: {
-		...mixins.gutters(),
-		// paddingTop: spacing.unit * 2,
-		// paddingBottom: spacing.unit * 2,
-	}
-});
+import { GET_ALL_INVOICES } from '../queries';
 
-const tableStyles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
+const useStyles = makeStyles(theme => ({
+	addBox: {
+		...theme.mixins.gutters(),
+		paddingTop: theme.spacing(2),
+		paddingBottom: theme.spacing(2),
+	}
+}));
+
+const useTableStyles = makeStyles(theme => ({
 	root: {
 		width: '100%',
-		// marginTop: spacing.unit * 3,
+		marginTop: theme.spacing(3),
 		overflowX: 'auto',
 	},
 	table: {
 	},
 	cell: {
-		[breakpoints.down('md')]: {
+		[theme.breakpoints.down('md')]: {
 			padding: '4px 0px 4px 15px'
 		},
 	},
 	unit: {
 		color: '#ccc'
 	}
-});
+}));
 
 export interface IOverviewProps {
 	classes: any;
@@ -61,60 +72,56 @@ export interface IOverviewState {
 }
 
 const SimpleInvoiceTable = (props: any) => {
-	const { classes, measurement, invoices = [] } = props;
+	const { measurement, invoices = [] } = props;
+	const classes = useTableStyles();
+
 	return (
 		<Paper className={classes.root}>
 			<Table className={classes.table}>
-			<TableHead>
-				<TableRow>
-					<TableCell className={classes.cell}>Nummer</TableCell>
-					<TableCell className={classes.cell}>Faktura dato</TableCell>
-					<TableCell className={classes.cell}>Leverandør</TableCell>
-					<TableCell className={classes.cell} align="right">Total</TableCell>
-					<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
-					<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
-					<TableCell className={classes.cell}>Øko %</TableCell>
-				</TableRow>
-			</TableHead>
-			<TableBody>
-				{invoices && invoices.map((invoice: any) => {
-					const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
-					return (
-						<TableRow key={invoice.id || invoice.invoiceId}>
-							<TableCell className={classes.cell} component="th" scope="row">
-								<Link routeName="edit-invoice" routeParams={{ invoiceId: id }}>
-									{invoiceId}
-								</Link>
-							</TableCell>
-							<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
-							<TableCell className={classes.cell}>{supplier}</TableCell>
-							<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
-							<TableCell className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
-						</TableRow>
-					);
-				})}
-			</TableBody>
+				<TableHead>
+					<TableRow>
+						<TableCell className={classes.cell}>Nummer</TableCell>
+						<TableCell className={classes.cell}>Faktura dato</TableCell>
+						<TableCell className={classes.cell}>Leverandør</TableCell>
+						<TableCell className={classes.cell} align="right">Total</TableCell>
+						<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
+						<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
+						<TableCell className={classes.cell}>Øko %</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					{invoices && invoices.map((invoice: any) => {
+						const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
+						return (
+							<TableRow key={invoice.id || invoice.invoiceId}>
+								<TableCell className={classes.cell} component="th" scope="row">
+									<Link routeName="edit-invoice" routeParams={{ invoiceId: id }}>
+										{invoiceId}
+									</Link>
+								</TableCell>
+								<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+								<TableCell className={classes.cell}>{supplier}</TableCell>
+								<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+								<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+								<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+								<TableCell className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
+							</TableRow>
+						);
+					})}
+				</TableBody>
 			</Table>
 		</Paper>
 	);
 };
 
-const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
+const StyledInvoiceTable = SimpleInvoiceTable;
 
 // IOverviewProps, IOverviewState>
 function Overview(props: IOverviewProps) {
 	const currentTeam = props.currentUser.currentTeam;
+	const classes = useStyles();
 
-	const InvoiceButton = React.forwardRef((buttonProps, ref) => <Link routeName="add-invoice" {...buttonProps} ref={ref}>
-		{buttonProps.children} Tilføj faktura
-		<AddIcon />
-	</Link>);
-
-	// const {
-	// 	classes
-	// } = this.props;
+	const InvoiceButton = React.forwardRef((buttonProps, ref) => <Link routeName="add-invoice" {...buttonProps} ref={ref}> {buttonProps.children} Tilføj faktura <AddIcon /></Link>);
 
 	const { loading, data, error } = useQuery<any, any>(
 		GET_ALL_INVOICES,
@@ -172,24 +179,30 @@ function Overview(props: IOverviewProps) {
 					Oversigt
 				</Typography>
 
-				<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
+				<Grid container spacing={4}>
+					<Grid item lg={3} sm={6} xl={3} xs={12}>
+						<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
+					</Grid>
+					<Grid item lg={3} sm={6} xl={3} xs={12}>
+						<NotesCard notes={currentTeam.notes} />
+					</Grid>
 
-				<Typography component="h2" variant="h6" gutterBottom>
-					Tidligere leverancer for {currentTeam.name}
-				</Typography>
-
-				<Typography component="h2" variant="body2" gutterBottom>
-					{currentTeam.notes}
-				</Typography>
-
-				<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
-
-				<br />
-
-				<Button variant="contained" color="secondary" component={InvoiceButton} />
+					<Grid item lg={12} md={12} xl={12} xs={12}>
+						<Card>
+							<CardHeader
+								action={
+									<Button variant="contained" color="secondary" component={InvoiceButton} />
+								}
+								title={`Tidligere leverancer ${currentTeam.name}`}
+							/>
+							<Divider />
+							<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
+						</Card>
+					</Grid>
+				</Grid>
 			</main>
 		</React.Fragment>
 	);
 }
 
-export default withStyles(styles)(Overview);
+export default Overview;

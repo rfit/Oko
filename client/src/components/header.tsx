@@ -15,18 +15,18 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
-
-
 import TeamSwitcher from './TeamSwitcher';
+import { makeStyles } from '@material-ui/core/styles';;
+import InputIcon from '@material-ui/icons/Input';
 
 const lightColor = 'rgba(255, 255, 255, 0.7)';
 
-const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
+const useStyles = makeStyles(theme => ({
 	secondaryBar: {
 		zIndex: 0,
 	},
 	menuButton: {
-		// marginLeft: -spacing.unit,
+		marginLeft: -theme.spacing(),
 	},
 	iconButtonAvatar: {
 		padding: 4,
@@ -35,13 +35,19 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		textDecoration: 'none',
 		color: lightColor,
 		'&:hover': {
-			color: palette.common.white,
+			color: theme.palette.common.white
 		},
 	},
+	flexGrow: {
+		flexGrow: 1
+	  },
 	button: {
 		borderColor: lightColor,
 	},
-});
+	signOutButton: {
+		marginLeft: theme.spacing(1)
+	}
+}));
 
 interface IHeaderState {
 	auth: boolean;
@@ -50,14 +56,15 @@ interface IHeaderState {
 }
 
 interface IHeaderProps {
-	classes: any;
 	currentUser: any;
 	onDrawerToggle: any;
 	children?: React.ReactNode;
 }
 
 function Header(props: IHeaderProps) {
-	const { classes, onDrawerToggle, currentUser } = props;
+	const { onDrawerToggle, currentUser } = props;
+	const classes = useStyles();
+
 	return (
 	  <React.Fragment>
 		<AppBar color="primary" position="sticky" elevation={0}>
@@ -78,8 +85,16 @@ function Header(props: IHeaderProps) {
 			  <Grid item>
 				<TeamSwitcher />
 			  </Grid>
+			  <div className={classes.flexGrow} />
 			  <Grid item>
-				Logget på som:<br /> {currentUser.name} ({currentUser.email})
+				{currentUser.name} ({currentUser.email})
+				<IconButton
+					aria-label="sign out"
+					className={classes.signOutButton}
+					color="inherit"
+				>
+					<InputIcon />
+				</IconButton>
 			  </Grid>
 			</Grid>
 		  </Toolbar>
@@ -88,9 +103,8 @@ function Header(props: IHeaderProps) {
 	);
   }
 
-  Header.propTypes = {
-	classes: PropTypes.object.isRequired,
+Header.propTypes = {
 	onDrawerToggle: PropTypes.func.isRequired,
-  };
+};
 
-  export default withStyles(styles)(Header);
+export default Header;
