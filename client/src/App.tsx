@@ -1,7 +1,6 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { RouteNode, routeNode, withRouter, withRoute, useRoute } from 'react-router5'
 import { Query } from 'react-apollo';
-
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import gql from 'graphql-tag';
@@ -77,9 +76,10 @@ const styles = ({ palette, spacing, breakpoints, mixins, transitions, zIndex }: 
 	},
 });
 
+// we use @client for development currently
 const GET_CURRENT_USER = gql`
 	query GetCurrentUser {
-		currentUser {
+		currentUser @client {
 			id,
 			name,
 			email,
@@ -119,7 +119,18 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	public handleLoginFake = () => {
 		console.log('logging in!');
-		this.props.client.writeData({ data: { isLoggedIn: true } })
+		this.props.client.writeData({
+			data: {
+				currentUser: {
+					id: 0,
+					name: 'test',
+					email: 'test@test.test',
+					__typename: 'User'
+				},
+				isLoggedIn: true
+			}
+		});
+		this.setState({ open: true });
 	};
 
 	public render() {
@@ -182,7 +193,7 @@ class App extends React.Component<IAppProps, IAppState> {
 					}
 
 					if(!data.currentUser) {
-						console.log('Current user is not set, we should login.');
+						console.log('Current user is not set, we should login.', data.currentUser);
 						// We don't have a user
 						return (
 							<div className={classes.root}>

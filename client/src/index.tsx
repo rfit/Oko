@@ -76,7 +76,7 @@ const typeDefs = gql`
 
 
 const client = new ApolloClient({
-	// Backend API Url from firebase
+	// Backend API
 	uri: getEndpoint(location.hostname),
 	fetchOptions: {
 		credentials: 'omit'
@@ -91,6 +91,31 @@ const client = new ApolloClient({
 	typeDefs,
 	resolvers: {
 		Query: {
+			currentUser() {
+				return {
+					id: 203757,
+					name: 'Allan Kimmer Jensen',
+					email: 'test@test.test',
+					role: 'SUPERADMIN',
+					__typename: 'User',
+					currentTeam: {
+						id: 18213,
+						measurement: 'KG',
+						name: 'Local test Team',
+						notes: 'test note',
+						__typename: 'Team'
+					},
+					teams: [
+						{
+							id: 1,
+							measurement: 'KG',
+							name: 'Local test Team',
+							notes: 'test note',
+							__typename: 'Team'
+						}
+					]
+				}
+			},
 			isLoggedIn() {
 				return !!localStorage.getItem('token');
 			}
