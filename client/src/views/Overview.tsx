@@ -103,98 +103,93 @@ const SimpleInvoiceTable = (props: any) => {
 
 const StyledInvoiceTable = withStyles(tableStyles)(SimpleInvoiceTable);
 
-class Overview extends React.Component<IOverviewProps, IOverviewState> {
-	public render() {
-		const currentTeam = this.props.currentUser.currentTeam;
-		// const {
-		// 	classes
-		// } = this.props;
+// IOverviewProps, IOverviewState>
+function Overview(props: IOverviewProps) {
+	const currentTeam = props.currentUser.currentTeam;
 
-		const { loading, data, error } = useQuery<any, any>(
-			GET_ALL_INVOICES,
-			{
-				fetchPolicy: "cache-and-network",
-				variables: {
-				teamId: parseInt(currentTeam.id, 10)
-			}}
-		);
+	const InvoiceButton = React.forwardRef((buttonProps, ref) => <Link routeName="add-invoice" {...buttonProps} ref={ref}>
+		{buttonProps.children} Tilføj faktura
+		<AddIcon />
+	</Link>);
 
+	// const {
+	// 	classes
+	// } = this.props;
 
-		if (loading) { return <Loading />; }
-		if (error) { return <p>Error: {JSON.stringify(error)}</p>; }
+	const { loading, data, error } = useQuery<any, any>(
+		GET_ALL_INVOICES,
+		{
+			fetchPolicy: "cache-and-network",
+			variables: {
+			teamId: parseInt(currentTeam.id, 10)
+		}}
+	);
 
-		const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
-		const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
-		const totalExcluded = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
+	if (loading) { return <Loading />; }
+	if (error) { return <p>Error: {JSON.stringify(error)}</p>; }
 
-		if(!currentTeam.measurement || currentTeam.measurement === "" || currentTeam.measurement === "null" ) {
-			return (
-				<main>
-					<Typography component="h1" variant="h3" gutterBottom>
-						Oversigt
-					</Typography>
+	const totalEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
+	const totalNonEco = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.nonEco, 0 );
+	const totalExcluded = data.invoices && data.invoices.reduce((acc: number, currentValue: any) => acc + currentValue.excluded, 0 );
 
-					<Typography variant="body1" gutterBottom>
-						Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
-					</Typography>
-				</main>
-			)
-		}
-
-		console.log('Overview data', data);
-
-		if(!data.invoices) {
-			return (
-				<main>
-					<Typography component="h1" variant="h3" gutterBottom>
-						Oversigt
-					</Typography>
-
-					<Typography variant="body1" gutterBottom>
-						Der er endnu ikke oprettet en fraktura. Gør dette for at se overblik.
-					</Typography>
-
-					{/* tslint:disable-next-line:jsx-no-lambda */}
-					<Button variant="contained" color="secondary" component={(props: any) => <Link routeName="add-invoice" {...props} />}>
-						Tilføj faktura
-						<AddIcon />
-					</Button>
-				</main>
-			)
-		}
-
+	if(!currentTeam.measurement || currentTeam.measurement === "" || currentTeam.measurement === "null" ) {
 		return (
-			<React.Fragment>
-				{/* <SubHeader title="Oversigt" /> */}
-				<main>
-					<Typography component="h1" variant="h3" gutterBottom>
-						Oversigt
-					</Typography>
+			<main>
+				<Typography component="h1" variant="h3" gutterBottom>
+					Oversigt
+				</Typography>
 
-					<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
-
-					<Typography component="h2" variant="h6" gutterBottom>
-						Tidligere leverancer for {currentTeam.name}
-					</Typography>
-
-					<Typography component="h2" variant="body2" gutterBottom>
-						{currentTeam.notes}
-					</Typography>
-
-					<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
-
-					<br />
-
-					{/* tslint:disable-next-line:jsx-no-lambda */}
-					<Button variant="contained" color="secondary" component={(props: any) => <Link routeName="add-invoice" {...props} />}>
-						Tilføj faktura
-						<AddIcon />
-					</Button>
-				</main>
-			</React.Fragment>
-		);
-
+				<Typography variant="body1" gutterBottom>
+					Din leder skal vælge om boden registere i kilo eller kroner. Før dette er gjort kan der ikke registeres.
+				</Typography>
+			</main>
+		)
 	}
+
+	console.log('Overview data', data);
+
+	if(!data.invoices) {
+		return (
+			<main>
+				<Typography component="h1" variant="h3" gutterBottom>
+					Oversigt
+				</Typography>
+
+				<Typography variant="body1" gutterBottom>
+					Der er endnu ikke oprettet en fraktura. Gør dette for at se overblik.
+				</Typography>
+
+				<Button variant="contained" color="secondary" component={InvoiceButton} />
+			</main>
+		)
+	}
+
+	return (
+		<React.Fragment>
+			{/* <SubHeader title="Oversigt" /> */}
+			<main>
+				<Typography component="h1" variant="h3" gutterBottom>
+					Oversigt
+				</Typography>
+
+				<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
+
+				<Typography component="h2" variant="h6" gutterBottom>
+					Tidligere leverancer for {currentTeam.name}
+				</Typography>
+
+				<Typography component="h2" variant="body2" gutterBottom>
+					{currentTeam.notes}
+				</Typography>
+
+				<StyledInvoiceTable invoices={data.invoices} measurement={currentTeam.measurement} />
+
+				<br />
+
+				<Button variant="contained" color="secondary" component={InvoiceButton} />
+			</main>
+		</React.Fragment>
+	);
 }
 
 export default withStyles(styles)(Overview);
