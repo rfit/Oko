@@ -32,8 +32,8 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 	addBox: {
 		...mixins.gutters(),
-		// paddingTop: spacing.unit * 2,
-		// paddingBottom: spacing.unit * 2,
+		paddingTop: spacing(2),
+		paddingBottom: spacing(2),
 	}
 });
 

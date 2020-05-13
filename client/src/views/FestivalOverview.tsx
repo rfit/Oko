@@ -22,7 +22,7 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	addBox: {
 		...mixins.gutters(),
 		paddingTop: spacing(2),
-		// paddingBottom: spacing.unit * 2,
+		paddingBottom: spacing(2),
 	},
 	warningIcon: {
 
