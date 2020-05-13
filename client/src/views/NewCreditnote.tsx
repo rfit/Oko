@@ -327,7 +327,6 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 									<p>Oprettede kreditnota # {this.state.lastCreated}!</p>
 								)}
 
-
 								{error && (
 									<div>
 										<h2>Der opstod en fejl.</h2>
