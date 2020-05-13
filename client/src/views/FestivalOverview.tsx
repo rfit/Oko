@@ -1,6 +1,6 @@
 import Typography from '@material-ui/core/Typography';
 import * as React from 'react';
-import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
+import { createStyles, Theme, withStyles, makeStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
 import { useQuery } from '@apollo/react-hooks';
@@ -21,7 +21,7 @@ import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
 	addBox: {
 		...mixins.gutters(),
-		// paddingTop: spacing.unit * 2,
+		paddingTop: spacing(2),
 		// paddingBottom: spacing.unit * 2,
 	},
 	warningIcon: {
@@ -32,8 +32,8 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	}
 });
 
-class FestivalOverview extends React.Component<any, any> {
-	public calcTeam = (invoices: any) => {
+function FestivalOverview (props: any) {
+	const calcTeam = (invoices: any) => {
 		if (!invoices) { return 0; }
 
 		const totalEco = invoices && invoices.reduce((acc: number, currentValue: any) => acc + currentValue.eco, 0 );
@@ -44,7 +44,7 @@ class FestivalOverview extends React.Component<any, any> {
 
 		return p.toFixed(1);
 	}
-	public calulateFestivalTotal = (teams: any) => {
+	const calulateFestivalTotal = (teams: any) => {
 		const allInvoices = [].concat(...teams.map((team: any) => team.invoices));
 
 		console.log(allInvoices);
@@ -59,135 +59,131 @@ class FestivalOverview extends React.Component<any, any> {
 
 		return p;
 	}
-	public render() {
-		console.log('render', this.props, this.props.data);
-		const { classes, data } = this.props;
 
-		const krTeams = data.teams.filter((team: any) => team.measurement === 'KR');
-		const kgTeams = data.teams.filter((team: any) => team.measurement === 'KG');
+	console.log('render', props, props.data);
+	const { classes, data } = props;
 
-		console.log(krTeams);
+	const krTeams = data.teams.filter((team: any) => team.measurement === 'KR');
+	const kgTeams = data.teams.filter((team: any) => team.measurement === 'KG');
 
-		const kgPercentage: number = this.calulateFestivalTotal(kgTeams);
-		const krPercentage = this.calulateFestivalTotal(krTeams);
+	console.log(krTeams);
 
-		const combinedTotalPercentage = (krPercentage + kgPercentage) / 2;
+	const kgPercentage: number = calulateFestivalTotal(kgTeams);
+	const krPercentage = calulateFestivalTotal(krTeams);
 
-		console.log(kgPercentage, krPercentage, combinedTotalPercentage);
+	const combinedTotalPercentage = (krPercentage + kgPercentage) / 2;
 
-		return (
-			<div>
-				<Typography component="h1" variant="h3" gutterBottom>
-					Festivals Oversigt
-				</Typography>
-				<Typography paragraph>
-					Oversigt over hele festivallens øko procent.
-				</Typography>
+	console.log(kgPercentage, krPercentage, combinedTotalPercentage);
 
-				<Paper className={classes.root} style={{ marginBottom: 40 }}>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Måleenhed</TableCell>
-								<TableCell align="right">Teams</TableCell>
-								<TableCell align="right">Øko Procent</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							<TableRow>
+	return (
+		<div>
+			<Typography component="h1" variant="h3" gutterBottom>
+				Festivals Oversigt
+			</Typography>
+			<Typography paragraph>
+				Oversigt over hele festivallens øko procent.
+			</Typography>
+
+			<Paper className={classes.root} style={{ marginBottom: 40 }}>
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableCell>Måleenhed</TableCell>
+							<TableCell align="right">Teams</TableCell>
+							<TableCell align="right">Øko Procent</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						<TableRow>
+							<TableCell component="th" scope="row">
+								kg
+							</TableCell>
+							<TableCell align="right">
+								{kgTeams.length}
+							</TableCell>
+							<TableCell align="right">
+								{kgPercentage.toFixed(1)}%
+							</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell component="th" scope="row">
+								kr
+							</TableCell>
+							<TableCell align="right">
+								{krTeams.length}
+							</TableCell>
+							<TableCell align="right" >
+								{krPercentage.toFixed(1)}%
+							</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell component="th" scope="row" />
+							<TableCell align="right" >
+								Total Gennemsnit
+							</TableCell>
+							<TableCell align="right">
+								<strong>{combinedTotalPercentage.toFixed(1)}%</strong>
+							</TableCell>
+						</TableRow>
+					</TableBody>
+				</Table>
+			</Paper>
+
+			<Typography component="h2" variant="h3" gutterBottom>
+				Team Oversigt
+			</Typography>
+			<Typography paragraph>
+				Oversigt over alle boder.
+			</Typography>
+
+			<Paper className={classes.root}>
+				<Table>
+					<TableHead>
+						<TableRow>
+							<TableCell>Team Navn</TableCell>
+							<TableCell align="right">Antal Fakturer</TableCell>
+							<TableCell align="right">Øko Procent</TableCell>
+							<TableCell align="center">Status</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+					{props.data.teams.map((row: any, index: number) => {
+						const percentage = calcTeam(row.invoices) || 0;
+						const showError = percentage >= 90 ? false : true;
+
+						/* Don't show them in red if they havent started yet. */
+						if(row.invoices.length === 0) {
+							// showError = 'transparent';
+						}
+
+						return (
+							<TableRow key={row.name + index}>
 								<TableCell component="th" scope="row">
-									kg
+									<Link routeName="festival-overview-team" routeParams={{ teamId: row.id }}>
+										{row.name}
+									</Link>
 								</TableCell>
-								<TableCell align="right">
-									{kgTeams.length}
-								</TableCell>
-								<TableCell align="right">
-									{kgPercentage.toFixed(1)}%
-								</TableCell>
-							</TableRow>
-							<TableRow>
-								<TableCell component="th" scope="row">
-									kr
-								</TableCell>
-								<TableCell align="right">
-									{krTeams.length}
-								</TableCell>
+								<TableCell align="right">{row.invoices && row.invoices.length || 0}</TableCell>
 								<TableCell align="right" >
-									{krPercentage.toFixed(1)}%
+									{row.invoices && row.invoices.length && calcTeam(row.invoices) || '--'}
+								</TableCell>
+								<TableCell align="center">
+									{showError &&
+										<WarningIcon className={classes.warningIcon} color="error" />
+									}
+									{!showError &&
+										<CheckCircleIcon className={classes.okIcon} />
+									}
 								</TableCell>
 							</TableRow>
-							<TableRow>
-								<TableCell component="th" scope="row" />
-								<TableCell align="right" >
-									Total Gennemsnit
-								</TableCell>
-								<TableCell align="right">
-									<strong>{combinedTotalPercentage.toFixed(1)}%</strong>
-								</TableCell>
-							</TableRow>
-						</TableBody>
-					</Table>
-				</Paper>
-
-				<Typography component="h2" variant="h3" gutterBottom>
-					Team Oversigt
-				</Typography>
-				<Typography paragraph>
-					Oversigt over alle boder.
-				</Typography>
-
-
-				<Paper className={classes.root}>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Team Navn</TableCell>
-								<TableCell align="right">Antal Fakturer</TableCell>
-								<TableCell align="right">Øko Procent</TableCell>
-								<TableCell align="center">Status</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-						{this.props.data.teams.map((row: any, index: number) => {
-							const percentage = this.calcTeam(row.invoices) || 0;
-							const showError = percentage >= 90 ? false : true;
-
-							/* Don't show them in red if they havent started yet. */
-							if(row.invoices.length === 0) {
-								// showError = 'transparent';
-							}
-
-							return (
-								<TableRow key={row.name + index}>
-									<TableCell component="th" scope="row">
-										<Link routeName="festival-overview-team" routeParams={{ teamId: row.id }}>
-											{row.name}
-										</Link>
-									</TableCell>
-									<TableCell align="right">{row.invoices && row.invoices.length || 0}</TableCell>
-									<TableCell align="right" >
-										{row.invoices && row.invoices.length && this.calcTeam(row.invoices) || '--'}
-									</TableCell>
-									<TableCell align="center">
-										{showError &&
-											<WarningIcon className={classes.warningIcon} color="error" />
-										}
-										{!showError &&
-											<CheckCircleIcon className={classes.okIcon} />
-										}
-									</TableCell>
-								</TableRow>
-							)
-						})}
-						</TableBody>
-					</Table>
-				</Paper>
-			</div>
-		)
-	}
+						)
+					})}
+					</TableBody>
+				</Table>
+			</Paper>
+		</div>
+	)
 }
-
-
 
 export const GET_ALL_TEAMS_WITH_INVOICES = gql`
 	{
@@ -207,25 +203,18 @@ export const GET_ALL_TEAMS_WITH_INVOICES = gql`
 	}
 `
 
+function FestivalOverviewContainer (props: any) {
+	const { loading, data, error } = useQuery<any, any>(
+		GET_ALL_TEAMS_WITH_INVOICES,
+		{ variables: { } }
+	);
 
-// tslint:disable-next-line: max-classes-per-file
-class FestivalOverviewContainer extends React.Component<any, any> {
-	public render() {
+	if(error) { return <p>{error}</p> }
+	if(loading) { return <p>Henter data...</p>; }
 
-		const { loading, data, error } = useQuery<any, any>(
-			GET_ALL_TEAMS_WITH_INVOICES,
-			{ variables: { } }
-		);
-
-		if(error) { return error }
-		if(loading) { return 'Henter data...'; }
-
-		return (
-			<FestivalOverview data={data} {...this.props} />
-		);
-
-	}
+	return (
+		<FestivalOverview data={data} {...props} />
+	);
 }
 
 export default withStyles(styles)(FestivalOverviewContainer);
-// export default FestivalOverviewContainer;
