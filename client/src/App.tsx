@@ -1,7 +1,7 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { RouteNode, routeNode, withRouter, withRoute, useRoute } from 'react-router5'
 import { Query } from 'react-apollo';
-import { createStyles, Theme } from '@material-ui/core/styles';
+import { useQuery } from '@apollo/react-hooks';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import gql from 'graphql-tag';
@@ -142,6 +142,10 @@ function App (props: IAppProps) {
 
 	console.log('clientState', props.clientState);
 
+	const { loading, data, error } = useQuery<any, any>(
+		GET_CURRENT_USER
+	);
+
 	if(!props.clientState.isLoggedIn) {
 		console.log('not logged in');
 		return (
@@ -154,149 +158,142 @@ function App (props: IAppProps) {
 		);
 	}
 
-	return (
-		<Query<any, any> query={GET_CURRENT_USER}>
-			{({ loading, error, data }) => {
+	console.log('GET_CURRENT_USER', data);
 
-				console.log('GET_CURRENT_USER', data);
-
-				if(loading) { return <Loading />; }
-				if(error) {
-					const AuthError = error.graphQLErrors.find((err) => err && err.extensions && err.extensions.code === "UNAUTHENTICATED" ? true : false);
-					if(AuthError) {
-						return (
-							<div className={classes.root}>
-								<CssBaseline />
-								<main className={classes.appContent}>
-									<Login loginFunction={handleLoginFake}  />
-								</main>
-							</div>
-						)
-					}
-
-					if(typeof(error) === "object") {
-						return  (
-							<div className={classes.root}>
-								<CssBaseline />
-								<main className={classes.appContent}>
-									<ErrorView error={{message: JSON.stringify(error)}} />
-								</main>
-							</div>
-						)
-					}
-					return (
-						<div className={classes.root}>
-							<CssBaseline />
-							<main className={classes.appContent}>
-								<ErrorView error={{message: error}} />
-							</main>
-						</div>
-					);
-				}
-
-				if(!data.currentUser) {
-					console.log('Current user is not set, we should login.', data.currentUser);
-					// We don't have a user
-					return (
-						<div className={classes.root}>
-							<CssBaseline />
-							<main className={classes.appContent}>
-								<Login loginFunction={handleLoginFake}  />
-							</main>
-						</div>
-					)
-				}
-
-				// Is user setup? (Has changed password-)
-				if(false) {
-					return (
-						<div className={classes.root}>
-							<CssBaseline />
-							<main className={classes.mainContent}>
-								<div>Du skal skifte kodeord</div>
-							</main>
-						</div>
-					)
-				}
-
-				// Is Team setup?
-				if(!data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null") {
-					if('ADMIN' === data.currentUser.role) {
-						return (
-							<div className={classes.root}>
-								<CssBaseline />
-								<main className={classes.mainContent}>
-									<TeamSetupView {...data} />
-								</main>
-							</div>
-						)
-					}
-				}
-
-				// There's no team for the user
-				if(!data.currentUser.teams || data.currentUser.teams.length <= 0) {
-					return (
-						<div className={classes.root}>
-							<CssBaseline />
-							<main className={classes.mainContent}>
-								<p>Der er ikke tilknyttet et hold til denne bruger.</p>
-							</main>
-						</div>
-					)
-				}
-
-				return (
-					<div className={classes.root}>
+	if(loading) { return <Loading />; }
+	if(error) {
+		const AuthError = error.graphQLErrors.find((err) => err && err.extensions && err.extensions.code === "UNAUTHENTICATED" ? true : false);
+		if(AuthError) {
+			return (
+				<div className={classes.root}>
 					<CssBaseline />
-					<nav className={classes.drawer}>
-						<Hidden mdUp implementation="js">
-							<Navigator
-								role={data.currentUser.role}
-								PaperProps={{ style: { width: drawerWidth } }}
-								variant="temporary"
-								open={mobileOpenState}
-								onClose={handleDrawerToggle}
-							/>
-						</Hidden>
-						<Hidden smDown implementation="css">
-							<Navigator role={data.currentUser.role} PaperProps={{ style: { width: drawerWidth } }} />
-						</Hidden>
-					</nav>
 					<main className={classes.appContent}>
-						<Header onDrawerToggle={handleDrawerToggle} currentUser={data.currentUser} />
-						<main className={classes.mainContent}>
-							<ErrorBoundary>
-								{ !data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null" && (
-									<div style={{
-										backgroundColor: '#ffa000',
-										boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
-										padding: 8,
-										marginBottom: 25
-									}}>
-										<WarningIcon style={{ margin: '0 8px 0 0' }} />
-										<span>Din leder har ikke gennemført opsætningen af teamet, endnu. Ikke alle funktioner er aktiveret.</span>
-									</div>
-								)}
-
-								{topRouteName === 'overview' && <Overview {...data} /> }
-								{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
-								{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
-								{topRouteName === 'add-creditnote' && <NewCreditnote {...data} route={route} router={router} /> }
-								{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
-								{topRouteName === 'festival-iteration' && <FestivalIteration {...data} route={route} router={router}  /> }
-								{topRouteName === 'help' && <Help /> }
-								{topRouteName === 'help-general' && <HelpGenral /> }
-								{topRouteName === 'help-support' && <HelpSupport /> }
-								{topRouteName === 'styleguide' && <Styleguide /> }
-							</ErrorBoundary>
-						</main>
+						<Login loginFunction={handleLoginFake}  />
 					</main>
 				</div>
-				);
-			}}
-		</Query>
+			)
+		}
+
+		if(typeof(error) === "object") {
+			return  (
+				<div className={classes.root}>
+					<CssBaseline />
+					<main className={classes.appContent}>
+						<ErrorView error={{message: JSON.stringify(error)}} />
+					</main>
+				</div>
+			)
+		}
+		return (
+			<div className={classes.root}>
+				<CssBaseline />
+				<main className={classes.appContent}>
+					<ErrorView error={{message: error}} />
+				</main>
+			</div>
+		);
+	}
+
+	if(!data.currentUser) {
+		console.log('Current user is not set, we should login.', data.currentUser);
+		// We don't have a user
+		return (
+			<div className={classes.root}>
+				<CssBaseline />
+				<main className={classes.appContent}>
+					<Login loginFunction={handleLoginFake}  />
+				</main>
+			</div>
+		)
+	}
+
+	// Is user setup? (Has changed password-)
+	if(false) {
+		return (
+			<div className={classes.root}>
+				<CssBaseline />
+				<main className={classes.mainContent}>
+					<div>Du skal skifte kodeord</div>
+				</main>
+			</div>
+		)
+	}
+
+	// Is Team setup?
+	if(!data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null") {
+		if('ADMIN' === data.currentUser.role) {
+			return (
+				<div className={classes.root}>
+					<CssBaseline />
+					<main className={classes.mainContent}>
+						<TeamSetupView {...data} />
+					</main>
+				</div>
+			)
+		}
+	}
+
+	// There's no team for the user
+	if(!data.currentUser.teams || data.currentUser.teams.length <= 0) {
+		return (
+			<div className={classes.root}>
+				<CssBaseline />
+				<main className={classes.mainContent}>
+					<p>Der er ikke tilknyttet et hold til denne bruger.</p>
+				</main>
+			</div>
+		)
+	}
+
+	return (
+		<div className={classes.root}>
+		<CssBaseline />
+		<nav className={classes.drawer}>
+			<Hidden mdUp implementation="js">
+				<Navigator
+					role={data.currentUser.role}
+					PaperProps={{ style: { width: drawerWidth } }}
+					variant="temporary"
+					open={mobileOpenState}
+					onClose={handleDrawerToggle}
+				/>
+			</Hidden>
+			<Hidden smDown implementation="css">
+				<Navigator role={data.currentUser.role} PaperProps={{ style: { width: drawerWidth } }} />
+			</Hidden>
+		</nav>
+		<main className={classes.appContent}>
+			<Header onDrawerToggle={handleDrawerToggle} currentUser={data.currentUser} />
+			<main className={classes.mainContent}>
+				<ErrorBoundary>
+					{ !data.currentUser.currentTeam.measurement || data.currentUser.currentTeam.measurement === "null" && (
+						<div style={{
+							backgroundColor: '#ffa000',
+							boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+							padding: 8,
+							marginBottom: 25
+						}}>
+							<WarningIcon style={{ margin: '0 8px 0 0' }} />
+							<span>Din leder har ikke gennemført opsætningen af teamet, endnu. Ikke alle funktioner er aktiveret.</span>
+						</div>
+					)}
+
+					{topRouteName === 'overview' && <Overview {...data} /> }
+					{topRouteName === 'team-admin' && <TeamAdmin {...data} /> }
+					{topRouteName === 'add-invoice' && <NewEntry {...data} route={route} router={router} /> }
+					{topRouteName === 'add-creditnote' && <NewCreditnote {...data} route={route} router={router} /> }
+					{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
+					{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
+					{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+					{topRouteName === 'festival-iteration' && <FestivalIteration {...data} route={route} router={router}  /> }
+					{topRouteName === 'help' && <Help /> }
+					{topRouteName === 'help-general' && <HelpGenral /> }
+					{topRouteName === 'help-support' && <HelpSupport /> }
+					{topRouteName === 'styleguide' && <Styleguide /> }
+				</ErrorBoundary>
+			</main>
+		</main>
+	</div>
 	);
 }
 
