@@ -232,6 +232,18 @@ class App extends React.Component<IAppProps, IAppState> {
 						}
 					}
 
+					// There's no team for the user
+					if(!data.currentUser.teams || data.currentUser.teams.length <= 0) {
+						return (
+							<div className={classes.root}>
+								<CssBaseline />
+								<main className={classes.mainContent}>
+									<p>Der er ikke tilknyttet et hold til denne bruger.</p>
+								</main>
+							</div>
+						)
+					}
+
 					return (
 						<div className={classes.root}>
 						<CssBaseline />
