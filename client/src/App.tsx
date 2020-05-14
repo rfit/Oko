@@ -26,6 +26,7 @@ import TeamAdmin from './views/TeamAdmin';
 import { ApolloClient } from 'apollo-boost';
 import Loading from './components/Loading';
 import TeamSetupView from './views/TeamStartup';
+import FestivalIteration from './views/SuperAdmin/FestivalIteration';
 
 import WarningIcon from '@material-ui/icons/Warning';
 
@@ -271,6 +272,7 @@ class App extends React.Component<IAppProps, IAppState> {
 									{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
 									{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
 									{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+									{topRouteName === 'festival-iteration' && <FestivalIteration {...data} route={route} router={router}  /> }
 									{topRouteName === 'help' && <Help /> }
 									{topRouteName === 'help-general' && <HelpGenral /> }
 									{topRouteName === 'help-support' && <HelpSupport /> }

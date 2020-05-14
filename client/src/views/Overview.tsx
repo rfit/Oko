@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import * as React from 'react';
+import React, { Suspense } from 'react';
 import { Query } from "react-apollo";
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
@@ -30,6 +30,7 @@ import AddIcon from '@material-ui/icons/Add';
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
 
+import StatusBullet from '../components/StatusBullet';
 import NotesCard from '../components/Notes';
 import SubHeader from '../components/SubHeader';
 import Loading from '../components/Loading';
@@ -92,6 +93,7 @@ const SimpleInvoiceTable = (props: any) => {
 				<TableBody>
 					{invoices && invoices.map((invoice: any) => {
 						const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
+						const ecoPercentage = calculateEcoPercentage(eco, nonEco, excluded);
 						return (
 							<TableRow key={invoice.id || invoice.invoiceId}>
 								<TableCell className={classes.cell} component="th" scope="row">
@@ -104,7 +106,11 @@ const SimpleInvoiceTable = (props: any) => {
 								<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
 								<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
 								<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
-								<TableCell className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
+								<TableCell className={classes.cell}>
+									<StatusBullet
+										size="sm"
+										color={(ecoPercentage <= 90) ?  "danger" : "success" }
+									/> {ecoPercentage.toFixed(1)}%</TableCell>
 							</TableRow>
 						);
 					})}
@@ -120,8 +126,6 @@ const StyledInvoiceTable = SimpleInvoiceTable;
 function Overview(props: IOverviewProps) {
 	const currentTeam = props.currentUser.currentTeam;
 	const classes = useStyles();
-
-	const InvoiceButton = React.forwardRef((buttonProps, ref) => <Link routeName="add-invoice" {...buttonProps} ref={ref}> {buttonProps.children} Tilføj faktura <AddIcon /></Link>);
 
 	const { loading, data, error } = useQuery<any, any>(
 		GET_ALL_INVOICES,
@@ -166,7 +170,9 @@ function Overview(props: IOverviewProps) {
 					Der er endnu ikke oprettet en fraktura. Gør dette for at se overblik.
 				</Typography>
 
-				<Button variant="contained" color="secondary" component={InvoiceButton} />
+				<Button variant="contained" color="primary" component={Link} routeName="add-invoice">
+					<AddIcon /> Tilføj faktura
+				</Button>
 			</main>
 		)
 	}
@@ -191,7 +197,9 @@ function Overview(props: IOverviewProps) {
 						<Card>
 							<CardHeader
 								action={
-									<Button variant="contained" color="secondary" component={InvoiceButton} />
+									<Button variant="contained" color="primary" component={Link} routeName="add-invoice">
+										<AddIcon /> Tilføj faktura
+									</Button>
 								}
 								title={`Tidligere leverancer ${currentTeam.name}`}
 							/>

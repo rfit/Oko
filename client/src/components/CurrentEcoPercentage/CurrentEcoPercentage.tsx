@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
 		width: 32
 	},
 	percentageValue: (props: any) => ({
-		color: props.statusColor
+		color: props.statusOk ? '#1b5e20' : '#fff'
 	}),
 	progress: {
 		marginTop: theme.spacing(3),
