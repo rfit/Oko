@@ -14,6 +14,7 @@ import ErrorView from './components/ErrorView';
 
 import FestivalOverview from './views/FestivalOverview';
 import FestivalOverviewTeam from './views/FestivalOverviewTeam';
+import FestivalOverviewTeamEdit from './views/SuperAdmin/EditTeam';
 import Help from './views/help';
 import HelpGenral from './views/help/General';
 import HelpSupport from './views/help/Support';
@@ -285,6 +286,7 @@ function App (props: IAppProps) {
 					{topRouteName === 'edit-invoice' && <EditInvoice {...data} route={route} router={router}  /> }
 					{topRouteName === 'festival-overview' && <FestivalOverview {...data} route={route} router={router}  /> }
 					{topRouteName === 'festival-overview-team' && <FestivalOverviewTeam {...data} route={route} router={router}  /> }
+					{topRouteName === 'festival-overview-team-edit' && <FestivalOverviewTeamEdit {...data} route={route} router={router}  /> }
 					{topRouteName === 'festival-iteration' && <FestivalIteration {...data} route={route} router={router}  /> }
 					{topRouteName === 'help' && <Help /> }
 					{topRouteName === 'help-general' && <HelpGenral /> }

@@ -1,21 +1,32 @@
-import Typography from '@material-ui/core/Typography';
 import * as React from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-
+import { makeStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
-import { Query, Mutation } from "react-apollo";
 import { useQuery } from '@apollo/react-hooks';
 import ErrorView from '../components/ErrorView';
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import {
+	Card,
+	CardActions,
+	Paper,
+	CardHeader,
+	CardContent,
+	Button,
+	Divider,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	Typography,
+	TableRow,
+	Tooltip,
+	TableSortLabel,
+	Grid
+} from '@material-ui/core';
 
 import CurrentEcoPercentage from '../components/CurrentEcoPercentage';
 import calculateEcoPercentage from '../utils/calculateEcoPercentage';
+import NotesCard from '../components/Notes';
+import TeamNameCard from '../components/TeamName';
 
 const useStyles = makeStyles(theme => ({
 	root: {},
@@ -59,48 +70,60 @@ function FestivalOverviewTeam(props: any) {
 				Oversigt: {props.data.team.name}
 			</Typography>
 
-			<Typography component="h2" variant="body2" gutterBottom>
-				{currentTeam.notes}
-			</Typography>
+			<Grid container spacing={4}>
+			<Grid item lg={4} sm={6} xl={4} xs={12}>
+					<TeamNameCard team={props.data.team} editRoute='festival-overview-team-edit' />
+				</Grid>
+				<Grid item lg={3} sm={6} xl={3} xs={12}>
+					<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
+				</Grid>
+				<Grid item lg={3} sm={6} xl={3} xs={12}>
+					<NotesCard notes={currentTeam.notes} />
+				</Grid>
 
-			<CurrentEcoPercentage eco={totalEco} nonEco={totalNonEco} excluded={totalExcluded} />
-
-			<Paper className={classes.root}>
-				<Table>
-					<TableHead>
-						<TableRow>
-							<TableCell className={classes.cell}>Nummer</TableCell>
-							<TableCell className={classes.cell}>Faktura dato</TableCell>
-							<TableCell className={classes.cell}>Leverandør</TableCell>
-							<TableCell className={classes.cell} align="right">Total</TableCell>
-							<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
-							<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
-							<TableCell className={classes.cell}>Øko %</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{invoices.map((invoice: any, index: number) => {
-							const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
-							const percentage = calculateEcoPercentage(invoice.eco, invoice.nonEco, invoice.excluded); // this.calcTeam(invoices) || 0;
-							const okoRowColor = percentage >= 90 ? 'green' : 'red';
-
-							return (
-								<TableRow key={invoice.id || invoice.invoiceId}>
-									<TableCell className={classes.cell} component="th" scope="row">
-										{invoiceId}
-									</TableCell>
-									<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
-									<TableCell className={classes.cell}>{supplier}</TableCell>
-									<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
-									<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
-									<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
-									<TableCell  style={{ backgroundColor: okoRowColor }} className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
+				<Grid item lg={12} md={12} xl={12} xs={12}>
+					<Card>
+						<CardHeader
+							title={`Tidligere leverancer ${currentTeam.name}`}
+						/>
+						<Divider />
+						<Table>
+							<TableHead>
+								<TableRow>
+									<TableCell className={classes.cell}>Nummer</TableCell>
+									<TableCell className={classes.cell}>Faktura dato</TableCell>
+									<TableCell className={classes.cell}>Leverandør</TableCell>
+									<TableCell className={classes.cell} align="right">Total</TableCell>
+									<TableCell className={classes.cell} align="right">Ikke omfattet</TableCell>
+									<TableCell className={classes.cell} align="right">Økologisk Andel</TableCell>
+									<TableCell className={classes.cell}>Øko %</TableCell>
 								</TableRow>
-							);
-						})}
-					</TableBody>
-				</Table>
-			</Paper>
+							</TableHead>
+							<TableBody>
+								{invoices.map((invoice: any, index: number) => {
+									const { id, invoiceId, invoiceDate, eco, nonEco, excluded, total, supplier } = invoice;
+									const percentage = calculateEcoPercentage(invoice.eco, invoice.nonEco, invoice.excluded); // this.calcTeam(invoices) || 0;
+									const okoRowColor = percentage >= 90 ? 'green' : 'red';
+
+									return (
+										<TableRow key={invoice.id || invoice.invoiceId}>
+											<TableCell className={classes.cell} component="th" scope="row">
+												{invoiceId}
+											</TableCell>
+											<TableCell className={classes.cell}>{new Date(invoiceDate).toISOString().split('T')[0]}</TableCell>
+											<TableCell className={classes.cell}>{supplier}</TableCell>
+											<TableCell className={classes.cell} align="right">{total} <span className={classes.unit}>{measurement}</span></TableCell>
+											<TableCell className={classes.cell} align="right">{excluded} <span className={classes.unit}>{measurement}</span></TableCell>
+											<TableCell className={classes.cell} align="right">{eco} <span className={classes.unit}>{measurement}</span></TableCell>
+											<TableCell  style={{ backgroundColor: okoRowColor }} className={classes.cell}>{calculateEcoPercentage(eco, nonEco, excluded).toFixed(1)}%</TableCell>
+										</TableRow>
+									);
+								})}
+							</TableBody>
+						</Table>
+					</Card>
+				</Grid>
+			</Grid>
 		</div>
 	)
 }
@@ -141,7 +164,7 @@ function FestivalOverviewTeamContainer(props: any) {
 	);
 
 	if (error) { return <ErrorView error={error} />}
-	if (loading) { return <p>'Henter data...'</p>; }
+	if (loading) { return <p>Henter data...</p>; }
 
 	return (
 		<FestivalOverviewTeam data={data} {...props} />

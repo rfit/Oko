@@ -23,7 +23,9 @@ function FestivalIteration() {
 	return <React.Fragment>
 		<Card>
 			<CardContent>
-
+				test
+				<Divider />
+				test2
 			</CardContent>
 		</Card>
 	</React.Fragment>
