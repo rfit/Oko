@@ -41,8 +41,21 @@ export default [
 		path: '/festival-overview'
 	},
 	{
+		name: 'festival-iteration',
+		path: '/festival-iteration'
+	},
+	{
+		name: 'festival-teams',
+		path: '/festival-teams'
+		// path: '/festival-teams/:iteration' could be used to add new teams depending on iterations
+	},
+	{
 		name: 'festival-overview-team',
 		path: '/festival-overview/:teamId'
+	},
+	{
+		name: 'festival-overview-team-edit',
+		path: '/festival-overview/:teamId/edit'
 	},
 	{
 		name: 'styleguide',

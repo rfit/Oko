@@ -12,8 +12,9 @@ import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import AddIcon from '@material-ui/icons/PersonAdd';
 import SaveIcon from '@material-ui/icons/Save';
+import { useQuery } from '@apollo/react-hooks';
 
-import * as React from 'react';
+import React, { useState } from 'react';
 
 import PersonList from '../components/personList';
 import Loading from '../components/Loading';
@@ -31,8 +32,8 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 	},
 	addBox: {
 		...mixins.gutters(),
-		paddingTop: spacing.unit * 2,
-		paddingBottom: spacing.unit * 2,
+		paddingTop: spacing(2),
+		paddingBottom: spacing(2),
 	}
 });
 
@@ -105,213 +106,196 @@ const GET_TEAM = gql`
 	}
 `
 
-class Admin extends React.Component<IAdminProps, IAdminState> {
-	constructor(props: IAdminProps) {
-		super(props);
+function TeamAdminView (props: IAdminProps) {
+	const [unitValue, setUnitValue] = useState(props.unitValue);
+	const [unitHasBeenPicked, setUnitHasBeenPicked] = useState(props.unitHasBeenPicked || false);
+	const [emailState, setEmailState] = useState('');
+	const [notesState, setNotesState] = useState('');
+	const [email, setEmail] = useState('');
 
-		this.state = {
-			unitValue: props.unitValue,
-			unitHasBeenPicked: props.unitHasBeenPicked || false
-		}
-	}
-	public handleUnitChange = (event: any) => {
-		this.setState({ unitValue: event.target.value });
-	}
+	const { currentTeam } = props.currentUser;
+	const { classes } = props;
 
-	public onAddNewUser = (e: any, addUser: any) => {
-		e.preventDefault();
-		const { currentTeam } = this.props.currentUser;
-
-		console.log('Add new user', e, addUser);
-
-		addUser({
+	const { loading, data, error } = useQuery<any, any>(
+		GET_TEAM,
+		{
+			fetchPolicy: "cache-and-network",
 			variables: {
-				teamId: currentTeam.id,
-				email: this.state.email
-			}
-		}).then((ethen: any) => {
-			console.log('User added:', ethen);
+			teamId: parseInt(currentTeam.id, 10)
+		}}
+	);
 
-			if(ethen.data.addUser.id) {
-				this.setState({
-					emailState: `Bruger tilføjet med e-mailen ${ethen.data.addUser.email}`,
-					email: ''
-				})
-			} else {
-				this.setState({ emailState: 'Kunne ikke tilføje bruger, prøv igen.' })
-			}
-		});
+	const handleUnitChange = (event: any) => {
+		setUnitValue(event.target.value);
 	}
 
-	public onAddNotes = (e: any, addNotes: any) => {
-		e.preventDefault();
-		const { currentTeam } = this.props.currentUser;
-
-		console.log('Set Notes', e, addNotes);
-
-		addNotes({
-			variables: {
-				teamId: currentTeam.id,
-				notes: this.state.notes
-			}
-		}).then((ethen: any) => {
-			console.log('Notes set:', ethen);
-
-			if(ethen.data.setNotes.notes) {
-				this.setState({
-					notesState: `Noten er blevet gemt.`,
-				})
-			} else {
-				this.setState({ emailState: 'Kunne ikke sætte note, prøv igen.' })
-			}
-		});
-	}
-
-	public handleUnitSave = () => {
-
-		if(!this.state.unitValue) {
+	const handleUnitSave = () => {
+		if(!unitValue) {
 			alert('Du skal vælge en enhed.')
 			return;
 		}
 
 		const choice = confirm('Er du sikker? Dette kan kun vælges én gang.');
 		if(choice) {
-			this.setState({
-				unitHasBeenPicked: true
-			})
+			setUnitHasBeenPicked(true);
 		}
-		return this;
+
+		return unitValue;
 	}
-	public render() {
-		const { currentTeam } = this.props.currentUser;
-		return (
-			<Query
-				variables={{
-					teamId: currentTeam.id
-				}}
-				query={GET_TEAM}
-				>
-				{({ loading, error, data }) => {
-					if (loading) { return <Loading />; }
-					if (error) { return (<ErrorView error={error} />); }
 
-					const {
-						classes,
-					} = this.props;
+	const onAddNewUser = (e: any, addUser: any) => {
+		e.preventDefault();
+		const { currentTeam: ct } = props.currentUser;
 
-					const {
-						unitHasBeenPicked
-					} = this.state;
+		console.log('Add new user', e, addUser);
 
-					console.log('TeamAdminData', data);
+		addUser({
+			variables: {
+				teamId: ct.id,
+				email
+			}
+		}).then((ethen: any) => {
+			console.log('User added:', ethen);
 
-					return (
-						<main>
-							<Typography component="h1" variant="h2" gutterBottom>
-								Bod Administration
-							</Typography>
-							<Typography variant="body2" gutterBottom>
-								Styr dine indstillinger og rettigheder.
-							</Typography>
+			if(ethen.data.addUser.id) {
+				setEmailState(`Bruger tilføjet med e-mailen ${ethen.data.addUser.email}`);
+				setEmail(``);
+			} else {
+				setEmailState('Kunne ikke tilføje bruger, prøv igen.');
+			}
+		});
+	}
 
-							<SetTeamMesurement unitValue={data.team.measurement} teamId={currentTeam.id} />
+	const onAddNotes = (e: any, addNotes: any) => {
+		e.preventDefault();
 
-							<hr />
+		console.log('Set Notes', e, addNotes);
+
+		addNotes({
+			variables: {
+				teamId: currentTeam.id,
+				notes: notesState
+			}
+		}).then((ethen: any) => {
+			console.log('Notes set:', ethen);
+
+			if(ethen.data.setNotes.notes) {
+				setNotesState(`Noten er blevet gemt.`)
+			} else {
+				setNotesState('Kunne ikke sætte note, prøv igen.')
+			}
+		});
+	}
+
+	if (loading) { return <Loading />; }
+	if (error) { return (<ErrorView error={error} />); }
+
+	console.log('TeamAdminData', data);
+
+	return (
+		<main>
+			<Typography component="h1" variant="h2" gutterBottom>
+				Bod Administration
+			</Typography>
+			<Typography variant="body2" gutterBottom>
+				Styr dine indstillinger og rettigheder.
+			</Typography>
+
+			<SetTeamMesurement unitValue={data.team.measurement} teamId={currentTeam.id} />
+
+			<hr />
+			<Typography component="h1" variant="h6" gutterBottom>
+				Personer med adgang
+			</Typography>
+
+			{data.team.users && <PersonList persons={data.team.users} onDeletePerson={handleDelete} />}
+
+
+			<Mutation<any, any> mutation={ADD_USER_FOR_TEAM}>
+				{(addUser, { error: addError, loading: addLoading }) => (
+					<form
+						// tslint:disable-next-line: jsx-no-lambda
+						onSubmit={e => { onAddNewUser(e, addUser); }}
+					>
+							<Paper className={classes.addBox}>
+							<Typography component="h2" variant="h5" gutterBottom>
+									Tilføj adgang
+								</Typography>
+								<FormControl className={classes.margin}>
+									<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
+									<Input
+										id="input-with-icon-adornment"
+
+										// tslint:disable-next-line: jsx-no-lambda
+										onChange={(e) => {
+											// converted this but it seems like a bug
+											setNotesState(e.target.value);
+										}}
+										startAdornment={
+											<InputAdornment position="start">
+												<AccountCircle />
+											</InputAdornment>
+										}
+									/>
+								</FormControl>
+								<div style={{ margin: '20px 0' }}>
+									<Button type="submit" disabled={addLoading} variant="contained" color="primary"><AddIcon />
+										{addLoading ? 'Tilføjer...' : 'Tilføj'}
+									</Button>
+								</div>
+								<Typography variant="body2" gutterBottom>
+									{emailState}
+								</Typography>
+							</Paper>
+					</form>
+				)}
+			</Mutation>
+
+			<hr />
+
+			<Mutation<any, any> mutation={SET_NOTE_FOR_TEMA}>
+				{(addNotes, { error: notesError, loading: notesLoading }) => (
+					<form
+						// tslint:disable-next-line: jsx-no-lambda
+						onSubmit={e => { onAddNotes(e, addNotes); }}
+					>
+							<Paper className={classes.addBox}>
 							<Typography component="h1" variant="h6" gutterBottom>
-								Personer med adgang
-							</Typography>
-
-							{data.team.users && <PersonList persons={data.team.users} onDeletePerson={handleDelete} />}
-
-
-							<Mutation mutation={ADD_USER_FOR_TEAM}>
-								{(addUser, { error: addError, loading: addLoading }) => (
-									<form
+									Sæt note
+								</Typography>
+								<Typography variant="body2" gutterBottom>
+									Denne besked vil blive vist til fødevarestyrelsen og alle team medlemer.
+								</Typography>
+								<br />
+								<br />
+								<FormControl className={classes.margin}>
+								<InputLabel htmlFor="note">Note</InputLabel>
+									<Input
+										id="note"
+										defaultValue={data.team.notes}
 										// tslint:disable-next-line: jsx-no-lambda
-										onSubmit={e => { this.onAddNewUser(e, addUser); }}
-									>
-											<Paper className={classes.addBox}>
-											<Typography component="h2" variant="h5" gutterBottom>
-													Tilføj adgang
-												</Typography>
-												<FormControl className={classes.margin}>
-													<InputLabel htmlFor="input-with-icon-adornment">E-Mail eller People-ID</InputLabel>
-													<Input
-														id="input-with-icon-adornment"
+										onChange={(e) => {
+											setNotesState(e.target.value);
+										}}
 
-														// tslint:disable-next-line: jsx-no-lambda
-														onChange={(e) => {
-															this.setState({ notes: e.target.value });
-														}}
-														startAdornment={
-															<InputAdornment position="start">
-																<AccountCircle />
-															</InputAdornment>
-														}
-													/>
-												</FormControl>
-												<div style={{ margin: '20px 0' }}>
-													<Button type="submit" disabled={addLoading} variant="contained" color="primary"><AddIcon />
-														{addLoading ? 'Tilføjer...' : 'Tilføj'}
-													</Button>
-												</div>
-												<Typography variant="body2" gutterBottom>
-													{this.state.emailState}
-												</Typography>
-											</Paper>
-									</form>
-								)}
-							</Mutation>
+									/>
+								</FormControl>
+								<div style={{ margin: '20px 0' }}>
+									<Button disabled={notesLoading} type="submit" variant="contained" color="primary"><SaveIcon />
+										{notesLoading ? 'Gemmer...' : 'Gem'}
+									</Button>
+								</div>
+								<Typography variant="body2" gutterBottom>
+									{notesState}
+								</Typography>
+							</Paper>
+					</form>
+				)}
+			</Mutation>
 
-							<hr />
-
-							<Mutation mutation={SET_NOTE_FOR_TEMA}>
-								{(addNotes, { error: notesError, loading: notesLoading }) => (
-									<form
-										// tslint:disable-next-line: jsx-no-lambda
-										onSubmit={e => { this.onAddNotes(e, addNotes); }}
-									>
-											<Paper className={classes.addBox}>
-											<Typography component="h1" variant="h6" gutterBottom>
-													Sæt note
-												</Typography>
-												<Typography variant="body2" gutterBottom>
-													Denne besked vil blive vist til fødevarestyrelsen og alle team medlemer.
-												</Typography>
-												<br />
-												<br />
-												<FormControl className={classes.margin}>
-												<InputLabel htmlFor="note">Note</InputLabel>
-													<Input
-														id="note"
-														defaultValue={data.team.notes}
-														// tslint:disable-next-line: jsx-no-lambda
-														onChange={(e) => {
-															this.setState({ notes: e.target.value });
-														}}
-
-													/>
-												</FormControl>
-												<div style={{ margin: '20px 0' }}>
-													<Button disabled={notesLoading} type="submit" variant="contained" color="primary"><SaveIcon />
-														{notesLoading ? 'Gemmer...' : 'Gem'}
-													</Button>
-												</div>
-												<Typography variant="body2" gutterBottom>
-													{this.state.notesState}
-												</Typography>
-											</Paper>
-									</form>
-								)}
-							</Mutation>
-
-						</main>
-					);
-				}}
-				</Query>
-		)
-	}
+		</main>
+	);
 }
 
 
-export default withStyles(styles)(Admin);
+export default withStyles(styles)(TeamAdminView);

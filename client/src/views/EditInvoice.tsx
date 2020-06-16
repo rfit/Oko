@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 import * as React from 'react';
 import { Mutation, Query } from "react-apollo";
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
+import { useQuery } from '@apollo/react-hooks';
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -190,11 +191,11 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 
 		return (
 			<>
-				<Mutation
+				<Mutation<any, any>
 					mutation={UPDATE_INVOICE}
 					onCompleted={this.handleComplete}
 					>
-					{(UpdateInvoice, {  }) => (
+					{(UpdateInvoice: any, {  }) => (
 						<form
 							// tslint:disable-next-line: jsx-no-lambda
 							onSubmit={this.onCreate(UpdateInvoice)}
@@ -346,7 +347,7 @@ class EditInvoice extends React.Component<INewEntryProps, INewEntryState> {
 					mutation={DELETE_INVOICE_MUTATION}
 					refetchQueries={[{ query: GET_ALL_INVOICES, variables: { id: currentTeam.id } }]}
 				>
-					{(DeleteInvoice, {  }) => (
+					{(DeleteInvoice: any, {  }) => (
 						<form
 							// tslint:disable-next-line: jsx-no-lambda
 							onSubmit={this.onDelete(DeleteInvoice)}
@@ -373,36 +374,31 @@ const ConnectedInvoiceEdit = (props: {
 }) => {
 	const { classes, route, currentUser } = props;
 	const { currentTeam } = currentUser;
+
+	const { loading, data, error } = useQuery<any, any>(
+		GET_INVOICE_QUERY,
+		{ variables: { id: route.params.invoiceId } }
+	);
+
+	// if(error) { return error }
+	// if(loading) { return '...'; }
+
+	console.log(data, currentTeam.measurement);
+	// this.setState({
+	// 	invoiceId: data.invoice.invoiceId
+	// });
+
+	// parseFloat(data.invoice.total) - parseFloat(this.state.excludedAmount || data.invoice.excluded) - parseFloat(this.state.ecoAmount  || data.invoice.eco)
+
 	return (
-		<Query
-			variables={{
-				id: route.params.invoiceId
-			}}
-			query={GET_INVOICE_QUERY}
-		>
-			{({ loading, error, data }) => {
-				if(error) { return error }
-				if(loading) { return '...'; }
-
-				console.log(data, currentTeam.measurement);
-				// this.setState({
-				// 	invoiceId: data.invoice.invoiceId
-				// });
-
-				// parseFloat(data.invoice.total) - parseFloat(this.state.excludedAmount || data.invoice.excluded) - parseFloat(this.state.ecoAmount  || data.invoice.eco)
-
-				return (
-					<EditInvoice
-						{...props}
-						invoiceId={data.invoice.invoiceId}
-						excludedAmount={data.invoice.excluded}
-						ecoAmount={data.invoice.eco}
-						total={data.invoice.total}
-					/>
-				);
-			}}
-		</Query>
-	)
+		<EditInvoice
+			{...props}
+			invoiceId={data.invoice.invoiceId}
+			excludedAmount={data.invoice.excluded}
+			ecoAmount={data.invoice.eco}
+			total={data.invoice.total}
+		/>
+	);
 }
 
 export default withStyles(styles)(ConnectedInvoiceEdit);

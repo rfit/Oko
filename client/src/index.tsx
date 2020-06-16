@@ -5,7 +5,8 @@ import { RouterProvider, RouteNode } from 'react-router5';
 import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
-import { ApolloProvider, Query } from 'react-apollo';
+import {  Query } from 'react-apollo';
+import { ApolloProvider } from '@apollo/react-hooks';
 import DateFnsUtils from '@date-io/date-fns';
 import daLocale from "date-fns/locale/en-US";
 
@@ -18,29 +19,19 @@ import createRouter from './router/create-router';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import getEndpoint from './utils/getEndpoint';
-import getFirebaseConfig from './utils/getFirebaseConfig';
-
-import * as firebase from "firebase/app";
-import "firebase/performance";
 
 const localeMap = {
 	da: daLocale
 };
 
-// Initialize Firebase
-firebase.initializeApp(getFirebaseConfig(location.hostname));
-
-// Initialize Performance Monitoring and get a reference to the service
-firebase.performance();
-
 const RFMuiTheme = createMuiTheme({
-	palette: {
-		primary: {
-			main: '#ee7203' // RF Orange
-		}
-	},
+	// palette: {
+	// 	primary: {
+	// 		// main: '#ee7203' // RF Orange
+	// 	}
+	// },
 	typography: {
-		useNextVariants: true
+		// useNextVariants: true
 	},
 	shape: {
 		borderRadius: 8
@@ -85,21 +76,46 @@ const typeDefs = gql`
 
 
 const client = new ApolloClient({
-	// Backend API Url from firebase
+	// Backend API
 	uri: getEndpoint(location.hostname),
 	fetchOptions: {
 		credentials: 'omit'
 	},
-	request: async (operation) => {
+	request: async (operation: any) => {
 		operation.setContext({
-		  headers: {
-			authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ""
-		  }
+			headers: {
+				authorization: localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ""
+			}
 		});
 	},
 	typeDefs,
 	resolvers: {
 		Query: {
+			currentUser() {
+				return {
+					id: 203757,
+					name: 'Allan Kimmer Jensen',
+					email: 'test@test.test',
+					role: 'SUPERADMIN',
+					__typename: 'User',
+					currentTeam: {
+						id: 18213,
+						measurement: 'KG',
+						name: 'Local test Team',
+						notes: 'test note',
+						__typename: 'Team'
+					},
+					teams: [
+						{
+							id: 1,
+							measurement: 'KG',
+							name: 'Local test Team',
+							notes: 'test note',
+							__typename: 'Team'
+						}
+					]
+				}
+			},
 			isLoggedIn() {
 				return !!localStorage.getItem('token');
 			}
@@ -108,34 +124,35 @@ const client = new ApolloClient({
 });
 
 const authPromise = new Promise((resolve, reject) => {
-	firebase.auth().onIdTokenChanged((user) => {
-		console.debug('running token check', user)
-		if (user) {
-			user.getIdToken().then((token) => {
-				console.log('Setting new token');
+	const user = 'Allan';
+	const token = 'test';
+	console.debug('running token check', user)
 
-				localStorage.setItem('token', token);
+	if (user) {
+			console.log('Setting new token');
 
-				client.cache.writeData({
-					data: {
-						isLoggedIn: true
-					}
-				});
+			localStorage.setItem('token', token);
 
-				resolve(token);
-			});
-		} else {
-			console.log('User signed out.');
-			localStorage.setItem('token', '');
 			client.cache.writeData({
 				data: {
-					isLoggedIn: false
+					isLoggedIn: true
 				}
 			});
 
-			resolve(false);
-		}
-	});
+			resolve(token);
+	} else {
+		console.log('User signed out.');
+
+		localStorage.setItem('token', '');
+
+		client.cache.writeData({
+			data: {
+				isLoggedIn: false
+			}
+		});
+
+		resolve(false);
+	};
 });
 
 const GET_CLIENT_STATE = gql`
