@@ -1,5 +1,3 @@
-const admin = require('firebase-admin');
-const serverTimestamp = require("firebase-admin").firestore.FieldValue.serverTimestamp();
 const { AuthenticationError } = require("apollo-server-express");
 const rp = require('request-promise-native');
 const config = require('../../config');
