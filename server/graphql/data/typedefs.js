@@ -40,7 +40,7 @@ const typeDefs = gql`
   }
 
   type User {
-    id: ID!
+    _id: ID!
     peopleId: Int
     name: String
     email: String!
@@ -51,7 +51,7 @@ const typeDefs = gql`
   }
 
   type Team {
-    id: ID!
+    _id: ID!
     peopleId: Int!
     name: String!
     "General notes about this team"
@@ -63,8 +63,7 @@ const typeDefs = gql`
   }
 
   type Invoice {
-    "Firebase invoice id"
-    id: ID
+    _id: ID
     invoiceId: ID!
     createdDate: String
     invoiceDate: String

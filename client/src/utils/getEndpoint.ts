@@ -1,7 +1,7 @@
 function getEndpoint(hostname: string) {
 	switch (hostname) {
 		default:
-			return 'http://localhost:8080';
+			return 'http://localhost:8080/gql';
 	}
 	// switch (hostname) {
 	// 	case 'oko.roskilde-festival.dk':

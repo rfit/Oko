@@ -1,35 +1,39 @@
 // require all dependencies to set up server
 
 const express = require("express");
+const bodyParser = require('body-parser');
 const { ApolloServer, AuthenticationError } = require("apollo-server-express");
 const { User } = require('./data/schema');
 
 // cors allows our server to accept requests from different origins
 const cors = require("cors");
-const passport = require('passport');
 const { login } = require('./auth');
 const { authenticate } = require('./auth');
-
-function getUserByToken (token) {
-	return new Promise(resolve => { throw Error('Eyyy') })
-}
 
 function configureServer() {
 	// invoke express to create our server
 	const app = express();
-	app.get('/profile', async (req, res) => {
-		const eyy = await authenticate(req, res)
-		res.send(eyy)
-	})
-
-	app.get('/login',
-		function(req, res) {
-			res.send(login(12345));
-		}
-	);
 
 	//use the cors middleware
 	app.use(cors());
+	app.use(bodyParser.json());
+
+	app.post('/login', (req, res) => {
+		const { email, password } = req.body
+
+		login(email, password)
+			.then(token => res.json({ token }))
+			.catch(() => res.status(401).send())
+	});
+
+	app.post('/user', async (req, res) => {
+		const { email, password, role } = req.body
+
+		const newUser = await new User({ email, password, role }).save()
+		if (!newUser) res.status(500)
+
+		res.json({ email: newUser.email })
+	})
 
 	const typeDefs = require('./data/typedefs');
 	const resolvers = require('./data/resolvers');
@@ -48,29 +52,19 @@ function configureServer() {
 		uploads: false,
 		// Add current user / auth to context
 		context: async ({ req, res }) => {
-			let authToken = null;
-			let currentUser = null;
+			const jwtAuth = await authenticate(req, res);
+			if (!jwtAuth) throw new AuthenticationError('Invalid JWT');
 
-			try {
-				authToken = req.headers.authorization.replace('Bearer ', '');
-				if (authToken) {
-					currentUser = await getUserByToken(authToken);
-				}
-			} catch (e) {
-				console.log(`Unable to authenticate using auth token: ${authToken}`, e);
-				throw new AuthenticationError('Invalid JWT');
-			}
+			const currentUser = await User.findOne({ email: jwtAuth.email }).lean()
+			if (!currentUser) throw new AuthenticationError('User does not exist');
 
-			return {
-				authToken,
-				currentUser,
-			};
+			return { currentUser };
 		}
 	});
 
 	// now we take our newly instantiated ApolloServer and apply the
 	// previously configured express application
-	server.applyMiddleware({ app, path: '/api' });
+	server.applyMiddleware({ app, path: '/gql' });
 
 	// finally return the application
 	return app;

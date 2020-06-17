@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 const { JWT_SECRET } = require('../config');
+const { User } = require('./data/schema')
 
 const verifyOptions = {
 	jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -12,10 +13,7 @@ const verifyOptions = {
 };
 
 passport.use(
-	new JwtStrategy(verifyOptions, (payload, done) => {
-		console.log('Woot', payload)
-		done(null, { test: true })
-	})
+	new JwtStrategy(verifyOptions, (payload, done) => done(null, payload))
 );
 
 exports.authenticate = (req, res) =>
@@ -26,11 +24,21 @@ exports.authenticate = (req, res) =>
 		})(req, res);
 	});
 
-exports.login = function (userId) {
-	return jwt.sign({ uid: userId }, JWT_SECRET, {
-		algorithm: 'HS256',
-		issuer: verifyOptions.issuer,
-		audience: verifyOptions.audience,
-		expiresIn: '30 days'
-	});
+exports.login = function (email, password) {
+	return new Promise((resolve, reject) => {
+		User.findOne({ email }, function(err, user) {
+			if (err || !user) return reject(err);
+
+			user.comparePassword(password, function(err, isMatch) {
+				if (err || !isMatch) return reject(err);
+
+				return resolve(jwt.sign({ email: user.email }, JWT_SECRET, {
+					algorithm: 'HS256',
+					issuer: verifyOptions.issuer,
+					audience: verifyOptions.audience,
+					expiresIn: '30 days'
+				}));
+			});
+		});
+	})
 }

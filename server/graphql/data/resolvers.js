@@ -17,8 +17,8 @@ const resolvers = {
 					if (users.length === 0) {
 						console.log('No such document!');
 						return null;
-					} 
-					
+					}
+
 					return users;
 			})
 			.catch(errorHandler);
@@ -31,16 +31,16 @@ const resolvers = {
 					return null;
 				}
 				return user;
-				
+
 			})
 			.catch(errorHandler);
 		},
 		currentUser: (root, args, context) => {
 			// If we are not logged in, just return null
 			if(!context.currentUser) { throw new AuthenticationError('must authenticate'); }
-	
+
 			// console.log('currentUser', context, context.currentUser);
-			return User.findById(context.currentUser.uid)
+			return User.findById(context.currentUser._id)
 				.then(user => {
 					if (!user) {
 						console.log('No such user!');
@@ -57,8 +57,8 @@ const resolvers = {
 				if (users.length === 0) {
 					console.log('No such document!');
 					return [];
-				} 
-			
+				}
+
 				return users;
 			})
 			.catch(errorHandler);
@@ -80,8 +80,8 @@ const resolvers = {
 				if (invoices.length === 0) {
 					console.log('allinvoices - No such document!');
 					return [];
-				} 
-				
+				}
+
 				return invoices;
 			})
 			.catch(errorHandler);
@@ -120,7 +120,7 @@ const resolvers = {
 					if (!teamDoc) {
 						console.log(`No such document: teams/${teamId}`);
 						return null;
-					} 
+					}
 
 					return teamDoc;
 				})
@@ -133,8 +133,8 @@ const resolvers = {
 				if (teams.length === 0) {
 					console.log('No such document!');
 					return [];
-				} 
-				
+				}
+
 				let teamArray = [];
 				teams.forEach(team => {
 					user.teams.forEach(existingTeam => {
@@ -143,7 +143,7 @@ const resolvers = {
 						}
 					});
 
-				}); 
+				});
 				return teamArray;
 			})
 			.catch(errorHandler);
@@ -154,8 +154,8 @@ const resolvers = {
 				if (invoices.length === 0) {
 					console.log('No such document!');
 					return [];
-				} 
-				
+				}
+
 				let teamArray = [];
 				invoices.forEach(invoice => {
 					user.teams.forEach(team => {
@@ -163,7 +163,7 @@ const resolvers = {
 							teamArray.push(invoice);
 						}
 					});
-				}); 
+				});
 				return teamArray;
 			})
 			.catch(errorHandler);
@@ -176,8 +176,8 @@ const resolvers = {
 				if (users.length === 0) {
 					console.log('No such document!');
 					return [];
-				} 
-				
+				}
+
 				let userArray = [];
 				users.forEach(user => {
 					user.teams.forEach(id => {
@@ -199,14 +199,14 @@ const resolvers = {
 				if (invoices.length === 0) {
 					console.log('No invoices for ', team.id);
 					return [];
-				} 
-				
+				}
+
 				return invoices;
 			})
 			.catch(errorHandler);
 		},
 	},
-	
+
 	Mutation: {
 		addUser: (parent, args) => {
 			//console.log('args.email: ', args.email);
@@ -214,101 +214,44 @@ const resolvers = {
 			.then(docs => {
 				if (docs.length === 0) {
 					let myURL = `https://people-vol.roskilde-festival.dk/Api/MemberApi/1/GetTeamMembers/?teamId=${args.teamId}&ApiKey=${config.HEIMDAL_APIKEY}`;
-					
+
 					return rp(myURL)
 					.then((response) => {
 						const PeopleData = JSON.parse(response);
-						
+
 						Object.keys(PeopleData.TeamMembers).forEach((item) => {
 							// Find users that are admins / "Holdleder". If not users is "basis"
 							if (PeopleData.TeamMembers[item].Email === args.email) {
-	
-								return admin.auth().createUser({
-									uid: PeopleData.TeamMembers[item].MemberId.toString(),
+
+								let user = {
 									email: PeopleData.TeamMembers[item].Email,
-									emailVerified: false,
+									name: PeopleData.TeamMembers[item].MemberName,
+									peopleId: PeopleData.TeamMembers[item].MemberId,
 									password: args.password || 'test1234',
-									displayName: PeopleData.TeamMembers[item].MemberName,
-									disabled: false
-								})
-								.then((userRecord) => {
-									// See the UserRecord reference doc for the contents of userRecord.
-									console.log('Successfully created new auth user:', userRecord);
-			
-									let user = {
-										_id: PeopleData.TeamMembers[item].MemberId,
-										uid: PeopleData.TeamMembers[item].MemberId,
-										email: PeopleData.TeamMembers[item].Email,
-										name: PeopleData.TeamMembers[item].MemberName,
-										peopleId: PeopleData.TeamMembers[item].MemberId,
-										role: 'Editor',
-										teams: [args.teamId]
-									};
+									role: 'EDITOR',
+									teams: [args.teamId]
+								};
 
-									return User.create(user)
-										.then(ref => {
-											console.log("User Added to collection: ", user);
-											return user;
-										})
-										.catch(err => {
-											console.log('Failed adding user', err);
-											return err;
-										});
-
-								})
-								.catch((error) => {
-									console.log('Error creating new user:', error);
-								});
+								return User.create(user)
+									.then(newUser => {
+										console.log("User Added to collection: ", newUser);
+										return user;
+									})
+									.catch(err => {
+										console.log('Failed adding user', err);
+										return err;
+									});
 							}
-						});
-						
-						console.log('User not found in PeopleData.');
-
-						return admin.auth().createUser({
-							// uid: PeopleData.TeamMembers[item].MemberId.toString(),
-							email: args.email,
-							emailVerified: false,
-							password: args.password || 'test1234',
-							displayName: '',
-							disabled: false
-						})
-						.then((userRecord) => {
-							// See the UserRecord reference doc for the contents of userRecord.
-							console.log('Successfully created new auth user:', userRecord);
-	
-							let user = {
-								_id: userRecord.uid,
-								uid: userRecord.uid,
-								email: args.email,
-								name: '',
-								peopleId: null,
-								role: 'EDITOR',
-								teams: [args.teamId]
-							};
-						
-							return User.create(user)
-								.then(ref => {
-									console.log("User Added to collection: ", user, ref);
-									return user;
-								})
-								.catch(err => {
-									console.warn('Failed adding user', err);
-									return err;
-								});
-
-						})
-						.catch((error) => {
-							console.log('Error creating new user:', error);
 						});
 					})
 					.catch(errorHandler);
 				}
-				
+
 				return docs.forEach(doc => {
 					console.log('User already exists:', doc.email, doc);
 					return 'User already exists:' + doc.email;
 				});
-			}) 
+			})
 			.catch(err => {
 				console.log('Error getting document', err);
 				return err;
@@ -335,7 +278,7 @@ const resolvers = {
 			.catch(err => {
 				console.log('Error getting document', err);
 				return err;
-				//throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`); 
+				//throw new Error(`Use addTeams with the following inputs: teamId, teamName, TeamParentId, CopyOfTeamId.`);
 			});
 		},
 		addInvoice: (parent, args, context) => {
@@ -346,12 +289,12 @@ const resolvers = {
 			}
 
 			const invoice = {
-				invoiceId: args.invoiceId, 
+				invoiceId: args.invoiceId,
 				createdDate: serverTimestamp,
 				invoiceDate: args.invoiceDate,
 				supplier: args.supplier,
 				teamId: args.teamId,
-				userId: context.currentUser.uid,
+				userId: context.currentUser._id,
 				eco: args.eco,
 				nonEco: args.nonEco,
 				excluded: args.excluded,
@@ -394,7 +337,7 @@ const resolvers = {
 						invoiceId: doc.invoiceId,
 						invoiceDate: doc.invoiceDate,
 						teamId: doc.teamId,
-						userId: context.currentUser.uid,
+						userId: context.currentUser._id,
 						eco: doc.eco,
 						nonEco: doc.nonEco,
 						excluded: doc.excluded,
@@ -440,7 +383,7 @@ const resolvers = {
 			})
 			.catch(err => {
 				console.log('Error getting document', err);
-				return err; 
+				return err;
 			});
 		},
 		deleteInvoice: (parent, args, context) => {
@@ -462,7 +405,7 @@ const resolvers = {
 			})
 			.catch(err => {
 				console.log('Error getting document', err);
-				return err; 
+				return err;
 			});
         },
 		setTeamMeasurement: (parent, args, context) => {
@@ -473,7 +416,7 @@ const resolvers = {
 						measurement: args.measurement
 					})
 					.then(time => {
-						console.log(`Measurement Changed for ${args.teamId} to ${args.measurement} by ${context.currentUser.uid}`);
+						console.log(`Measurement Changed for ${args.teamId} to ${args.measurement} by ${context.currentUser._id}`);
 
 						return Team.findById(args.id)
 							.catch(errorHandler);
@@ -495,7 +438,7 @@ const resolvers = {
 					notes: args.notes
 				})
 				.then(time => {
-					console.log(`Note set for ${args.teamId} to ${args.notes} by ${context.currentUser.uid}`);
+					console.log(`Note set for ${args.teamId} to ${args.notes} by ${context.currentUser._id}`);
 
 					return Team.findById(args.id)
 						.catch(errorHandler);
@@ -506,11 +449,11 @@ const resolvers = {
 		// Set Current Team for user, used if there are more then one team on a user. This allows changing between them.
 		setCurrentTeam: (parent, args, context) => {
 			if(!context.currentUser) { throw new Error('401 Unauthorized'); }
-			
-			return User.findOneAndUpdate({ _id: context.currentUser.uid },{
+
+			return User.findOneAndUpdate({ _id: context.currentUser._id },{
 				currentTeam: args.id
 			}).then(() => {
-				return User.findById(context.currentUser.uid).get()
+				return User.findById(context.currentUser._id).get()
 					.then(doc => {
 						console.log('Updated current team:', doc, args.id);
 						return doc;
@@ -520,9 +463,9 @@ const resolvers = {
 						return err;
 					});
 			});
- 
+
 		},
 	},
 };
-  
+
 module.exports = resolvers;
