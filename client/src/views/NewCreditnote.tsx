@@ -172,11 +172,11 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		console.log('state', this.state)
 
 		return (
-			<Mutation
+			<Mutation<any, any>
 				mutation={ADD_INVOICE}
 				onCompleted={this.handleComplete}
 				>
-				{(CreateInvoice, { data, error, loading }) => (
+				{(CreateInvoice: any, { data, error, loading }) => (
 					<form
 						// tslint:disable-next-line: jsx-no-lambda
 						onSubmit={this.onCreate(CreateInvoice)}
@@ -326,7 +326,6 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 								{this.state.created && (
 									<p>Oprettede kreditnota # {this.state.lastCreated}!</p>
 								)}
-
 
 								{error && (
 									<div>

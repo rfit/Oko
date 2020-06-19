@@ -19,3 +19,11 @@ export const GET_ALL_INVOICES = gql`
 		}
 	}
 `
+
+export const LOGIN = gql`
+	query Login($id: String! $pw: String!) {
+		login(email: $id, pw: $pw) {
+			token
+		}
+	}
+`

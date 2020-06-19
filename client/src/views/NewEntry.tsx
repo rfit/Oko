@@ -182,11 +182,11 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 		}
 
 		return (
-			<Mutation
+			<Mutation<any, any>
 				mutation={ADD_INVOICE}
 				onCompleted={this.handleComplete}
 				>
-				{(CreateInvoice, { data, error, loading }) => (
+				{(CreateInvoice: any, { data, error, loading }) => (
 					<Formik
 						validationSchema={InvoiceSchema}
 						initialValues={{
@@ -224,7 +224,7 @@ class NewEntry extends React.Component<INewEntryProps, INewEntryState> {
 										// value={this.state.invoiceDate}
 										// onChange={this.handleDateChange}
 										onChange={props.handleChange}
-										onBlur={props.handleBlur}
+										// onBlur={props.handleBlur}
 										value={props.values.invoiceDate}
 										name="excluded"
 

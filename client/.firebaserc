@@ -1,6 +1,0 @@
-{
-  "projects": {
-    "default": "okoapp-staging",
-    "production": "okoapp-production-2019"
-  }
-}

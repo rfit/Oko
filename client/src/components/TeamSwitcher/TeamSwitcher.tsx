@@ -1,13 +1,12 @@
-// import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
-import * as React from 'react';
+import React, { useState } from 'react';
 import { createStyles, Theme, withStyles } from '@material-ui/core/styles';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
 import { Link } from 'react-router5'
+import { makeStyles } from '@material-ui/core/styles';;
 
-import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
-import ErrorIcon from '@material-ui/icons/Error';
+import TeamIcon from '@material-ui/icons/Group';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Input from '@material-ui/core/Input';
@@ -16,8 +15,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
-import Chip from '@material-ui/core/Chip';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -39,16 +36,15 @@ interface ITeamSwitcherProps {
 	currentTeam: any;
 	teams: ITeam[];
 	changeTeam: any;
-	classes: any;
 }
 
-const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyles({
+const useStyles = makeStyles(theme => ({
 	root: {
 		display: 'flex',
 		flexWrap: 'wrap',
 	},
 	formControl: {
-		margin: spacing.unit,
+		margin: theme.spacing(),
 		minWidth: 120,
 		maxWidth: 300,
 	},
@@ -57,76 +53,74 @@ const styles = ({ palette, spacing, breakpoints, mixins }: Theme) => createStyle
 		flexWrap: 'wrap',
 	},
 	chip: {
-		margin: spacing.unit / 4,
+		margin: theme.spacing(1) / 4,
 	},
 	noLabel: {
-		marginTop: spacing.unit * 3,
+		marginTop: theme.spacing(3),
 	},
-});
+	teamIcon: {
+		verticalAlign: 'bottom'
+	}
+}));
 
-class TeamSwitcher extends React.Component<ITeamSwitcherProps, any> {
-	public state = {
-		currentTeam: this.props.currentTeam,
-	};
+function TeamSwitcher (props: ITeamSwitcherProps) {
+	const [currentTeam, setCurrentTeam] = useState(props.currentTeam);
+	const { teams } = props;
+	const classes = useStyles();
 
-	public handleChange = (event: any) => {
+	const handleChange = (event: any) => {
 		console.log('check', event.target.value);
-		this.props.changeTeam({ variables: { id: event.target.value } }).then((ref: any) => {
+		props.changeTeam({ variables: { id: event.target.value } }).then((ref: any) => {
 			console.log('CHANGED!', ref.data);
 			// this.setState({ currentTeam: ref.curre });
 		});
 	};
 
-	public render() {
-		const { teams, classes, currentTeam } = this.props;
+	return (
+		<>
+			{teams.length === 1 && (
+				<Typography component="h3" style={{ padding: 10 }}>
+					<TeamIcon className={classes.teamIcon}/> {currentTeam.name}
+				</Typography>
+			)}
 
-		return (
-			<>
-				{teams.length === 1 && (
-					<Typography component="h3" style={{ padding: 10 }}>
-						Team: {currentTeam.name}
-					</Typography>
-				)}
+			{teams.length > 1 && (
+				<FormControl className={classNames(classes.formControl, classes.noLabel)}>
+					Team: <Select
+						displayEmpty
+						value={currentTeam.id}
+						onChange={handleChange}
+						input={<Input id="select-multiple-placeholder" />}
+						// tslint:disable-next-line: jsx-no-lambda
+						renderValue={selected => {
+							if (!selected) {
+								return <em>Vælg team</em>;
+							}
 
-				{teams.length > 1 && (
-					<FormControl className={classNames(classes.formControl, classes.noLabel)}>
-						Team: <Select
-							displayEmpty
-							value={this.state.currentTeam.id}
-							onChange={this.handleChange}
-							input={<Input id="select-multiple-placeholder" />}
-							// tslint:disable-next-line: jsx-no-lambda
-							renderValue={selected => {
-								if (!selected) {
-									return <em>Vælg team</em>;
-								}
+							const ct = teams.find((element: ITeam) => {
+								return element.id === selected;
+							});
 
-								const ct = teams.find((element: ITeam) => {
-									return element.id === selected;
-								});
+							return ct && ct.name || currentTeam.name;
+						}}
+						MenuProps={MenuProps}
+					>
+						<MenuItem disabled value="">
+							<em>Vælg Team</em>
+						</MenuItem>
 
-								return ct && ct.name || this.state.currentTeam.name;
-							}}
-							MenuProps={MenuProps}
-						>
-							<MenuItem disabled value="">
-								<em>Vælg Team</em>
+						{teams.map((team: any) => (
+							<MenuItem key={team.id} value={team.id}>
+								{team.name}
 							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+			)}
+		</>
+	)
 
-							{teams.map((team: any) => (
-								<MenuItem key={team.id} value={team.id}>
-									{team.name}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-				)}
-			</>
-		)
-	}
 };
-
-const StyledTeamSwitcher = withStyles(styles)(TeamSwitcher);
 
 const CHANGE_TEAM = gql`
 	mutation changeTeam($id: ID!) {
@@ -141,11 +135,18 @@ const CHANGE_TEAM = gql`
   	}
 `;
 
+/*
+
+const AllPeopleComponent = <Query<Data, Variables> query={ALL_PEOPLE_QUERY}>
+  {({ loading, error, data }) => { ... }}
+</Query>
+
+*/
 const ConnectedTeamSwitcher = () => {
 	return (
 		<Mutation mutation={CHANGE_TEAM}>
-			{(changeTeam) => (
-				<Query
+			{(changeTeam: any) => (
+				<Query<any, any>
 					query={gql`
 						{
 							currentUser {
@@ -167,7 +168,7 @@ const ConnectedTeamSwitcher = () => {
 
 						console.log(data);
 					return (
-						<StyledTeamSwitcher teams={data.currentUser.teams} currentTeam={data.currentUser.currentTeam} changeTeam={changeTeam} />
+						<TeamSwitcher teams={data.currentUser.teams} currentTeam={data.currentUser.currentTeam} changeTeam={changeTeam} />
 					);
 				}}
 				</Query>
