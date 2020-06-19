@@ -1,7 +1,7 @@
 function getEndpoint(hostname: string) {
 	switch (hostname) {
 		default:
-			return 'https://europe-west1-okoapp-staging.cloudfunctions.net/api';
+			return 'http://localhost:8080/gql';
 	}
 	// switch (hostname) {
 	// 	case 'oko.roskilde-festival.dk':
