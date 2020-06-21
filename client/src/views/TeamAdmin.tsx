@@ -44,6 +44,7 @@ export interface IAdminProps {
 	currentUser: any;
 }
 
+
 export interface IAdminState {
 	unitValue?: 'kr' | 'kg';
 	unitHasBeenPicked: boolean;
@@ -208,6 +209,7 @@ function TeamAdminView (props: IAdminProps) {
 			</Typography>
 
 			{data.team.users && <PersonList persons={data.team.users} onDeletePerson={handleDelete} />}
+
 
 			<Mutation<any, any> mutation={ADD_USER_FOR_TEAM}>
 				{(addUser, { error: addError, loading: addLoading }) => (
