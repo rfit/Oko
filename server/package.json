@@ -1,12 +1,9 @@
 {
-  "name": "functions",
-  "description": "Cloud Functions for Firebase",
+  "name": "server",
+  "description": "backend for Oko app",
   "scripts": {
     "lint": "eslint .",
     "start": "node index.js"
-  },
-  "engines": {
-    "node": "10"
   },
   "dependencies": {
     "apollo-server": "^2.3.1",
