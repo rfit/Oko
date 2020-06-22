@@ -84,6 +84,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.backendapi.entrypoints=http
       - traefik.http.routers.backendapi.rule=Path(`/gql`)
+      - traefik.http.routers.backendapi.priority=9999
       # - traefik.http.routers.backendapi.tls.certresolver=http
       # - traefik.http.routers.backendapi.middlewares=whitelist
       - traefik.http.services.backendapi.loadbalancer.server.port=8080
