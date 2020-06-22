@@ -77,7 +77,7 @@ const typeDefs = gql`
 
 const client = new ApolloClient({
 	// Backend API
-	uri: getEndpoint(location.hostname),
+	uri: getEndpoint(location.port),
 	fetchOptions: {
 		credentials: 'omit'
 	},
