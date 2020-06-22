@@ -12,6 +12,10 @@ The project its split in two, a client and a server. The server is an API and yo
 
 The API is powered by GraphQL, and you can get some insights by looking at the schema.
 
+### Running with docker
+
+`docker-compose up -d`
+
 ### Getting started
 
 To get the project running you need a few things. But these are documented under each part of the app, so take a look under both the server and the client folder.

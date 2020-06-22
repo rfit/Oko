@@ -64,7 +64,7 @@ function configureServer() {
 
 	// now we take our newly instantiated ApolloServer and apply the
 	// previously configured express application
-	server.applyMiddleware({ app, path: '/gql' });
+	server.applyMiddleware({ app, path: '/' });
 
 	// finally return the application
 	return app;
