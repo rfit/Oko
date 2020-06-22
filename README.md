@@ -14,7 +14,9 @@ The API is powered by GraphQL, and you can get some insights by looking at the s
 
 ### Running with docker
 
-`docker-compose up -d`
+1. run `yarn && yarn run build` in client
+2. run `yarn && yarn run build` in server
+3. run `docker-compose up -d` and enjoy
 
 ### Getting started
 
