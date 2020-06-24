@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 export const GET_ALL_INVOICES = gql`
 	query Invoices($teamId: ID!) {
 		invoices(teamId: $teamId) {
-			id,
+			_id,
 			invoiceId,
 			createdDate,
 			invoiceDate,
