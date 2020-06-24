@@ -290,7 +290,7 @@ const resolvers = {
 
 			const invoice = {
 				invoiceId: args.invoiceId,
-				createdDate: serverTimestamp,
+				createdDate: Date.now(),
 				invoiceDate: args.invoiceDate,
 				supplier: args.supplier,
 				teamId: args.teamId,
@@ -333,7 +333,7 @@ const resolvers = {
 
 					const invoice = {
 						_id: args.id,
-						createdDate: serverTimestamp,
+						createdDate: Date.now(),
 						invoiceId: doc.invoiceId,
 						invoiceDate: doc.invoiceDate,
 						teamId: doc.teamId,
