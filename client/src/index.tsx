@@ -124,23 +124,40 @@ const client = new ApolloClient({
 });
 
 const authPromise = new Promise((resolve, reject) => {
-	const user = 'Allan';
-	const token = 'test';
-	console.debug('running token check', user)
+	// const user = 'Allan';
+	// const token = '';
+	// console.debug('running token check', user)
 
-	if (user) {
-			console.log('Setting new token');
+	const loginInfo = {
+		email: 'elias.jorgensen@roskilde-festival.dk',
+		password: 'ejoj'
+	};
 
-			localStorage.setItem('token', token);
+	fetch('http://localhost:8082/login', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json; charset=UTF-8'
+		},
+		body: JSON.stringify(loginInfo),
+	})
+	.then(response => response.json())
+	.then(result => {
+		console.log('Setting new token');
+		console.log('Success:', result);
+		localStorage.setItem('token', result.token);
 
-			client.cache.writeData({
-				data: {
-					isLoggedIn: true
-				}
-			});
+		client.cache.writeData({
+			data: {
+				isLoggedIn: true
+			}
+		});
 
-			resolve(token);
-	} else {
+		resolve( result.token);
+
+	})
+	.catch(loginerror => {
+		console.error('Error:', loginerror);
+
 		console.log('User signed out.');
 
 		localStorage.setItem('token', '');
@@ -152,7 +169,7 @@ const authPromise = new Promise((resolve, reject) => {
 		});
 
 		resolve(false);
-	};
+	});
 });
 
 const GET_CLIENT_STATE = gql`
