@@ -73,6 +73,7 @@ services:
     working_dir: /home/node/app
     environment:
       - NODE_ENV=production
+      - MONGO_HOST=mongo
     networks:
       - proxy
     volumes:
@@ -83,7 +84,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.backendapi.entrypoints=http
-      - traefik.http.routers.backendapi.rule=Path(`/gql`)
+      - traefik.http.routers.backendapi.rule=Path(`/gql`, `/gql/{[a-z]+}`, `/login`)
       - traefik.http.routers.backendapi.priority=9999
       # - traefik.http.routers.backendapi.tls.certresolver=http
       # - traefik.http.routers.backendapi.middlewares=whitelist
@@ -95,13 +96,13 @@ services:
     networks:
       - proxy
     ports:
-    - 27017:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: oko
     volumes:
-    - ./init-dev-db.js:/docker-entrypoint-initdb.d/init.js
+      - ./init-dev-db.js:/docker-entrypoint-initdb.d/init.js
 
   mongo-express:
     image: mongo-express
