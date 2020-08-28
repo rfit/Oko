@@ -46,7 +46,7 @@ const styles: any = (theme: any) => ({
 });
 
 interface ILoginProps {
-	loginFunction: () => void;
+	loginFunction: (email: string, password: string) => void;
 	classes: any;
 }
 
@@ -70,7 +70,8 @@ function Login(props: ILoginProps) {
 					<br />
 
 					<Button
-						onClick={props.loginFunction}
+						// tslint:disable-next-line: jsx-no-lambda
+						onClick={() => props.loginFunction('test', 'test')}
 						type="submit"
 						fullWidth
 						variant="contained"

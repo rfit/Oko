@@ -121,19 +121,39 @@ function App (props: IAppProps) {
 		setMobileOpenState(!mobileOpenState)
 	};
 
-	const handleLoginFake = () => {
+	const handleLoginFake = (email: string, pwd: string) => {
 		console.log('logging in!');
-		props.client.writeData({
-			data: {
-				currentUser: {
-					id: 0,
-					name: 'test',
-					email: 'test@test.test',
-					__typename: 'User'
-				},
-				isLoggedIn: true
-			}
+
+		const loginInfo = {
+			email,
+			password: pwd
+		};
+
+		fetch('http://localhost:8082/login', {
+			method: 'POST',
+			body: JSON.stringify(loginInfo),
+		})
+		.then(response => response.json())
+		.then(result => {
+			console.log('Success:', result);
+			setOpenState(true);
+		})
+		.catch(loginerror => {
+			console.error('Error:', loginerror);
 		});
+
+
+		// props.client.writeData({
+		// 	data: {
+		// 		currentUser: {
+		// 			id: 0,
+		// 			name: 'test',
+		// 			email: 'test@test.test',
+		// 			__typename: 'User'
+		// 		},
+		// 		isLoggedIn: true
+		// 	}
+		// });
 		setOpenState(true);
 	};
 

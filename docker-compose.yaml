@@ -1,20 +1,113 @@
-version: "3.5"
+version: "3.7"
 
 services:
+
+  # Reverse Proxy
+  traefik:
+    image: traefik:latest
+    restart: always
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    #  - ./traefik/traefik.yml:/traefik.yml
+    #  - ./traefik/acme.json:/acme.json
+    #  - ./traefik/config.yml:/config.yml
+    networks:
+      - proxy
+    ports: # We want træfik to handle all of the HTTP and HTTPS stuff, it's a reverse proxy after all.
+      - 80:80
+      - 443:443
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    environment:
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL} # These are used for Let's Encrypt
+      - CLOUDFLARE_API_KEY=${CLOUDFLARE_APIKEY}
+    labels:
+      - traefik.enable=true
+      # Global Middlewares
+      # - traefik.http.middlewares.redirect.redirectscheme.scheme=https
+      # - traefik.http.middlewares.whitelist.ipwhitelist.sourcerange=10.0.1.0/24,89.23.232.16 # Only allow local connections 89.23.232.16
+      # Redirect HTTP to HTTPS
+      # - traefik.http.routers.redirect.entrypoints=http
+      # - traefik.http.routers.redirect.rule=HostRegexp(`{any:.*}`)
+      # - traefik.http.routers.redirect.middlewares=redirect
+      # Enable Dashboard
+      - traefik.http.routers.traefik.entrypoints=http
+      - traefik.http.routers.traefik.rule=Host(`localhost`)
+      - traefik.http.routers.traefik.tls.certresolver=http
+      # - traefik.http.routers.traefik.middlewares=whitelist
+      - traefik.http.routers.traefik.service=api@internal
+
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    networks:
+      - proxy
+    ports:
+      - 3002:80
+    volumes:
+        - ./client/build:/usr/share/nginx/html:ro
+        # - ./nginx.conf:/etc/nginx/nginx.conf
+        - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.entrypoints=http
+      - traefik.http.routers.frontend.rule=Host(`localhost`)
+      # - traefik.http.routers.frontend.tls.certresolver=http
+      # - traefik.http.routers.frontend.middlewares=whitelist
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+
+  backendapi:
+    container_name: backendapi
+    image: "node:14.4.0-alpine3.12"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+      - MONGO_HOST=mongo
+    networks:
+      - proxy
+    volumes:
+      - ./server:/home/node/app
+    command: sh -c "yarn && yarn run start"
+    ports:
+      - "8082:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backendapi.entrypoints=http
+      - traefik.http.routers.backendapi.rule=Path(`/gql`, `/gql/{[a-z]+}`, `/login`)
+      - traefik.http.routers.backendapi.priority=9999
+      # - traefik.http.routers.backendapi.tls.certresolver=http
+      # - traefik.http.routers.backendapi.middlewares=whitelist
+      - traefik.http.services.backendapi.loadbalancer.server.port=8080
+
   mongo:
     image: mongo:4.2
     container_name: mongo
+    networks:
+      - proxy
     ports:
-    - 27017:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: oko
     volumes:
-    - ./init-dev-db.js:/docker-entrypoint-initdb.d/init.js
+      - ./init-dev-db.js:/docker-entrypoint-initdb.d/init.js
 
   mongo-express:
     image: mongo-express
+    networks:
+      - proxy
     container_name: mongo-express
     depends_on:
       - mongo
@@ -23,3 +116,8 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+
+networks:
+  proxy: # Used for Reverse proxy
+    external: true
+      
